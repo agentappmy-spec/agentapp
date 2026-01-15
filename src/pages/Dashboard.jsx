@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { useOutletContext, useNavigate } from 'react-router-dom';
-import { Users, FileCheck, AlertCircle, TrendingUp, Gift, ChevronRight, Target } from 'lucide-react';
+import { Users, FileCheck, AlertCircle, TrendingUp, Gift, ChevronRight, Target, MessageCircle as MessageCheck } from 'lucide-react';
 import './Dashboard.css';
 
 const StatCard = ({ title, value, label, icon: Icon, color }) => (
@@ -38,7 +38,114 @@ const Dashboard = () => {
     const { contacts, userProfile, userGoals, openAddModal } = useOutletContext();
     const navigate = useNavigate();
 
-    // --- Analytics Logic ---
+    // --- SUPER ADMIN DASHBOARD ---
+    if (userProfile.role === 'super_admin') {
+        return (
+            <div className="dashboard-container">
+                <header className="page-header">
+                    <div>
+                        <h1 className="page-title">Super Admin Dashboard</h1>
+                        <p className="page-subtitle">Platform Overview & SaaS Metrics</p>
+                    </div>
+                </header>
+
+                {/* SaaS Metrics Grid */}
+                <div className="stats-grid">
+                    <StatCard
+                        title="Total Users"
+                        value="3"
+                        label="+1 this week"
+                        icon={Users}
+                        color="37, 99, 235" // Blue
+                    />
+                    <StatCard
+                        title="Active Pro Subs"
+                        value="1"
+                        label="RM 150.00 / mo"
+                        icon={Target}
+                        color="16, 185, 129" // Emerald
+                    />
+                    <StatCard
+                        title="Total Revenue"
+                        value="RM 450"
+                        label="Lifetime Value"
+                        icon={TrendingUp}
+                        color="124, 58, 237" // Purple
+                    />
+                    <StatCard
+                        title="Conversion Rate"
+                        value="33%"
+                        label="Free to Pro"
+                        icon={TrendingUp}
+                        color="245, 158, 11" // Orange
+                    />
+                </div>
+
+                <div className="dashboard-content">
+                    {/* Left: Recent Activity */}
+                    <div className="content-section glass-panel">
+                        <h2 className="section-title">Recent Signups</h2>
+                        <div className="attention-list">
+                            <div className="attention-item">
+                                <div>
+                                    <div style={{ fontWeight: 600 }}>Ali Baba</div>
+                                    <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Free Plan • Joined 2 hours ago</div>
+                                </div>
+                                <span className="status-dot active"></span>
+                            </div>
+                            <div className="attention-item">
+                                <div>
+                                    <div style={{ fontWeight: 600 }}>Siti Sarah</div>
+                                    <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Pro Plan • Upgraded yesterday</div>
+                                </div>
+                                <span className="status-dot active"></span>
+                            </div>
+                            <div className="attention-item">
+                                <div>
+                                    <div style={{ fontWeight: 600 }}>John Doe</div>
+                                    <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Free Plan • Inactive</div>
+                                </div>
+                                <span className="status-dot inactive"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Right: Quick Actions */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                        <div className="content-section glass-panel" style={{ minHeight: 'auto' }}>
+                            <h2 className="section-title">System Status</h2>
+                            <div className="matrix-label" style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                                <span>Database</span>
+                                <span style={{ color: '#10b981' }}>Operational</span>
+                            </div>
+                            <div className="matrix-label" style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                                <span>Email Service</span>
+                                <span style={{ color: '#10b981' }}>Operational</span>
+                            </div>
+                            <div className="matrix-label" style={{ display: 'flex', justifyContent: 'space-between' }}>
+                                <span>API Latency</span>
+                                <span style={{ color: '#3b82f6' }}>24ms</span>
+                            </div>
+                        </div>
+
+                        <div className="content-section glass-panel" style={{ minHeight: 'auto' }}>
+                            <h2 className="section-title">Quick Actions</h2>
+                            <div className="quick-actions-grid">
+                                <button className="action-btn" onClick={() => navigate('/super-admin')}>
+                                    <Users size={16} style={{ marginRight: '8px', display: 'inline' }} /> User Management
+                                </button>
+                                <button className="action-btn" onClick={() => navigate('/super-admin')}>
+                                    <MessageCheck size={16} style={{ marginRight: '8px', display: 'inline' }} /> Configure Automation
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    // --- AGENT DASHBOARD (Existing Logic) ---
     const stats = useMemo(() => {
         const activeClients = contacts.filter(c => c.role === 'Client' && c.status === 'Active');
         const prospects = contacts.filter(c => c.role === 'Prospect');
@@ -99,15 +206,10 @@ const Dashboard = () => {
             const thisYearBday = new Date(today.getFullYear(), bdate.getMonth(), bdate.getDate());
 
             if (thisYearBday < today) {
-                // Try next year? No, we only care if it's coming up soon. 
-                // If it passed yesterday, ignore.
-                // Actually if it's Dec 30 and today is Jan 1... handle wrap.
-                // Simple logic:
                 thisYearBday.setFullYear(today.getFullYear());
             }
 
             // Check if within range
-            // If passed, maybe it's next year (e.g. today Dec 28, bday Jan 2)
             if (thisYearBday < today) {
                 thisYearBday.setFullYear(today.getFullYear() + 1);
             }

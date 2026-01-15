@@ -1,0 +1,136 @@
+.auth-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background: #f8fafc;
+    padding: 1rem;
+}
+
+.auth-card {
+    background: white;
+    width: 100%;
+    max-width: 400px;
+    padding: 2.5rem;
+    border-radius: 20px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.auth-header {
+    text-align: center;
+}
+
+.brand-logo {
+    width: 64px;
+    height: 64px;
+    background: #f0fdf4;
+    color: var(--primary);
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem;
+}
+
+.auth-header h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 0.5rem;
+}
+
+.auth-header p {
+    color: #64748b;
+    font-size: 0.9rem;
+}
+
+.auth-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.input-icon-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.input-icon-wrapper svg {
+    position: absolute;
+    left: 1rem;
+    color: #94a3b8;
+}
+
+.input-icon-wrapper input {
+    width: 100%;
+    padding: 0.8rem 1rem 0.8rem 2.8rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    font-size: 1rem;
+    transition: all 0.2s;
+}
+
+.input-icon-wrapper input:focus {
+    border-color: var(--primary);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.1);
+}
+
+.primary-btn.full-width {
+    width: 100%;
+    justify-content: center;
+}
+
+.auth-footer {
+    text-align: center;
+    font-size: 0.9rem;
+    color: #64748b;
+    margin-top: 0.5rem;
+}
+
+.link-btn {
+    background: none;
+    border: none;
+    color: var(--primary);
+    font-weight: 600;
+    cursor: pointer;
+    margin-left: 0.25rem;
+}
+
+.link-btn:hover {
+    text-decoration: underline;
+}
+
+.demo-hint {
+    margin-top: 1rem;
+    padding: 1rem;
+    background: #f1f5f9;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    color: #475569;
+}
+
+.demo-hint code {
+    background: #e2e8f0;
+    padding: 2px 4px;
+    border-radius: 4px;
+    font-family: monospace;
+}
+
+.spin {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}

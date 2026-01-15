@@ -1,5 +1,5 @@
-import { BrowserRouter, Routes, Route, Outlet, Navigate } from 'react-router-dom';
-import React, { useState, useEffect } from 'react';
+import { BrowserRouter, Routes, Route, Outlet, Navigate, useOutletContext, useLocation } from 'react-router-dom';
+import React, { useState, useEffect, useMemo } from 'react';
 import Sidebar from './components/Sidebar';
 import MobileHeader from './components/MobileHeader';
 import BottomNav from './components/BottomNav';
@@ -11,8 +11,27 @@ import LandingPage from './pages/LandingPage';
 import PublicLanding from './pages/PublicLanding';
 import LinkWhatsApp from './pages/LinkWhatsApp';
 import Settings from './pages/Settings';
+import Login from './pages/Login';
+import SuperAdmin from './pages/SuperAdmin';
 import './App.css';
 import './MobileStyles.css';
+
+// Auth Guard Helper
+const AuthGuard = ({ children, requiredRole }) => {
+  const profile = JSON.parse(localStorage.getItem('agent_user_profile') || 'null');
+  const location = useLocation();
+
+  if (!profile) {
+    return <Navigate to="/login" state={{ from: location }} replace />;
+  }
+
+  if (requiredRole && profile.role !== requiredRole) {
+    // Redirect unauthorized access to home/dashboard
+    return <Navigate to="/" replace />;
+  }
+
+  return children;
+};
 
 // Takaful-specific data structure
 const INITIAL_DATA = [
@@ -508,8 +527,25 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
+        <Route path="/login" element={<Login />} />
+        {/* Public Landing (if kept separate) */}
         <Route path="/p/public" element={<PublicLanding />} />
-        <Route path="/" element={<AppLayout context={contextValue} userProfile={userProfile} openAddModal={openAddModal} checkPermission={checkPermission} setUserProfile={setUserProfile} />}>
+
+        {/* Protected Routes */}
+        <Route
+          path="/"
+          element={
+            <AuthGuard>
+              <AppLayout
+                context={contextValue}
+                userProfile={userProfile}
+                openAddModal={openAddModal}
+                checkPermission={checkPermission}
+                setUserProfile={setUserProfile}
+              />
+            </AuthGuard>
+          }
+        >
           <Route index element={<Dashboard />} />
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="databases" element={<Databases />} />
@@ -517,10 +553,24 @@ function App() {
           <Route path="follow-up" element={<FollowUp />} />
           <Route path="landing-page" element={<LandingPage />} />
           <Route path="link-whatsapp" element={<LinkWhatsApp />} />
+
+          {/* Super Admin Route */}
+          <Route
+            path="super-admin"
+            element={
+              <AuthGuard requiredRole="super_admin">
+                <SuperAdmin />
+              </AuthGuard>
+            }
+          />
+
           <Route path="settings" element={<Settings />} />
           <Route path="*" element={<div className="flex-center" style={{ height: '100%' }}>Page Not Found</div>} />
         </Route>
       </Routes>
+
+      {/* ... Modal remains ... */}
+
 
       <AddContactModal
         isOpen={isContactModalOpen}

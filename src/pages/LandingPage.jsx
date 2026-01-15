@@ -160,10 +160,9 @@ const LandingPage = () => {
     };
 
     const applyTemplate = (templateKey) => {
-        if (window.confirm('Applying a new template will overwrite your current page. Continue?')) {
-            setPageConfig(JSON.parse(JSON.stringify(TEMPLATES[templateKey]))); // Deep copy
-            setSelectedSectionId(null);
-        }
+        // Direct switch for better UX - User can always switch back
+        setPageConfig(JSON.parse(JSON.stringify(TEMPLATES[templateKey])));
+        setSelectedSectionId(null);
     };
 
     const selectedSection = pageConfig.sections.find(s => s.id === selectedSectionId);
