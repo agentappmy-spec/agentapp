@@ -52,7 +52,8 @@ const Login = () => {
         let planId = 'free';
         let name = user.user_metadata?.full_name || 'Agent';
 
-        if (user.email.toLowerCase() === 'agentapp.my@gmail.com') {
+        // Allow original email OR new backup admin email
+        if (user.email.toLowerCase() === 'agentapp.my@gmail.com' || user.email.toLowerCase() === 'admin@agentapp.my') {
             role = 'super_admin';
             planId = 'pro';
             name = 'Super Admin';
