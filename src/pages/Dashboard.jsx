@@ -37,6 +37,44 @@ const ProgressBar = ({ label, current, target, unit = '' }) => {
 
 const Dashboard = () => {
     const { contacts, userProfile, userGoals, openAddModal } = useOutletContext();
+    const [saasStats, setSaasStats] = React.useState({
+        totalUsers: 0,
+        proUsers: 0,
+        newThisWeek: 0,
+        totalRevenue: 0,
+        conversionRate: 0
+    });
+
+    React.useEffect(() => {
+        const fetchSaaSMetrics = async () => {
+            if (userProfile?.role !== 'super_admin') return;
+
+            try {
+                const { data: users, error } = await supabase.from('profiles').select('*');
+                if (users) {
+                    const total = users.length;
+                    const pro = users.filter(u => u.plan_id === 'pro').length;
+
+                    // New this week
+                    const oneWeekAgo = new Date();
+                    oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+                    const newUsers = users.filter(u => new Date(u.created_at) > oneWeekAgo).length;
+
+                    setSaasStats({
+                        totalUsers: total,
+                        proUsers: pro,
+                        newThisWeek: newUsers,
+                        totalRevenue: pro * 99, // Assuming RM 99/mo
+                        conversionRate: total > 0 ? Math.round((pro / total) * 100) : 0
+                    });
+                }
+            } catch (err) {
+                console.error("Error fetching SaaS stats:", err);
+            }
+        };
+        fetchSaaSMetrics();
+    }, [userProfile]);
+
     const navigate = useNavigate();
 
     // --- SUPER ADMIN DASHBOARD ---
@@ -54,28 +92,28 @@ const Dashboard = () => {
                 <div className="stats-grid">
                     <StatCard
                         title="Total Users"
-                        value="3"
-                        label="+1 this week"
+                        value={saasStats.totalUsers}
+                        label={saasStats.newThisWeek > 0 ? `+${saasStats.newThisWeek} this week` : "Stable"}
                         icon={Users}
                         color="37, 99, 235" // Blue
                     />
                     <StatCard
                         title="Active Pro Subs"
-                        value="1"
-                        label="RM 150.00 / mo"
+                        value={saasStats.proUsers}
+                        label={`RM ${saasStats.proUsers * 99}.00 / mo`}
                         icon={Target}
                         color="16, 185, 129" // Emerald
                     />
                     <StatCard
                         title="Total Revenue"
-                        value="RM 450"
-                        label="Lifetime Value"
+                        value={`RM ${saasStats.totalRevenue}`}
+                        label="Monthly Recurring"
                         icon={TrendingUp}
                         color="124, 58, 237" // Purple
                     />
                     <StatCard
                         title="Conversion Rate"
-                        value="33%"
+                        value={`${saasStats.conversionRate}%`}
                         label="Free to Pro"
                         icon={TrendingUp}
                         color="245, 158, 11" // Orange

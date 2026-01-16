@@ -170,6 +170,10 @@ const SuperAdmin = () => {
                     joined: new Date(u.created_at || Date.now()).toLocaleDateString()
                 }));
                 setUsers(mappedUsers);
+
+                if (mappedUsers.length === 0) {
+                    console.warn('Fetched 0 profiles. RLS Policy likely blocking access.');
+                }
             }
         } catch (err) {
             console.warn('Failed to fetch users from Supabase (Table "profiles" likely missing).', err);
