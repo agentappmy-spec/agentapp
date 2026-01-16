@@ -175,14 +175,14 @@ function App() {
       name: 'Free Starter',
       price: 0,
       contactLimit: 10,
-      features: ['dashboard', 'email', 'sms'] // No 'whatsapp', No 'landing_page'
+      features: ['dashboard', 'email'] // email only
     },
     {
       id: 'pro',
       name: 'Pro Agent',
-      price: 99,
-      contactLimit: 99999,
-      features: ['dashboard', 'email', 'sms', 'whatsapp', 'landing_page', 'analytics']
+      price: 22,
+      contactLimit: 999999, // Unlimited
+      features: ['dashboard', 'email', 'sms', 'whatsapp', 'landing_page', 'landing_pub', 'analytics']
     }
   ]);
 

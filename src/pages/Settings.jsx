@@ -174,6 +174,12 @@ const Settings = () => {
                         <User size={18} /> My Profile
                     </button>
                     <button
+                        className={`settings-nav-item ${activeTab === 'billing' ? 'active' : ''}`}
+                        onClick={() => handleTabChange('billing')}
+                    >
+                        <Tag size={18} /> Billing & Plan
+                    </button>
+                    <button
                         className={`settings-nav-item ${activeTab === 'config' ? 'active' : ''}`}
                         onClick={() => handleTabChange('config')}
                     >
@@ -201,6 +207,12 @@ const Settings = () => {
                     {userProfile.role === 'super_admin' && (
                         <div style={{ padding: '1rem', marginTop: '1rem', borderTop: '1px solid #eee' }}>
                             <small style={{ color: '#888', fontWeight: 600 }}>ADMIN</small>
+                            <button
+                                className={`settings-nav-item ${activeTab === 'admin_codes' ? 'active' : ''}`}
+                                onClick={() => handleTabChange('admin_codes')}
+                            >
+                                <Tag size={18} /> Promo Codes
+                            </button>
                         </div>
                     )}
 
@@ -221,7 +233,7 @@ const Settings = () => {
                     {activeTab === 'profile' && (
                         <div className="profile-section fade-in">
                             <h2 className="section-title">Agent Profile</h2>
-
+                            {/* ... (Existing Profile Content) ... */}
                             <div className="profile-grid-layout">
                                 {/* Left Column: Photo & Shortcodes */}
                                 <div className="profile-left-col">
@@ -382,6 +394,95 @@ const Settings = () => {
                                         </button>
                                     </div>
                                 </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {activeTab === 'billing' && (
+                        <div className="billing-section fade-in">
+                            <h2 className="section-title">Billing & Plan</h2>
+
+                            <div className="glass-panel" style={{ padding: '2rem', marginBottom: '2rem', borderLeft: userProfile.planId === 'pro' ? '4px solid #10b981' : '4px solid #3b82f6' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                    <div>
+                                        <div style={{ textTransform: 'uppercase', fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.05em', color: '#64748b' }}>Current Plan</div>
+                                        <h3 style={{ fontSize: '1.5rem', marginTop: '0.25rem' }}>{userProfile.planId === 'pro' ? 'Pro Agent' : 'Free Starter'}</h3>
+                                        <p style={{ color: '#64748b', marginTop: '0.5rem' }}>
+                                            {userProfile.planId === 'pro'
+                                                ? 'Unlimited contacts & full automation suite.'
+                                                : 'Limited to 10 contacts. Basic features only.'}
+                                        </p>
+                                    </div>
+                                    <div style={{ textAlign: 'right' }}>
+                                        <div style={{ fontSize: '1.5rem', fontWeight: 700, color: userProfile.planId === 'pro' ? '#10b981' : '#3b82f6' }}>
+                                            {userProfile.planId === 'pro' ? 'RM 22' : 'RM 0'}
+                                        </div>
+                                        <small style={{ color: '#94a3b8' }}>/ month</small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {userProfile.planId !== 'pro' && (
+                                <div className="glass-panel" style={{ padding: '2rem', background: 'linear-gradient(135deg, #eff6ff 0%, #ffffff 100%)' }}>
+                                    <h3 style={{ marginBottom: '1rem' }}>Upgrade to Pro</h3>
+                                    <ul style={{ listStyle: 'none', padding: 0, marginBottom: '2rem' }}>
+                                        <li style={{ marginBottom: '0.5rem', display: 'flex', gap: '10px' }}>✅ Unlimited Contacts</li>
+                                        <li style={{ marginBottom: '0.5rem', display: 'flex', gap: '10px' }}>✅ WhatsApp Automation</li>
+                                        <li style={{ marginBottom: '0.5rem', display: 'flex', gap: '10px' }}>✅ Publish Landing Page</li>
+                                        <li style={{ marginBottom: '0.5rem', display: 'flex', gap: '10px' }}>✅ Advanced Analytics</li>
+                                    </ul>
+                                    <div style={{ display: 'flex', gap: '1rem' }}>
+                                        <a
+                                            href="https://wa.me/60123456789?text=Hi%2C%20I%20want%20to%20upgrade%20to%20AgentApp%20Pro!"
+                                            target="_blank"
+                                            rel="noreferrer"
+                                            className="primary-btn"
+                                            style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center' }}
+                                        >
+                                            WhatsApp to Upgrade
+                                        </a>
+                                        <span style={{ alignSelf: 'center', fontSize: '0.9rem', color: '#64748b' }}>or enter code below</span>
+                                    </div>
+                                </div>
+                            )}
+
+                            <div className="glass-panel" style={{ marginTop: '2rem', padding: '2rem' }}>
+                                <h3>Redeem Code</h3>
+                                <p style={{ color: '#64748b', fontSize: '0.9rem', marginBottom: '1rem' }}>
+                                    Have a promo code? Enter it below to activate your Pro plan.
+                                </p>
+                                <form
+                                    onSubmit={async (e) => {
+                                        e.preventDefault();
+                                        const code = e.target.code.value.trim().toUpperCase();
+
+                                        // TODO: Validate against DB for dynamic codes
+                                        if (code === 'KDIGITAL') {
+                                            alert('Code Redeemed! Enjoy 30 Days of Pro.');
+
+                                            // Update Local
+                                            const newProfile = { ...userProfile, planId: 'pro', role: 'free' }; // status trial logic later
+                                            setUserProfile(newProfile);
+                                            localStorage.setItem('agent_user_profile', JSON.stringify(newProfile));
+
+                                            // Update DB
+                                            await supabase.from('profiles').update({
+                                                plan_id: 'pro',
+                                                subscription_status: 'trial',
+                                                subscription_end_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+                                                is_trial_used: true
+                                            }).eq('id', userProfile.id);
+
+                                            window.location.reload();
+                                        } else {
+                                            alert('Invalid Code.');
+                                        }
+                                    }}
+                                    style={{ display: 'flex', gap: '10px' }}
+                                >
+                                    <input name="code" type="text" placeholder="ENTER CODE" style={{ textTransform: 'uppercase', letterSpacing: '1px' }} />
+                                    <button type="submit" className="secondary-btn">Apply</button>
+                                </form>
                             </div>
                         </div>
                     )}
