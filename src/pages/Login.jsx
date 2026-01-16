@@ -42,11 +42,6 @@ const Login = () => {
     }, [view]);
 
     const loginSuccess = async (session) => {
-        // We can still store profile in localStorage for fast access, 
-        // but primarily rely on Supabase session.
-        // For now, let's keep the mock profile structure in localStorage for compatibility 
-        // with the rest of the app which expects 'agent_user_profile'.
-
         const user = session.user;
         let role = 'free';
         let planId = 'free';
@@ -59,6 +54,25 @@ const Login = () => {
             name = 'Super Admin';
         }
 
+        // 1. Sync to Supabase 'profiles' table
+        try {
+            const { error: upsertError } = await supabase.from('profiles').upsert({
+                id: user.id,
+                email: user.email,
+                full_name: name,
+                role: role,
+                plan_id: planId,
+                // updated_at: new Date() // Let Supabase handle timestamps if configured, or add if needed
+            });
+            if (upsertError) {
+                console.error('Supabase profile sync warning:', upsertError);
+                // Don't block login on this, but log it.
+            }
+        } catch (err) {
+            console.error('Supabase profile sync error:', err);
+        }
+
+        // 2. Local Storage Setup (Legacy/Fast Access)
         const newProfile = {
             name,
             role,
@@ -73,6 +87,8 @@ const Login = () => {
             social: { facebook: '', threads: '', tiktok: '', instagram: '' }
         };
         localStorage.setItem('agent_user_profile', JSON.stringify(newProfile));
+
+        // 3. Navigate
         window.location.href = '/';
     };
 
