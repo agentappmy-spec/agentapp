@@ -60,6 +60,36 @@ const Settings = () => {
         }));
     };
 
+    // Payment Logic
+    const [upgradePlan, setUpgradePlan] = useState('monthly');
+    const [isProcessingPayment, setIsProcessingPayment] = useState(false);
+
+    const handleUpgradePayment = async () => {
+        setIsProcessingPayment(true);
+        try {
+            const { data, error } = await supabase.functions.invoke('create-chip-purchase', {
+                body: {
+                    email: userProfile.email,
+                    plan: upgradePlan,
+                    successUrl: window.location.origin + '/settings?billing=success',
+                    failureUrl: window.location.origin + '/settings?billing=failed'
+                }
+            });
+
+            if (error) throw error;
+            if (data?.checkout_url) {
+                window.location.href = data.checkout_url;
+            } else {
+                alert('Payment initialization failed. Please try again.');
+            }
+        } catch (err) {
+            console.error('Payment Error:', err);
+            alert('Failed to start payment. Server might be busy.');
+        } finally {
+            setIsProcessingPayment(false);
+        }
+    };
+
     // Tag Manager Logic (Inline)
     const [newItemName, setNewItemName] = useState('');
     const [editingId, setEditingId] = useState(null);
@@ -428,17 +458,38 @@ const Settings = () => {
                                         <li style={{ marginBottom: '0.5rem', display: 'flex', gap: '10px' }}>✅ Publish Landing Page</li>
                                         <li style={{ marginBottom: '0.5rem', display: 'flex', gap: '10px' }}>✅ Advanced Analytics</li>
                                     </ul>
-                                    <div style={{ display: 'flex', gap: '1rem' }}>
-                                        <a
-                                            href="https://wa.me/60123456789?text=Hi%2C%20I%20want%20to%20upgrade%20to%20AgentApp%20Pro!"
-                                            target="_blank"
-                                            rel="noreferrer"
-                                            className="primary-btn"
-                                            style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center' }}
-                                        >
-                                            WhatsApp to Upgrade
-                                        </a>
-                                        <span style={{ alignSelf: 'center', fontSize: '0.9rem', color: '#64748b' }}>or enter code below</span>
+                                    <div style={{ display: 'flex', gap: '1rem', flexDirection: 'column' }}>
+                                        {/* Plan Selection */}
+                                        <div style={{ display: 'flex', gap: '1rem' }}>
+                                            <button
+                                                className={`tab-btn-sm ${upgradePlan === 'monthly' ? 'active' : ''}`}
+                                                style={{ background: upgradePlan === 'monthly' ? '#2563eb' : '#f1f5f9', color: upgradePlan === 'monthly' ? 'white' : '#64748b', border: 'none', padding: '0.5rem 1rem', borderRadius: '6px', cursor: 'pointer' }}
+                                                onClick={() => setUpgradePlan('monthly')}
+                                            >
+                                                Monthly (RM 22)
+                                            </button>
+                                            <button
+                                                className={`tab-btn-sm ${upgradePlan === 'yearly' ? 'active' : ''}`}
+                                                style={{ background: upgradePlan === 'yearly' ? '#2563eb' : '#f1f5f9', color: upgradePlan === 'yearly' ? 'white' : '#64748b', border: 'none', padding: '0.5rem 1rem', borderRadius: '6px', cursor: 'pointer' }}
+                                                onClick={() => setUpgradePlan('yearly')}
+                                            >
+                                                Yearly (RM 220)
+                                            </button>
+                                        </div>
+
+                                        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', marginTop: '1rem' }}>
+                                            <button
+                                                onClick={handleUpgradePayment}
+                                                className="primary-btn"
+                                                disabled={isProcessingPayment}
+                                                style={{ minWidth: '160px', justifyContent: 'center' }}
+                                            >
+                                                {isProcessingPayment ? 'Processing...' : 'Upgrade to PRO'}
+                                            </button>
+                                            <span style={{ fontSize: '0.85rem', color: '#64748b' }}>
+                                                Secure payment via Chip In
+                                            </span>
+                                        </div>
                                     </div>
                                 </div>
                             )}
