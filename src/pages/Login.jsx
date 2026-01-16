@@ -83,7 +83,7 @@ const Login = () => {
 
         try {
             const { data, error } = await supabase.auth.signInWithPassword({
-                email: email,
+                email: email.trim(),
                 password: password,
             });
 
@@ -99,6 +99,28 @@ const Login = () => {
         }
     };
 
+    const handleForgotPassword = async () => {
+        if (!email) {
+            setError('Please enter your email address first.');
+            return;
+        }
+        setIsLoading(true);
+        setError('');
+        setSuccess('');
+
+        try {
+            const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
+                redirectTo: window.location.origin + '/reset-password',
+            });
+            if (error) throw error;
+            setSuccess('Password reset link sent! Check your email.');
+        } catch (error) {
+            setError(error.message);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
     const handleRegister = async (e) => {
         e.preventDefault();
         setIsLoading(true);
@@ -107,7 +129,7 @@ const Login = () => {
 
         try {
             const { data, error } = await supabase.auth.signUp({
-                email: regEmail,
+                email: regEmail.trim(),
                 password: regPassword,
                 options: {
                     data: {
@@ -120,8 +142,6 @@ const Login = () => {
 
             if (data.session) {
                 // 2. Send Welcome Email (Fire & Forget)
-
-
                 loginSuccess(data.session);
             } else if (data.user && !data.session) {
                 // Email confirmation required context
@@ -191,6 +211,13 @@ const Login = () => {
                                     onChange={(e) => setPassword(e.target.value)}
                                 />
                             </div>
+                            <button
+                                type="button"
+                                onClick={handleForgotPassword}
+                                style={{ background: 'none', border: 'none', color: 'var(--primary)', fontSize: '0.8rem', cursor: 'pointer', textAlign: 'right', display: 'block', width: '100%', marginTop: '0.5rem' }}
+                            >
+                                Forgot Password?
+                            </button>
                         </div>
                         <button type="submit" className="primary-btn" disabled={isLoading}>
                             {isLoading ? <Loader className="spin" size={18} /> : 'Sign In'}
