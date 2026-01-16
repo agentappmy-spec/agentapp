@@ -21,8 +21,34 @@ import './MobileStyles.css';
 
 // Auth Guard Helper
 const AuthGuard = ({ children, requiredRole }) => {
-  const profile = JSON.parse(localStorage.getItem('agent_user_profile') || 'null');
+  const [isChecking, setIsChecking] = useState(true);
+  const [profile, setProfile] = useState(null);
   const location = useLocation();
+
+  useEffect(() => {
+    // Check both local storage AND supabase session to be sure
+    const check = async () => {
+      const localProfile = JSON.parse(localStorage.getItem('agent_user_profile') || 'null');
+      if (localProfile) {
+        setProfile(localProfile);
+        setIsChecking(false);
+        return;
+      }
+
+      // Fallback: Check Supabase session directly (slower but more accurate)
+      const { data } = await supabase.auth.getSession();
+      if (data.session) {
+        // If session exists but no local profile, we might be mid-login or state lost
+        // For now, redirect to login to force a clean re-sync is safer
+      }
+      setIsChecking(false);
+    };
+    check();
+  }, []);
+
+  if (isChecking) {
+    return <div className="flex-center" style={{ height: '100vh', background: '#f8fafc' }}>Loading...</div>; // Or a Spinner
+  }
 
   if (!profile) {
     return <Navigate to="/login" state={{ from: location }} replace />;
