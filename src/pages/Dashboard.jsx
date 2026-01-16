@@ -61,7 +61,7 @@ const Dashboard = () => {
                     oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
                     const newUsers = users.filter(u => new Date(u.created_at) > oneWeekAgo).length;
 
-                    const newUsers = users.filter(u => new Date(u.created_at) > oneWeekAgo).length;
+
 
                     // Recent Signups (Top 5)
                     const recent = [...users]
