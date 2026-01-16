@@ -233,8 +233,62 @@ const SuperAdmin = () => {
         }
     };
 
-    const handleSaveUser = (updatedUser) => {
-        setUsers(users.map(u => u.id === updatedUser.id ? updatedUser : u));
+    const handleDeleteUser = async (id) => {
+        if (!window.confirm('Are you sure you want to delete this user? This action cannot be undone.')) return;
+
+        try {
+            const { supabase } = await import('../services/supabaseClient');
+            // Assuming 'profiles' table. In a real app, deleting a user usually requires deleting from auth.users via Admin API.
+            // Client-side delete on 'profiles' might trigger a cascade or just delete the profile.
+            const { error } = await supabase.from('profiles').delete().eq('id', id);
+
+            if (error) throw error;
+            setUsers(users.filter(u => u.id !== id));
+        } catch (err) {
+            console.error('Error deleting user:', err);
+            alert('Failed to delete user. Ensure you have permission.');
+        }
+    };
+
+    const handleSaveUser = async (userData) => {
+        try {
+            const { supabase } = await import('../services/supabaseClient');
+
+            if (userData.isNew) {
+                // Insert New User (Profile only)
+                // Note: This does not create an Auth user. They must sign up.
+                // We are essentially pre-creating the profile or record.
+                const { data, error } = await supabase
+                    .from('profiles')
+                    .insert([{
+                        email: userData.email,
+                        full_name: userData.name,
+                        plan_id: userData.plan.toLowerCase(),
+                        role: 'agent' // default
+                    }])
+                    .select();
+
+                if (error) throw error;
+                fetchUsers(); // Refresh list
+            } else {
+                // Update Existing
+                const { error } = await supabase
+                    .from('profiles')
+                    .update({
+                        full_name: userData.name,
+                        plan_id: userData.plan.toLowerCase()
+                    })
+                    .eq('id', userData.id);
+
+                if (error) throw error;
+
+                // Optimistic update
+                setUsers(users.map(u => u.id === userData.id ? { ...userData, status: 'Active' } : u));
+            }
+        } catch (err) {
+            console.error('Error saving user:', err);
+            alert('Failed to save user. ' + err.message);
+        }
         setEditingUser(null);
     };
 
@@ -271,7 +325,12 @@ const SuperAdmin = () => {
                                 <Search size={18} className="text-gray-400" />
                                 <input placeholder="Search users..." style={{ border: 'none', background: 'transparent', outline: 'none', width: '100%' }} />
                             </div>
-                            <button onClick={fetchUsers} className="icon-btn-small" title="Refresh"><Clock size={16} /></button>
+                            <div className="flex gap-2">
+                                <button onClick={fetchUsers} className="icon-btn-small" title="Refresh"><Clock size={16} /></button>
+                                <button onClick={() => setEditingUser({ name: '', email: '', plan: 'Free', status: 'Active', isNew: true })} className="primary-btn small-btn">
+                                    <Plus size={16} style={{ marginRight: '4px' }} /> Add User
+                                </button>
+                            </div>
                         </div>
 
                         <table className="sa-table">
@@ -299,9 +358,14 @@ const SuperAdmin = () => {
                                         <td>{user.joined}</td>
                                         <td><span className={`status-dot ${user.status.toLowerCase()}`}></span> {user.status}</td>
                                         <td>
-                                            <button className="icon-btn-small" onClick={() => setEditingUser(user)} title="Edit User">
-                                                <Edit2 size={16} />
-                                            </button>
+                                            <div className="flex gap-1">
+                                                <button className="icon-btn-small" onClick={() => setEditingUser(user)} title="Edit User">
+                                                    <Edit2 size={16} />
+                                                </button>
+                                                <button className="icon-btn-small text-danger" onClick={() => handleDeleteUser(user.id)} title="Delete User">
+                                                    <Trash2 size={16} />
+                                                </button>
+                                            </div>
                                         </td>
                                     </tr>
                                 ))}
