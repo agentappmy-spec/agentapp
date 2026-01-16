@@ -42,7 +42,8 @@ const Dashboard = () => {
         proUsers: 0,
         newThisWeek: 0,
         totalRevenue: 0,
-        conversionRate: 0
+        conversionRate: 0,
+        recentSignups: []
     });
 
     React.useEffect(() => {
@@ -60,12 +61,27 @@ const Dashboard = () => {
                     oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
                     const newUsers = users.filter(u => new Date(u.created_at) > oneWeekAgo).length;
 
+                    const newUsers = users.filter(u => new Date(u.created_at) > oneWeekAgo).length;
+
+                    // Recent Signups (Top 5)
+                    const recent = [...users]
+                        .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+                        .slice(0, 5)
+                        .map(u => ({
+                            id: u.id,
+                            name: u.full_name || u.email?.split('@')[0] || 'User',
+                            email: u.email,
+                            plan: u.plan_id || 'free',
+                            date: new Date(u.created_at || Date.now()).toLocaleDateString()
+                        }));
+
                     setSaasStats({
                         totalUsers: total,
                         proUsers: pro,
                         newThisWeek: newUsers,
                         totalRevenue: pro * 99, // Assuming RM 99/mo
-                        conversionRate: total > 0 ? Math.round((pro / total) * 100) : 0
+                        conversionRate: total > 0 ? Math.round((pro / total) * 100) : 0,
+                        recentSignups: recent
                     });
                 }
             } catch (err) {
@@ -186,9 +202,28 @@ const Dashboard = () => {
                     <div className="content-section glass-panel">
                         <h2 className="section-title">Recent Signups</h2>
                         <div className="attention-list">
-                            {/* We could fetch real recent signups here if we had the list from saasStats or separate query */}
-                            <div className="text-muted" style={{ padding: '1rem', fontStyle: 'italic' }}>
-                                View User Management for detailed list.
+                            {saasStats.recentSignups && saasStats.recentSignups.length > 0 ? (
+                                saasStats.recentSignups.map(user => (
+                                    <div key={user.id} className="attention-item" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem', borderBottom: '1px solid #f1f5f9' }}>
+                                        <div>
+                                            <div style={{ fontWeight: 600 }}>{user.name}</div>
+                                            <div style={{ fontSize: '0.8rem', color: '#64748b' }}>{user.email} • {user.date}</div>
+                                        </div>
+                                        <span className={`badge ${user.plan === 'pro' ? 'pro' : ''}`} style={{ fontSize: '0.7rem', textTransform: 'uppercase' }}>{user.plan}</span>
+                                    </div>
+                                ))
+                            ) : (
+                                <div className="text-muted" style={{ padding: '1rem', fontStyle: 'italic' }}>
+                                    No recent signups found.
+                                </div>
+                            )}
+                            <div className="text-center" style={{ marginTop: '1rem' }}>
+                                <button
+                                    onClick={() => navigate('/super-admin', { state: { activeTab: 'users' } })}
+                                    style={{ background: 'none', border: 'none', color: '#3b82f6', fontSize: '0.85rem', cursor: 'pointer', fontWeight: 500 }}
+                                >
+                                    View All Users →
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -355,7 +390,7 @@ const Dashboard = () => {
             {/* --- Mobile Header New Design --- */}
             <div className="mobile-dashboard-header mobile-only">
                 <div className="mobile-header-content">
-                    <h1>Salam, {userProfile.name.split(' ')[0]}!</h1>
+                    <h1 style={{ color: 'white' }}>Salam, {userProfile.name.split(' ')[0]}!</h1>
                     <div className="tier-badge">
                         <Target size={12} />
                         {userProfile.role === 'super_admin' ? 'Super Admin' : userProfile.role === 'pro' ? 'PRO User' : 'FREE User'}
