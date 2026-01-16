@@ -243,32 +243,40 @@ const LandingPage = () => {
     return (
         <div className="landing-builder-container">
             {/* Header */}
-            <header className="builder-header">
-                <div className="flex-center" style={{ gap: '1rem' }}>
-                    <Layout size={24} className="text-primary" />
+            <header className="builder-header glass-panel">
+                <div className="header-left">
+                    <div className="icon-wrapper">
+                        <Layout size={24} className="text-primary" />
+                    </div>
                     <div>
-                        <h1 className="text-lg font-bold text-gray-900">Page Builder</h1>
-                        <p className="text-xs text-gray-500">Create your link-in-bio or landing page.</p>
+                        <h1 className="header-title">Page Builder</h1>
+                        <p className="header-subtitle">Create your personal brand.</p>
                     </div>
                 </div>
-                <div className="flex-center" style={{ gap: '1rem' }}>
-                    <div className="template-switcher desktop-only">
-                        <span style={{ fontSize: '0.85rem', fontWeight: '600', marginRight: '8px' }}>Template:</span>
-                        <button className="secondary-btn small-btn" onClick={() => applyTemplate('basic')}>Basic</button>
-                        <button className="secondary-btn small-btn" onClick={() => applyTemplate('pro')}>Pro</button>
+
+                <div className="header-controls">
+                    <div className="template-switcher">
+                        <span className="label-text">Template:</span>
+                        <div className="btn-group">
+                            <button className="secondary-btn small-btn" onClick={() => applyTemplate('basic')}>Basic</button>
+                            <button className="secondary-btn small-btn" onClick={() => applyTemplate('pro')}>Pro</button>
+                        </div>
                     </div>
 
+                    <div className="divider-vertical"></div>
+
                     <div className="view-toggles">
-                        <button className={`toggle-btn ${previewMode === 'desktop' ? 'active' : ''}`} onClick={() => setPreviewMode('desktop')} title="Desktop">
+                        <button className={`toggle-btn ${previewMode === 'desktop' ? 'active' : ''}`} onClick={() => setPreviewMode('desktop')} title="Desktop View">
                             <Monitor size={18} />
                         </button>
-                        <button className={`toggle-btn ${previewMode === 'mobile' ? 'active' : ''}`} onClick={() => setPreviewMode('mobile')} title="Mobile">
+                        <button className={`toggle-btn ${previewMode === 'mobile' ? 'active' : ''}`} onClick={() => setPreviewMode('mobile')} title="Mobile View">
                             <Smartphone size={18} />
                         </button>
                     </div>
-                    <button className="primary-btn">
-                        <Save size={18} style={{ marginRight: '8px' }} />
-                        Save
+
+                    <button className="primary-btn save-btn">
+                        <Save size={18} />
+                        <span>Save</span>
                     </button>
                 </div>
             </header>

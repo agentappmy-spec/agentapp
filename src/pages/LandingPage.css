@@ -6,13 +6,113 @@
     background: #f8fafc;
 }
 
+/* Builder Header Redesign */
 .builder-header {
     background: white;
-    padding: 1rem 1.5rem;
+    padding: 0.75rem 1.5rem;
     border-bottom: 1px solid var(--border-color);
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+    /* responsive wrap */
+    z-index: 10;
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.icon-wrapper {
+    width: 40px;
+    height: 40px;
+    background: rgba(37, 99, 235, 0.1);
+    border-radius: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.header-title {
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    line-height: 1.2;
+    margin: 0;
+}
+
+.header-subtitle {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    margin: 0;
+}
+
+.header-controls {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.divider-vertical {
+    width: 1px;
+    height: 24px;
+    background: var(--border-color);
+}
+
+.template-switcher {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    background: transparent;
+    padding: 0;
+}
+
+.label-text {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+.btn-group {
+    display: flex;
+    gap: 0.25rem;
+    background: #f1f5f9;
+    padding: 4px;
+    border-radius: 6px;
+}
+
+.save-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+}
+
+@media (max-width: 600px) {
+    .builder-header {
+        padding: 1rem;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 1rem;
+    }
+
+    .header-controls {
+        justify-content: space-between;
+        flex-wrap: wrap;
+    }
+
+    .header-left {
+        justify-content: center;
+        text-align: center;
+    }
+
+    .label-text {
+        display: none;
+        /* hide label on really small screens */
+    }
 }
 
 .builder-body {
