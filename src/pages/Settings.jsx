@@ -465,403 +465,405 @@ const Settings = () => {
                                     </div>
                                 </div>
                             </div>
+                        </div>
                     )}
 
-                            {activeTab === 'billing' && (
-                                <div className="animate-fade-in">
-                                    <div className="pricing-header">
-                                        <h2 className="pricing-title">Simple, transparent pricing</h2>
-                                        <p className="pricing-subtitle">Everything you need to grow your agency business.</p>
+                    {activeTab === 'billing' && (
+                        <div className="animate-fade-in">
+                            <div className="pricing-header">
+                                <h2 className="pricing-title">Simple, transparent pricing</h2>
+                                <p className="pricing-subtitle">Everything you need to grow your agency business.</p>
 
-                                        <div className="pricing-toggle-container">
-                                            <div className="pricing-toggle">
-                                                <div
-                                                    className={`toggle-option ${upgradePlan === 'monthly' ? 'active' : ''}`}
-                                                    onClick={() => setUpgradePlan('monthly')}
-                                                >
-                                                    Monthly
-                                                </div>
-                                                <div
-                                                    className={`toggle-option ${upgradePlan === 'yearly' ? 'active' : ''}`}
-                                                    onClick={() => setUpgradePlan('yearly')}
-                                                >
-                                                    Annual
-                                                </div>
-                                                <div className="discount-badge">Save ~17%</div>
-                                            </div>
+                                <div className="pricing-toggle-container">
+                                    <div className="pricing-toggle">
+                                        <div
+                                            className={`toggle-option ${upgradePlan === 'monthly' ? 'active' : ''}`}
+                                            onClick={() => setUpgradePlan('monthly')}
+                                        >
+                                            Monthly
                                         </div>
-                                    </div>
-
-                                    <div className="pricing-grid">
-                                        {/* Free Plan */}
-                                        <div className="pricing-card">
-                                            <div className="plan-name">Basic</div>
-                                            <div className="plan-desc">Essential tools to manage your leads, perfect for individuals.</div>
-                                            <div className="plan-price">
-                                                RM 0<small>/ mo</small>
-                                            </div>
-
-                                            <ul className="plan-features">
-                                                <li className="feature-item">
-                                                    <Check size={18} className="check-icon" />
-                                                    <span>50 Contacts Limit</span>
-                                                </li>
-                                                <li className="feature-item">
-                                                    <Check size={18} className="check-icon" />
-                                                    <span>Basic Analytics</span>
-                                                </li>
-                                                <li className="feature-item">
-                                                    <Check size={18} className="check-icon" />
-                                                    <span>Goal Tracking</span>
-                                                </li>
-                                                <li className="feature-item text-muted" style={{ opacity: 0.5 }}>
-                                                    <X size={18} />
-                                                    <span>No WhatsApp Automation</span>
-                                                </li>
-                                            </ul>
-
-                                            <button className="plan-btn outline" disabled>
-                                                {userProfile.planId === 'pro' ? 'Downgrade' : 'Current Plan'}
-                                            </button>
+                                        <div
+                                            className={`toggle-option ${upgradePlan === 'yearly' ? 'active' : ''}`}
+                                            onClick={() => setUpgradePlan('yearly')}
+                                        >
+                                            Annual
                                         </div>
-
-                                        {/* Pro Plan */}
-                                        <div className="pricing-card popular">
-                                            <div className="popular-badge"><Star size={12} fill="white" /> Most Popular</div>
-                                            <div className="plan-name">Pro</div>
-                                            <div className="plan-desc">Advanced features to track and grow your sales with ease.</div>
-                                            <div className="plan-price">
-                                                {upgradePlan === 'yearly' && <span className="old-price">RM 220</span>}
-                                                RM {upgradePlan === 'yearly' ? '220' : '22'}
-                                                <small>{upgradePlan === 'yearly' ? '/ year' : '/ mo'}</small>
-                                            </div>
-
-                                            <ul className="plan-features">
-                                                <li className="feature-item">
-                                                    <Check size={18} className="check-icon" />
-                                                    <span><strong>Unlimited</strong> Contacts</span>
-                                                </li>
-                                                <li className="feature-item">
-                                                    <Check size={18} className="check-icon" />
-                                                    <span>WhatsApp Auto-Follow up</span>
-                                                </li>
-                                                <li className="feature-item">
-                                                    <Check size={18} className="check-icon" />
-                                                    <span>Publish Landing Pages</span>
-                                                </li>
-                                                <li className="feature-item">
-                                                    <Check size={18} className="check-icon" />
-                                                    <span>Advanced Analytics</span>
-                                                </li>
-                                                <li className="feature-item">
-                                                    <Check size={18} className="check-icon" />
-                                                    <span>Priority Support</span>
-                                                </li>
-                                            </ul>
-
-                                            {userProfile.planId === 'pro' ? (
-                                                <button className="plan-btn outline" disabled>Current Plan</button>
-                                            ) : (
-                                                <button
-                                                    className="plan-btn primary"
-                                                    onClick={handleUpgradePayment}
-                                                    disabled={isProcessingPayment}
-                                                >
-                                                    {isProcessingPayment ? 'Processing...' : 'Upgrade to Pro'}
-                                                </button>
-                                            )}
-
-                                            <div className="guarantee-text">30-day money-back guarantee</div>
-                                        </div>
-                                    </div>
-
-                                    {/* Promo Code Section */}
-                                    <div className="promo-section">
-                                        <div style={{ fontWeight: 600, marginBottom: '0.5rem' }}>Have a promo code?</div>
-                                        <div style={{ color: '#64748b', fontSize: '0.9rem' }}>Enter your code below to redeem special offers.</div>
-                                        <div className="promo-input-group">
-                                            <input
-                                                type="text"
-                                                className="promo-input"
-                                                placeholder="e.g. KDIGITAL"
-                                                value={promoCode}
-                                                onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
-                                            />
-                                            <button className="promo-btn" onClick={handleRedeemCode}>
-                                                Redeem
-                                            </button>
-                                        </div>
+                                        <div className="discount-badge">Save ~17%</div>
                                     </div>
                                 </div>
-                            )}
+                            </div>
 
-
-
-                            {activeTab === 'config' && (
-                                <div className="config-section fade-in">
-                                    <h2 className="section-title">Reference Data Configuration</h2>
-
-                                    <div className="config-tabs">
-                                        <button
-                                            className={`tab-pill ${managerTab === 'products' ? 'active' : ''}`}
-                                            onClick={() => setManagerTab('products')}
-                                        >
-                                            Products
-                                        </button>
-                                        <button
-                                            className={`tab-pill ${managerTab === 'tags' ? 'active' : ''}`}
-                                            onClick={() => setManagerTab('tags')}
-                                        >
-                                            Behavior Tags
-                                        </button>
+                            <div className="pricing-grid">
+                                {/* Free Plan */}
+                                <div className="pricing-card">
+                                    <div className="plan-name">Basic</div>
+                                    <div className="plan-desc">Essential tools to manage your leads, perfect for individuals.</div>
+                                    <div className="plan-price">
+                                        RM 0<small>/ mo</small>
                                     </div>
 
-                                    <div className="manager-toolbar">
-                                        <form onSubmit={handleAddItem} className="add-item-row">
-                                            <input
-                                                type="text"
-                                                placeholder={`Add new ${managerTab === 'products' ? 'product' : 'tag'}...`}
-                                                value={newItemName}
-                                                onChange={e => setNewItemName(e.target.value)}
-                                            />
-                                            <button type="submit" className="icon-btn-primary">
-                                                <Plus size={18} />
-                                            </button>
-                                        </form>
-                                    </div>
-
-                                    <ul className="config-list">
-                                        {(managerTab === 'products' ? availableProducts : availableTags).map((item, idx) => (
-                                            <li key={idx} className="config-item">
-                                                {editingId === item ? (
-                                                    <div className="edit-mode-inline">
-                                                        <input
-                                                            autoFocus
-                                                            value={editName}
-                                                            onChange={e => setEditName(e.target.value)}
-                                                        />
-                                                        <button onClick={saveEdit} className="save-btn-sm"><Save size={14} /></button>
-                                                    </div>
-                                                ) : (
-                                                    <>
-                                                        <span>{item}</span>
-                                                        <div className="item-actions">
-                                                            <button onClick={() => startEditing(item)} className="action-btn-sm" title="Edit">
-                                                                <Edit2 size={16} />
-                                                            </button>
-                                                            <button onClick={() => handleDeleteItem(item)} className="action-btn-sm danger" title="Delete">
-                                                                <Trash2 size={16} />
-                                                            </button>
-                                                        </div>
-                                                    </>
-                                                )}
-                                            </li>
-                                        ))}
+                                    <ul className="plan-features">
+                                        <li className="feature-item">
+                                            <Check size={18} className="check-icon" />
+                                            <span>50 Contacts Limit</span>
+                                        </li>
+                                        <li className="feature-item">
+                                            <Check size={18} className="check-icon" />
+                                            <span>Basic Analytics</span>
+                                        </li>
+                                        <li className="feature-item">
+                                            <Check size={18} className="check-icon" />
+                                            <span>Goal Tracking</span>
+                                        </li>
+                                        <li className="feature-item text-muted" style={{ opacity: 0.5 }}>
+                                            <X size={18} />
+                                            <span>No WhatsApp Automation</span>
+                                        </li>
                                     </ul>
+
+                                    <button className="plan-btn outline" disabled>
+                                        {userProfile.planId === 'pro' ? 'Downgrade' : 'Current Plan'}
+                                    </button>
                                 </div>
-                            )}
 
-                            {activeTab === 'goals' && (
-                                <div className="goals-section fade-in">
-                                    <h2 className="section-title">Business Goals & KPIs</h2>
-                                    <p className="section-subtitle text-muted" style={{ marginBottom: '1.5rem' }}>Set your magic numbers to track your progress on the dashboard.</p>
-
-                                    <div className="profile-form">
-                                        <div className="form-group">
-                                            <label>Monthly Revenue Target (RM)</label>
-                                            <input
-                                                type="number"
-                                                value={userGoals.monthlyRevenue}
-                                                onChange={e => setUserGoals(prev => ({ ...prev, monthlyRevenue: Number(e.target.value) }))}
-                                                placeholder="5000"
-                                            />
-                                            <small className="text-muted">Target commission/profit per month.</small>
-                                        </div>
-                                        <div className="form-group">
-                                            <label>Monthly Case Count Target</label>
-                                            <input
-                                                type="number"
-                                                value={userGoals.monthlyCases}
-                                                onChange={e => setUserGoals(prev => ({ ...prev, monthlyCases: Number(e.target.value) }))}
-                                                placeholder="5"
-                                            />
-                                            <small className="text-muted">Number of new policies closed.</small>
-                                        </div>
-                                        <div className="form-group">
-                                            <label>Yearly MDRT / Production Goal (RM)</label>
-                                            <input
-                                                type="number"
-                                                value={userGoals.mdrtGoal}
-                                                onChange={e => setUserGoals(prev => ({ ...prev, mdrtGoal: Number(e.target.value) }))}
-                                                placeholder="600000"
-                                            />
-                                            <small className="text-muted">Target for Million Dollar Round Table.</small>
-                                        </div>
-                                        <button className="primary-btn" style={{ marginTop: '1rem', opacity: 0.7, cursor: 'default' }} disabled>
-                                            <Save size={18} style={{ marginRight: '8px' }} /> Auto-Saved
-                                        </button>
+                                {/* Pro Plan */}
+                                <div className="pricing-card popular">
+                                    <div className="popular-badge"><Star size={12} fill="white" /> Most Popular</div>
+                                    <div className="plan-name">Pro</div>
+                                    <div className="plan-desc">Advanced features to track and grow your sales with ease.</div>
+                                    <div className="plan-price">
+                                        {upgradePlan === 'yearly' && <span className="old-price">RM 220</span>}
+                                        RM {upgradePlan === 'yearly' ? '220' : '22'}
+                                        <small>{upgradePlan === 'yearly' ? '/ year' : '/ mo'}</small>
                                     </div>
-                                </div>
-                            )}
 
-                            {activeTab === 'integrations' && (
-                                <div className="integrations-section fade-in">
-                                    <h2 className="section-title">External Integrations</h2>
-                                    <div className="settings-grid">
-                                        <SettingsCard
-                                            icon={MessageCircle}
-                                            title="WhatsApp Integration"
-                                            description="Send automated messages via WhatsApp API (e.g. Waha, Twilio)."
-                                            enabled={integrations.whatsapp.enabled}
-                                            onToggle={() => toggleIntegration('whatsapp')}
-                                            locked={!checkPermission('whatsapp')}
-                                        >
-                                            <div className="form-group">
-                                                <label>API Endpoint</label>
-                                                <input
-                                                    type="text"
-                                                    placeholder="https://api.waha.dev/..."
-                                                    value={integrations.whatsapp.endpoint || ''}
-                                                    onChange={(e) => setIntegrations(prev => ({ ...prev, whatsapp: { ...prev.whatsapp, endpoint: e.target.value } }))}
-                                                />
-                                            </div>
-                                            <div className="form-group">
-                                                <label>API Key / Token</label>
-                                                <input
-                                                    type="password"
-                                                    placeholder="••••••••••••••"
-                                                    value={integrations.whatsapp.apiKey || ''}
-                                                    onChange={(e) => setIntegrations(prev => ({ ...prev, whatsapp: { ...prev.whatsapp, apiKey: e.target.value } }))}
-                                                />
-                                            </div>
-                                        </SettingsCard>
+                                    <ul className="plan-features">
+                                        <li className="feature-item">
+                                            <Check size={18} className="check-icon" />
+                                            <span><strong>Unlimited</strong> Contacts</span>
+                                        </li>
+                                        <li className="feature-item">
+                                            <Check size={18} className="check-icon" />
+                                            <span>WhatsApp Auto-Follow up</span>
+                                        </li>
+                                        <li className="feature-item">
+                                            <Check size={18} className="check-icon" />
+                                            <span>Publish Landing Pages</span>
+                                        </li>
+                                        <li className="feature-item">
+                                            <Check size={18} className="check-icon" />
+                                            <span>Advanced Analytics</span>
+                                        </li>
+                                        <li className="feature-item">
+                                            <Check size={18} className="check-icon" />
+                                            <span>Priority Support</span>
+                                        </li>
+                                    </ul>
 
-                                        <SettingsCard
-                                            icon={Mail}
-                                            title="Email Service"
-                                            description="Connect via SMTP or API (Resend, SendGrid) for newsletters."
-                                            enabled={integrations.email.enabled}
-                                            onToggle={() => toggleIntegration('email')}
-                                        >
-                                            <div className="form-group">
-                                                <label>SMTP Host</label>
-                                                <input
-                                                    type="text"
-                                                    placeholder="smtp.gmail.com"
-                                                    value={integrations.email.host || ''}
-                                                    onChange={(e) => setIntegrations(prev => ({ ...prev, email: { ...prev.email, host: e.target.value } }))}
-                                                />
-                                            </div>
-                                            <div className="form-group">
-                                                <label>Sender Email</label>
-                                                <input
-                                                    type="email"
-                                                    value={integrations.email.sender || ''}
-                                                    onChange={(e) => setIntegrations(prev => ({ ...prev, email: { ...prev.email, sender: e.target.value } }))}
-                                                />
-                                            </div>
-                                        </SettingsCard>
-
-                                        <SettingsCard
-                                            icon={MessageSquare}
-                                            title="SMS Gateway"
-                                            description="Traditional SMS for high-priority notifications."
-                                            enabled={integrations.sms.enabled}
-                                            onToggle={() => toggleIntegration('sms')}
-                                        >
-                                            <div className="form-group">
-                                                <label>Provider URL</label>
-                                                <input
-                                                    type="text"
-                                                    placeholder="https://sms-provider.com/api"
-                                                    value={integrations.sms.url || ''}
-                                                    onChange={(e) => setIntegrations(prev => ({ ...prev, sms: { ...prev.sms, url: e.target.value } }))}
-                                                />
-                                            </div>
-                                            <div className="form-group">
-                                                <label>API Key</label>
-                                                <input
-                                                    type="password"
-                                                    placeholder="••••••••"
-                                                    value={integrations.sms.apiKey || ''}
-                                                    onChange={(e) => setIntegrations(prev => ({ ...prev, sms: { ...prev.sms, apiKey: e.target.value } }))}
-                                                />
-                                            </div>
-                                        </SettingsCard>
-                                    </div>
-                                </div>
-                            )}
-
-                            {activeTab === 'whatsapp' && (
-                                <div className="whatsapp-section fade-in">
-                                    <h2 className="section-title">Link WhatsApp Device</h2>
-                                    {checkPermission('whatsapp') ? (
-                                        <div className="glass-panel" style={{ padding: '2rem', textAlign: 'center' }}>
-                                            <div style={{ marginBottom: '1.5rem' }}>
-                                                <div style={{ width: '200px', height: '200px', background: '#f0f0f0', margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                                    <span className="text-muted">QR Code Placeholder</span>
-                                                </div>
-                                            </div>
-                                            <h3>Scan to Link Device</h3>
-                                            <p className="text-muted" style={{ maxWidth: '400px', margin: '1rem auto' }}>
-                                                Open WhatsApp on your mobile phone, go to Settings &gt; Linked Devices &gt; Link a Device, and scan the QR code above.
-                                            </p>
-                                            <div className="status-indicator">
-                                                <span className={`status-dot dot-lapsed`}></span>
-                                                <span>Disconnected</span>
-                                            </div>
-                                        </div>
+                                    {userProfile.planId === 'pro' ? (
+                                        <button className="plan-btn outline" disabled>Current Plan</button>
                                     ) : (
-                                        <div className="detail-lock-screen" style={{ textAlign: 'center', padding: '4rem 1rem' }}>
-                                            <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🔒</div>
-                                            <h2>Pro Feature Locked</h2>
-                                            <p style={{ maxWidth: '400px', margin: '1rem auto', color: '#666' }}>
-                                                WhatsApp integration is only available on the Pro plan. Upgrade now to automate your messages and link your device.
-                                            </p>
-                                            <button className="primary-btn">Upgrade to Pro</button>
-                                        </div>
+                                        <button
+                                            className="plan-btn primary"
+                                            onClick={handleUpgradePayment}
+                                            disabled={isProcessingPayment}
+                                        >
+                                            {isProcessingPayment ? 'Processing...' : 'Upgrade to Pro'}
+                                        </button>
                                     )}
 
-                                    <div style={{ marginTop: '3rem', borderTop: '1px solid #e2e8f0', paddingTop: '2rem' }}>
-                                        <h3 className="section-title" style={{ fontSize: '1.1rem', marginBottom: '1rem' }}>Message Template Shortcodes</h3>
-                                        <div className="glass-panel" style={{ padding: '0', overflow: 'hidden' }}>
-                                            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem' }}>
-                                                <thead style={{ background: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
-                                                    <tr>
-                                                        <th style={{ padding: '12px 16px', textAlign: 'left', color: '#64748b' }}>Shortcode</th>
-                                                        <th style={{ padding: '12px 16px', textAlign: 'left', color: '#64748b' }}>Description</th>
-                                                        <th style={{ padding: '12px 16px', textAlign: 'left', color: '#64748b' }}>Example Output</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    {[
-                                                        { code: '{name}', desc: 'Contact Full Name', example: 'Ahmad Albab' },
-                                                        { code: '{phone}', desc: 'Contact Phone Number', example: '60123456789' },
-                                                        { code: '{email}', desc: 'Contact Email', example: 'ahmad@example.com' },
-                                                        { code: '{occupation}', desc: 'Contact Occupation', example: 'Government Servant' },
-                                                        { code: '{birthday}', desc: 'Contact Birthday', example: '1990-05-15' },
-                                                        { code: '{products}', desc: 'Interested Products', example: 'Hibah, Medical Card' },
-                                                        { code: '{dealValue}', desc: 'Deal/Budget Value', example: 'RM 1200' },
-                                                        { code: '{agent_name}', desc: 'Your Name', example: 'Dzulfaqar Hashim' },
-                                                        { code: '{agent_phone}', desc: 'Your Phone', example: '60123456789' },
-                                                        { code: '{renewalDate}', desc: 'Policy Renewal Date', example: '2026-10-12' },
-                                                        { code: '{years}', desc: 'Years since signup', example: '2' },
-                                                    ].map((row, i) => (
-                                                        <tr key={i} style={{ borderBottom: i < 10 ? '1px solid #f1f5f9' : 'none' }}>
-                                                            <td style={{ padding: '12px 16px', fontFamily: 'monospace', color: '#7c3aed', fontWeight: 600 }}>{row.code}</td>
-                                                            <td style={{ padding: '12px 16px', color: '#334155' }}>{row.desc}</td>
-                                                            <td style={{ padding: '12px 16px', color: '#64748b', fontStyle: 'italic' }}>{row.example}</td>
-                                                        </tr>
-                                                    ))}
-                                                </tbody>
-                                            </table>
+                                    <div className="guarantee-text">30-day money-back guarantee</div>
+                                </div>
+                            </div>
+
+                            {/* Promo Code Section */}
+                            <div className="promo-section">
+                                <div style={{ fontWeight: 600, marginBottom: '0.5rem' }}>Have a promo code?</div>
+                                <div style={{ color: '#64748b', fontSize: '0.9rem' }}>Enter your code below to redeem special offers.</div>
+                                <div className="promo-input-group">
+                                    <input
+                                        type="text"
+                                        className="promo-input"
+                                        placeholder="e.g. KDIGITAL"
+                                        value={promoCode}
+                                        onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
+                                    />
+                                    <button className="promo-btn" onClick={handleRedeemCode}>
+                                        Redeem
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+
+
+                    {activeTab === 'config' && (
+                        <div className="config-section fade-in">
+                            <h2 className="section-title">Reference Data Configuration</h2>
+
+                            <div className="config-tabs">
+                                <button
+                                    className={`tab-pill ${managerTab === 'products' ? 'active' : ''}`}
+                                    onClick={() => setManagerTab('products')}
+                                >
+                                    Products
+                                </button>
+                                <button
+                                    className={`tab-pill ${managerTab === 'tags' ? 'active' : ''}`}
+                                    onClick={() => setManagerTab('tags')}
+                                >
+                                    Behavior Tags
+                                </button>
+                            </div>
+
+                            <div className="manager-toolbar">
+                                <form onSubmit={handleAddItem} className="add-item-row">
+                                    <input
+                                        type="text"
+                                        placeholder={`Add new ${managerTab === 'products' ? 'product' : 'tag'}...`}
+                                        value={newItemName}
+                                        onChange={e => setNewItemName(e.target.value)}
+                                    />
+                                    <button type="submit" className="icon-btn-primary">
+                                        <Plus size={18} />
+                                    </button>
+                                </form>
+                            </div>
+
+                            <ul className="config-list">
+                                {(managerTab === 'products' ? availableProducts : availableTags).map((item, idx) => (
+                                    <li key={idx} className="config-item">
+                                        {editingId === item ? (
+                                            <div className="edit-mode-inline">
+                                                <input
+                                                    autoFocus
+                                                    value={editName}
+                                                    onChange={e => setEditName(e.target.value)}
+                                                />
+                                                <button onClick={saveEdit} className="save-btn-sm"><Save size={14} /></button>
+                                            </div>
+                                        ) : (
+                                            <>
+                                                <span>{item}</span>
+                                                <div className="item-actions">
+                                                    <button onClick={() => startEditing(item)} className="action-btn-sm" title="Edit">
+                                                        <Edit2 size={16} />
+                                                    </button>
+                                                    <button onClick={() => handleDeleteItem(item)} className="action-btn-sm danger" title="Delete">
+                                                        <Trash2 size={16} />
+                                                    </button>
+                                                </div>
+                                            </>
+                                        )}
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                    )}
+
+                    {activeTab === 'goals' && (
+                        <div className="goals-section fade-in">
+                            <h2 className="section-title">Business Goals & KPIs</h2>
+                            <p className="section-subtitle text-muted" style={{ marginBottom: '1.5rem' }}>Set your magic numbers to track your progress on the dashboard.</p>
+
+                            <div className="profile-form">
+                                <div className="form-group">
+                                    <label>Monthly Revenue Target (RM)</label>
+                                    <input
+                                        type="number"
+                                        value={userGoals.monthlyRevenue}
+                                        onChange={e => setUserGoals(prev => ({ ...prev, monthlyRevenue: Number(e.target.value) }))}
+                                        placeholder="5000"
+                                    />
+                                    <small className="text-muted">Target commission/profit per month.</small>
+                                </div>
+                                <div className="form-group">
+                                    <label>Monthly Case Count Target</label>
+                                    <input
+                                        type="number"
+                                        value={userGoals.monthlyCases}
+                                        onChange={e => setUserGoals(prev => ({ ...prev, monthlyCases: Number(e.target.value) }))}
+                                        placeholder="5"
+                                    />
+                                    <small className="text-muted">Number of new policies closed.</small>
+                                </div>
+                                <div className="form-group">
+                                    <label>Yearly MDRT / Production Goal (RM)</label>
+                                    <input
+                                        type="number"
+                                        value={userGoals.mdrtGoal}
+                                        onChange={e => setUserGoals(prev => ({ ...prev, mdrtGoal: Number(e.target.value) }))}
+                                        placeholder="600000"
+                                    />
+                                    <small className="text-muted">Target for Million Dollar Round Table.</small>
+                                </div>
+                                <button className="primary-btn" style={{ marginTop: '1rem', opacity: 0.7, cursor: 'default' }} disabled>
+                                    <Save size={18} style={{ marginRight: '8px' }} /> Auto-Saved
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
+                    {activeTab === 'integrations' && (
+                        <div className="integrations-section fade-in">
+                            <h2 className="section-title">External Integrations</h2>
+                            <div className="settings-grid">
+                                <SettingsCard
+                                    icon={MessageCircle}
+                                    title="WhatsApp Integration"
+                                    description="Send automated messages via WhatsApp API (e.g. Waha, Twilio)."
+                                    enabled={integrations.whatsapp.enabled}
+                                    onToggle={() => toggleIntegration('whatsapp')}
+                                    locked={!checkPermission('whatsapp')}
+                                >
+                                    <div className="form-group">
+                                        <label>API Endpoint</label>
+                                        <input
+                                            type="text"
+                                            placeholder="https://api.waha.dev/..."
+                                            value={integrations.whatsapp.endpoint || ''}
+                                            onChange={(e) => setIntegrations(prev => ({ ...prev, whatsapp: { ...prev.whatsapp, endpoint: e.target.value } }))}
+                                        />
+                                    </div>
+                                    <div className="form-group">
+                                        <label>API Key / Token</label>
+                                        <input
+                                            type="password"
+                                            placeholder="••••••••••••••"
+                                            value={integrations.whatsapp.apiKey || ''}
+                                            onChange={(e) => setIntegrations(prev => ({ ...prev, whatsapp: { ...prev.whatsapp, apiKey: e.target.value } }))}
+                                        />
+                                    </div>
+                                </SettingsCard>
+
+                                <SettingsCard
+                                    icon={Mail}
+                                    title="Email Service"
+                                    description="Connect via SMTP or API (Resend, SendGrid) for newsletters."
+                                    enabled={integrations.email.enabled}
+                                    onToggle={() => toggleIntegration('email')}
+                                >
+                                    <div className="form-group">
+                                        <label>SMTP Host</label>
+                                        <input
+                                            type="text"
+                                            placeholder="smtp.gmail.com"
+                                            value={integrations.email.host || ''}
+                                            onChange={(e) => setIntegrations(prev => ({ ...prev, email: { ...prev.email, host: e.target.value } }))}
+                                        />
+                                    </div>
+                                    <div className="form-group">
+                                        <label>Sender Email</label>
+                                        <input
+                                            type="email"
+                                            value={integrations.email.sender || ''}
+                                            onChange={(e) => setIntegrations(prev => ({ ...prev, email: { ...prev.email, sender: e.target.value } }))}
+                                        />
+                                    </div>
+                                </SettingsCard>
+
+                                <SettingsCard
+                                    icon={MessageSquare}
+                                    title="SMS Gateway"
+                                    description="Traditional SMS for high-priority notifications."
+                                    enabled={integrations.sms.enabled}
+                                    onToggle={() => toggleIntegration('sms')}
+                                >
+                                    <div className="form-group">
+                                        <label>Provider URL</label>
+                                        <input
+                                            type="text"
+                                            placeholder="https://sms-provider.com/api"
+                                            value={integrations.sms.url || ''}
+                                            onChange={(e) => setIntegrations(prev => ({ ...prev, sms: { ...prev.sms, url: e.target.value } }))}
+                                        />
+                                    </div>
+                                    <div className="form-group">
+                                        <label>API Key</label>
+                                        <input
+                                            type="password"
+                                            placeholder="••••••••"
+                                            value={integrations.sms.apiKey || ''}
+                                            onChange={(e) => setIntegrations(prev => ({ ...prev, sms: { ...prev.sms, apiKey: e.target.value } }))}
+                                        />
+                                    </div>
+                                </SettingsCard>
+                            </div>
+                        </div>
+                    )}
+
+                    {activeTab === 'whatsapp' && (
+                        <div className="whatsapp-section fade-in">
+                            <h2 className="section-title">Link WhatsApp Device</h2>
+                            {checkPermission('whatsapp') ? (
+                                <div className="glass-panel" style={{ padding: '2rem', textAlign: 'center' }}>
+                                    <div style={{ marginBottom: '1.5rem' }}>
+                                        <div style={{ width: '200px', height: '200px', background: '#f0f0f0', margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                            <span className="text-muted">QR Code Placeholder</span>
                                         </div>
                                     </div>
+                                    <h3>Scan to Link Device</h3>
+                                    <p className="text-muted" style={{ maxWidth: '400px', margin: '1rem auto' }}>
+                                        Open WhatsApp on your mobile phone, go to Settings &gt; Linked Devices &gt; Link a Device, and scan the QR code above.
+                                    </p>
+                                    <div className="status-indicator">
+                                        <span className={`status-dot dot-lapsed`}></span>
+                                        <span>Disconnected</span>
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="detail-lock-screen" style={{ textAlign: 'center', padding: '4rem 1rem' }}>
+                                    <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🔒</div>
+                                    <h2>Pro Feature Locked</h2>
+                                    <p style={{ maxWidth: '400px', margin: '1rem auto', color: '#666' }}>
+                                        WhatsApp integration is only available on the Pro plan. Upgrade now to automate your messages and link your device.
+                                    </p>
+                                    <button className="primary-btn">Upgrade to Pro</button>
                                 </div>
                             )}
+
+                            <div style={{ marginTop: '3rem', borderTop: '1px solid #e2e8f0', paddingTop: '2rem' }}>
+                                <h3 className="section-title" style={{ fontSize: '1.1rem', marginBottom: '1rem' }}>Message Template Shortcodes</h3>
+                                <div className="glass-panel" style={{ padding: '0', overflow: 'hidden' }}>
+                                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem' }}>
+                                        <thead style={{ background: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
+                                            <tr>
+                                                <th style={{ padding: '12px 16px', textAlign: 'left', color: '#64748b' }}>Shortcode</th>
+                                                <th style={{ padding: '12px 16px', textAlign: 'left', color: '#64748b' }}>Description</th>
+                                                <th style={{ padding: '12px 16px', textAlign: 'left', color: '#64748b' }}>Example Output</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {[
+                                                { code: '{name}', desc: 'Contact Full Name', example: 'Ahmad Albab' },
+                                                { code: '{phone}', desc: 'Contact Phone Number', example: '60123456789' },
+                                                { code: '{email}', desc: 'Contact Email', example: 'ahmad@example.com' },
+                                                { code: '{occupation}', desc: 'Contact Occupation', example: 'Government Servant' },
+                                                { code: '{birthday}', desc: 'Contact Birthday', example: '1990-05-15' },
+                                                { code: '{products}', desc: 'Interested Products', example: 'Hibah, Medical Card' },
+                                                { code: '{dealValue}', desc: 'Deal/Budget Value', example: 'RM 1200' },
+                                                { code: '{agent_name}', desc: 'Your Name', example: 'Dzulfaqar Hashim' },
+                                                { code: '{agent_phone}', desc: 'Your Phone', example: '60123456789' },
+                                                { code: '{renewalDate}', desc: 'Policy Renewal Date', example: '2026-10-12' },
+                                                { code: '{years}', desc: 'Years since signup', example: '2' },
+                                            ].map((row, i) => (
+                                                <tr key={i} style={{ borderBottom: i < 10 ? '1px solid #f1f5f9' : 'none' }}>
+                                                    <td style={{ padding: '12px 16px', fontFamily: 'monospace', color: '#7c3aed', fontWeight: 600 }}>{row.code}</td>
+                                                    <td style={{ padding: '12px 16px', color: '#334155' }}>{row.desc}</td>
+                                                    <td style={{ padding: '12px 16px', color: '#64748b', fontStyle: 'italic' }}>{row.example}</td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
                         </div>
-            </div >
-                );
+                    )}
+                </div>
+            </div>
+        </div>
+    );
 };
 
-                export default Settings;
+export default Settings;
