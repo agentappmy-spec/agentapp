@@ -11,6 +11,7 @@ import LandingPage from './pages/LandingPage';
 import PublicLanding from './pages/PublicLanding';
 import LinkWhatsApp from './pages/LinkWhatsApp';
 import Settings from './pages/Settings';
+import Login from './pages/Login';
 import ErrorBoundary from './components/ErrorBoundary';
 // ... (existing imports)
 import ResetPassword from './pages/ResetPassword';
