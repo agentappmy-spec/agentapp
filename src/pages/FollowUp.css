@@ -47,6 +47,19 @@
     padding: 1rem 1.5rem;
     border-bottom: 1px solid var(--border-color);
     background: white;
+    overflow-x: auto;
+    /* Enable horizontal scrolling */
+    white-space: nowrap;
+    /* Prevent wrapping */
+    -webkit-overflow-scrolling: touch;
+    /* Smooth scroll on iOS */
+    scrollbar-width: none;
+    /* Hide scrollbar Firefox */
+}
+
+.tabs-header::-webkit-scrollbar {
+    display: none;
+    /* Hide scrollbar Chrome/Safari */
 }
 
 .tab-btn {
@@ -59,6 +72,8 @@
     cursor: pointer;
     border-radius: 20px;
     transition: all 0.2s;
+    flex-shrink: 0;
+    /* Prevent squishing on mobile */
 }
 
 .tab-btn:hover {

@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 import { useOutletContext, useNavigate } from 'react-router-dom';
-import { Users, FileCheck, AlertCircle, TrendingUp, Gift, ChevronRight, Target, MessageCircle as MessageCheck } from 'lucide-react';
+import { Users, FileCheck, AlertCircle, TrendingUp, Gift, ChevronRight, Target, MessageCircle as MessageCheck, LogOut } from 'lucide-react';
+import { supabase } from '../services/supabaseClient';
 import './Dashboard.css';
 
 const StatCard = ({ title, value, label, icon: Icon, color }) => (
@@ -259,8 +260,19 @@ const Dashboard = () => {
                         <Target size={12} />
                         {userProfile.role === 'super_admin' ? 'Super Admin' : userProfile.role === 'pro' ? 'PRO User' : 'FREE User'}
                     </div>
-                    <p className="quote">"Success is not final, failure is not fatal: it is the courage to continue that counts."</p>
+
                 </div>
+                <button
+                    className="icon-btn-glass"
+                    onClick={async () => {
+                        await supabase.auth.signOut();
+                        localStorage.removeItem('agent_user_profile');
+                        window.location.href = '/login';
+                    }}
+                    style={{ marginLeft: 'auto', background: 'rgba(255,255,255,0.2)', border: 'none', color: 'white' }}
+                >
+                    <LogOut size={20} />
+                </button>
             </div>
 
             {/* --- Mobile Stats Matrix (Overlapping) --- */}
