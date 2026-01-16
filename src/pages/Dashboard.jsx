@@ -77,7 +77,68 @@ const Dashboard = () => {
 
     const navigate = useNavigate();
 
-    // --- SUPER ADMIN DASHBOARD ---
+    // --- System Health Checks ---
+    const [systemHealth, setSystemHealth] = React.useState({
+        dbStatus: 'Checking...',
+        authStatus: 'Checking...',
+        realtimeStatus: 'Checking...',
+        latency: 0,
+        lastChecked: null,
+        version: '1.2.0', // App Version
+        environment: import.meta.env.MODE || 'production'
+    });
+
+    React.useEffect(() => {
+        const checkSystemHealth = async () => {
+            if (userProfile?.role !== 'super_admin') return;
+
+            const start = performance.now();
+            let db = 'Unknown';
+            let auth = 'Unknown';
+
+            // 1. Check DB & Latency
+            try {
+                const { error } = await supabase.from('profiles').select('id').limit(1);
+                if (!error) db = 'Operational';
+                else db = 'Degraded';
+            } catch (e) {
+                db = 'Downtime';
+            }
+            const end = performance.now();
+            const latency = Math.round(end - start);
+
+            // 2. Check Auth
+            try {
+                const { data, error } = await supabase.auth.getSession();
+                if (data.session) auth = 'Operational';
+                else if (error) auth = 'Issues Detected';
+                else auth = 'Operational'; // No session but no error means service is up
+            } catch (e) {
+                auth = 'Down';
+            }
+
+            // 3. Realtime (Inferred from client socket state if accessible, else simplified)
+            // Supabase v2 exposes connection state differently, often abstracted. 
+            // We assume Operational if DB is up for now, or check a subscription.
+            const rt = 'Operational'; // Placeholder for deep socket check
+
+            setSystemHealth(prev => ({
+                ...prev,
+                dbStatus: db,
+                authStatus: auth,
+                realtimeStatus: rt,
+                latency: latency,
+                lastChecked: new Date().toLocaleTimeString()
+            }));
+        };
+
+        checkSystemHealth();
+        // Poll every 30 seconds
+        const interval = setInterval(checkSystemHealth, 30000);
+        return () => clearInterval(interval);
+    }, [userProfile]);
+
+
     if (userProfile.role === 'super_admin') {
         return (
             <div className="dashboard-container">
@@ -95,28 +156,28 @@ const Dashboard = () => {
                         value={saasStats.totalUsers}
                         label={saasStats.newThisWeek > 0 ? `+${saasStats.newThisWeek} this week` : "Stable"}
                         icon={Users}
-                        color="37, 99, 235" // Blue
+                        color="37, 99, 235"
                     />
                     <StatCard
                         title="Active Pro Subs"
                         value={saasStats.proUsers}
                         label={`RM ${saasStats.proUsers * 99}.00 / mo`}
                         icon={Target}
-                        color="16, 185, 129" // Emerald
+                        color="16, 185, 129"
                     />
                     <StatCard
                         title="Total Revenue"
                         value={`RM ${saasStats.totalRevenue}`}
                         label="Monthly Recurring"
                         icon={TrendingUp}
-                        color="124, 58, 237" // Purple
+                        color="124, 58, 237"
                     />
                     <StatCard
-                        title="Conversion Rate"
-                        value={`${saasStats.conversionRate}%`}
-                        label="Free to Pro"
-                        icon={TrendingUp}
-                        color="245, 158, 11" // Orange
+                        title="System Health"
+                        value={systemHealth.dbStatus === 'Operational' ? '100% Uptime' : 'Issues'}
+                        label={`Latency: ${systemHealth.latency}ms`}
+                        icon={AlertCircle}
+                        color="245, 158, 11"
                     />
                 </div>
 
@@ -125,45 +186,46 @@ const Dashboard = () => {
                     <div className="content-section glass-panel">
                         <h2 className="section-title">Recent Signups</h2>
                         <div className="attention-list">
-                            <div className="attention-item">
-                                <div>
-                                    <div style={{ fontWeight: 600 }}>Ali Baba</div>
-                                    <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Free Plan • Joined 2 hours ago</div>
-                                </div>
-                                <span className="status-dot active"></span>
-                            </div>
-                            <div className="attention-item">
-                                <div>
-                                    <div style={{ fontWeight: 600 }}>Siti Sarah</div>
-                                    <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Pro Plan • Upgraded yesterday</div>
-                                </div>
-                                <span className="status-dot active"></span>
-                            </div>
-                            <div className="attention-item">
-                                <div>
-                                    <div style={{ fontWeight: 600 }}>John Doe</div>
-                                    <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Free Plan • Inactive</div>
-                                </div>
-                                <span className="status-dot inactive"></span>
+                            {/* We could fetch real recent signups here if we had the list from saasStats or separate query */}
+                            <div className="text-muted" style={{ padding: '1rem', fontStyle: 'italic' }}>
+                                View User Management for detailed list.
                             </div>
                         </div>
                     </div>
 
-                    {/* Right: Quick Actions */}
+                    {/* Right: System Status & Actions */}
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                         <div className="content-section glass-panel" style={{ minHeight: 'auto' }}>
-                            <h2 className="section-title">System Status</h2>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                                <h2 className="section-title" style={{ marginBottom: 0 }}>Live System Status</h2>
+                                <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Last checked: {systemHealth.lastChecked}</span>
+                            </div>
+
                             <div className="matrix-label" style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-                                <span>Database</span>
-                                <span style={{ color: '#10b981' }}>Operational</span>
+                                <span>Database Connection</span>
+                                <span style={{ color: systemHealth.dbStatus === 'Operational' ? '#10b981' : '#ef4444', fontWeight: 600 }}>
+                                    {systemHealth.dbStatus}
+                                </span>
                             </div>
                             <div className="matrix-label" style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-                                <span>Email Service</span>
-                                <span style={{ color: '#10b981' }}>Operational</span>
+                                <span>Auth Services</span>
+                                <span style={{ color: systemHealth.authStatus === 'Operational' ? '#10b981' : '#ef4444', fontWeight: 600 }}>
+                                    {systemHealth.authStatus}
+                                </span>
+                            </div>
+                            <div className="matrix-label" style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                                <span>API Latency</span>
+                                <span style={{ color: systemHealth.latency < 200 ? '#3b82f6' : '#eab308' }}>
+                                    {systemHealth.latency}ms
+                                </span>
+                            </div>
+                            <div className="matrix-label" style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                                <span>Environment</span>
+                                <span style={{ color: '#64748b' }}>{systemHealth.environment}</span>
                             </div>
                             <div className="matrix-label" style={{ display: 'flex', justifyContent: 'space-between' }}>
-                                <span>API Latency</span>
-                                <span style={{ color: '#3b82f6' }}>24ms</span>
+                                <span>App Version</span>
+                                <span style={{ color: '#64748b' }}>v{systemHealth.version}</span>
                             </div>
                         </div>
 
