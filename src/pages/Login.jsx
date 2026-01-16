@@ -1,194 +1,255 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { Mail, Lock, ArrowRight, ShieldCheck, Loader, CheckCircle } from 'lucide-react';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
+import { ShieldCheck, ArrowRight, Loader, ArrowLeft, Mail, Lock, User } from 'lucide-react';
+import { supabase } from '../services/supabaseClient'; // Now valid
+import { sendWelcomeEmail } from '../services/emailService';
 import './Login.css';
 
 const Login = () => {
     const navigate = useNavigate();
     const location = useLocation();
-    const [view, setView] = useState('login'); // 'login', 'register', 'otp'
+    const [view, setView] = useState('login'); // 'login', 'register'
     const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState('');
+    const [success, setSuccess] = useState('');
+
+    // Login State
     const [email, setEmail] = useState('');
-    const [otp, setOtp] = useState('');
+    const [password, setPassword] = useState('');
 
-    // Demo Mock Data
-    const DEMO_OTP = '123456';
-
-    // Registration State
+    // Register State
     const [regName, setRegName] = useState('');
     const [regEmail, setRegEmail] = useState('');
+    const [regPassword, setRegPassword] = useState('');
 
     useEffect(() => {
-        // If already logged in, redirect
-        const profile = localStorage.getItem('agent_user_profile');
-        if (profile) navigate('/');
+        // If already logged in (via Supabase session), redirect
+        const checkSession = async () => {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (session) {
+                navigate('/');
+            }
+        };
+        checkSession();
     }, [navigate]);
 
-    const handleSendOtp = (e) => {
-        e.preventDefault();
-        setIsLoading(true);
-        // Mock API Call
-        setTimeout(() => {
-            setIsLoading(false);
-            setView('otp');
-            // For demo convenience, we autofill standard emails if typing specific ones
-        }, 1500);
+    // Clear messages on view switch
+    useEffect(() => {
+        setError('');
+        setSuccess('');
+    }, [view]);
+
+    const loginSuccess = async (session) => {
+        // We can still store profile in localStorage for fast access, 
+        // but primarily rely on Supabase session.
+        // For now, let's keep the mock profile structure in localStorage for compatibility 
+        // with the rest of the app which expects 'agent_user_profile'.
+
+        const user = session.user;
+        let role = 'free';
+        let planId = 'free';
+        let name = user.user_metadata?.full_name || 'Agent';
+
+        if (user.email.toLowerCase() === 'agentapp.my@gmail.com') {
+            role = 'super_admin';
+            planId = 'pro';
+            name = 'Super Admin';
+        }
+
+        const newProfile = {
+            name,
+            role,
+            planId,
+            email: user.email,
+            id: user.id,
+            phone: '',
+            photoUrl: '',
+            bio: '',
+            licenseNo: '',
+            agencyName: '',
+            social: { facebook: '', threads: '', tiktok: '', instagram: '' }
+        };
+        localStorage.setItem('agent_user_profile', JSON.stringify(newProfile));
+        window.location.href = '/';
     };
 
-    const handleVerifyOtp = (e) => {
+    const handleLogin = async (e) => {
         e.preventDefault();
         setIsLoading(true);
+        setError('');
 
-        setTimeout(() => {
-            if (otp === DEMO_OTP) {
-                // Login Success Logic
-                let role = 'free'; // Default
-                let planId = 'free';
-                let name = 'Agent';
+        try {
+            const { data, error } = await supabase.auth.signInWithPassword({
+                email: email,
+                password: password,
+            });
 
-                const targetEmail = view === 'register' ? regEmail.toLowerCase() : email.toLowerCase();
+            if (error) throw error;
 
-                if (targetEmail === 'agentapp.my@gmail.com') {
-                    role = 'super_admin';
-                    planId = 'pro'; // Admin gets pro features
-                    name = 'Super Admin';
-                } else if (targetEmail === 'pro@agentapp.my') {
-                    role = 'pro';
-                    planId = 'pro';
-                    name = 'Pro Agent';
-                } else {
-                    role = 'free'; // 'free@agentapp.my' falls here
-                    planId = 'free';
-                    name = view === 'register' ? regName : 'Free Agent';
+            if (data.session) {
+                loginSuccess(data.session);
+            }
+        } catch (error) {
+            console.error('Login Error:', error.message);
+            setError(error.message || 'Failed to sign in.');
+            setIsLoading(false);
+        }
+    };
+
+    const handleRegister = async (e) => {
+        e.preventDefault();
+        setIsLoading(true);
+        setError('');
+        setSuccess('');
+
+        try {
+            const { data, error } = await supabase.auth.signUp({
+                email: regEmail,
+                password: regPassword,
+                options: {
+                    data: {
+                        full_name: regName,
+                    },
+                },
+            });
+
+            if (error) throw error;
+
+            if (data.session) {
+                // 2. Send Welcome Email (Fire & Forget)
+                try {
+                    const { sendWelcomeEmail } = await import('../services/emailService');
+                    await sendWelcomeEmail(regEmail, regName);
+                } catch (err) {
+                    console.error("Failed to send welcome email", err);
                 }
 
-                const newProfile = {
-                    name,
-                    role, // 'super_admin', 'pro', 'free'
-                    planId,
-                    email: targetEmail,
-                    phone: '',
-                    photoUrl: '',
-                    bio: '',
-                    licenseNo: '',
-                    agencyName: '',
-                    social: { facebook: '', threads: '', tiktok: '', instagram: '' }
-                };
-
-                localStorage.setItem('agent_user_profile', JSON.stringify(newProfile));
-                // Force a hard reload to ensure all app state (Sidebar, Routes) updates correctly
-                window.location.href = '/';
-            } else {
-                alert('Invalid OTP. Use 123456 for demo.');
+                loginSuccess(data.session);
+            } else if (data.user && !data.session) {
+                // Email confirmation required context
+                setSuccess('Account created! Please check your email to verify.');
                 setIsLoading(false);
             }
-        }, 1500);
+        } catch (error) {
+            console.error('Registration Error:', error.message);
+            setError(error.message || 'Failed to create account.');
+            setIsLoading(false);
+        }
     };
 
     return (
         <div className="auth-container">
             <div className="auth-card">
                 <div className="auth-header">
-                    <div className="brand-logo">
+                    <div className="brand-icon-wrapper">
                         <ShieldCheck size={32} />
                     </div>
-                    <h1>{view === 'register' ? 'Join AgentApp' : 'Welcome Back'}</h1>
-                    <p>{view === 'otp' ? `We sent a code to ${view === 'register' ? regEmail : email}` : 'Enter your email to access your account'}</p>
+                    <h1>Welcome</h1>
+                    <p>Sign in to your account or create a new one</p>
                 </div>
 
+                <div className="auth-tabs">
+                    <button
+                        className={`tab-btn ${view === 'login' ? 'active' : ''}`}
+                        onClick={() => setView('login')}
+                    >
+                        Sign In
+                    </button>
+                    <button
+                        className={`tab-btn ${view === 'register' ? 'active' : ''}`}
+                        onClick={() => setView('register')}
+                    >
+                        Sign Up
+                    </button>
+                </div>
+
+                {error && <div className="auth-message error">{error}</div>}
+                {success && <div className="auth-message success">{success}</div>}
+
                 {view === 'login' && (
-                    <form onSubmit={handleSendOtp} className="auth-form">
+                    <form onSubmit={handleLogin} className="auth-form">
                         <div className="form-group">
-                            <label>Email Address</label>
-                            <div className="input-icon-wrapper">
-                                <Mail size={18} />
+                            <label>Email</label>
+                            <div className="input-wrapper">
+                                <Mail className="input-icon" size={18} />
                                 <input
                                     type="email"
                                     required
-                                    placeholder="name@example.com"
+                                    placeholder="you@example.com"
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
                                 />
                             </div>
                         </div>
-                        <button type="submit" className="primary-btn full-width" disabled={isLoading}>
-                            {isLoading ? <Loader className="spin" size={18} /> : <>Send Login Code <ArrowRight size={18} /></>}
-                        </button>
-                        <div className="auth-footer">
-                            <span>Don't have an account?</span>
-                            <button type="button" className="link-btn" onClick={() => setView('register')}>Sign Up</button>
+                        <div className="form-group">
+                            <label>Password</label>
+                            <div className="input-wrapper">
+                                <Lock className="input-icon" size={18} />
+                                <input
+                                    type="password"
+                                    required
+                                    placeholder="••••••••"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                />
+                            </div>
                         </div>
+                        <button type="submit" className="primary-btn" disabled={isLoading}>
+                            {isLoading ? <Loader className="spin" size={18} /> : 'Sign In'}
+                        </button>
                     </form>
                 )}
 
                 {view === 'register' && (
-                    <form onSubmit={handleSendOtp} className="auth-form">
+                    <form onSubmit={handleRegister} className="auth-form">
                         <div className="form-group">
                             <label>Full Name</label>
-                            <input
-                                type="text"
-                                required
-                                placeholder="e.g. Ali Baba"
-                                value={regName}
-                                onChange={(e) => setRegName(e.target.value)}
-                            />
+                            <div className="input-wrapper">
+                                <User className="input-icon" size={18} />
+                                <input
+                                    type="text"
+                                    required
+                                    placeholder="e.g. Ali Baba"
+                                    value={regName}
+                                    onChange={(e) => setRegName(e.target.value)}
+                                />
+                            </div>
                         </div>
                         <div className="form-group">
-                            <label>Email Address</label>
-                            <div className="input-icon-wrapper">
-                                <Mail size={18} />
+                            <label>Email</label>
+                            <div className="input-wrapper">
+                                <Mail className="input-icon" size={18} />
                                 <input
                                     type="email"
                                     required
-                                    placeholder="name@example.com"
+                                    placeholder="you@example.com"
                                     value={regEmail}
                                     onChange={(e) => setRegEmail(e.target.value)}
                                 />
                             </div>
                         </div>
-                        <button type="submit" className="primary-btn full-width" disabled={isLoading}>
-                            {isLoading ? <Loader className="spin" size={18} /> : <>Create Account <ArrowRight size={18} /></>}
-                        </button>
-                        <div className="auth-footer">
-                            <span>Already have an account?</span>
-                            <button type="button" className="link-btn" onClick={() => setView('login')}>Log In</button>
-                        </div>
-                    </form>
-                )}
-
-                {view === 'otp' && (
-                    <form onSubmit={handleVerifyOtp} className="auth-form">
                         <div className="form-group">
-                            <label>Enter Demo OTP (Use: 123456)</label>
-                            <div className="input-icon-wrapper">
-                                <Lock size={18} />
+                            <label>Password</label>
+                            <div className="input-wrapper">
+                                <Lock className="input-icon" size={18} />
                                 <input
-                                    type="text"
+                                    type="password"
                                     required
-                                    placeholder="000000"
-                                    value={otp}
-                                    onChange={(e) => setOtp(e.target.value)}
-                                    maxLength={6}
-                                    style={{ letterSpacing: '8px', fontWeight: 'bold', textAlign: 'center' }}
+                                    placeholder="••••••••"
+                                    value={regPassword}
+                                    onChange={(e) => setRegPassword(e.target.value)}
                                 />
                             </div>
                         </div>
-                        <button type="submit" className="primary-btn full-width" disabled={isLoading}>
-                            {isLoading ? <Loader className="spin" size={18} /> : <>Verify & Login <CheckCircle size={18} /></>}
+                        <button type="submit" className="primary-btn" disabled={isLoading}>
+                            {isLoading ? <Loader className="spin" size={18} /> : 'Create Account'}
                         </button>
-                        <div className="auth-footer">
-                            <button type="button" className="link-btn" onClick={() => { setView('login'); setOtp(''); }}>Changed email?</button>
-                        </div>
                     </form>
                 )}
 
-                {/* Demo Hint */}
-                <div className="demo-hint">
-                    <p><strong>Demo Access:</strong></p>
-                    <p>Super Admin: <code>agentapp.my@gmail.com</code></p>
-                    <p>Pro User: <code>pro@agentapp.my</code></p>
-                    <p>Code: <code>123456</code></p>
-                </div>
+                <Link to="/" className="back-link">
+                    ← Back to Home
+                </Link>
             </div>
         </div>
     );
