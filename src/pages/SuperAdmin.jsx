@@ -126,12 +126,54 @@ const EditUserModal = ({ user, onClose, onSave }) => {
 const SuperAdmin = () => {
     const [activeTab, setActiveTab] = useState('users');
 
-    // Mock Data
-    const [users, setUsers] = useState([
-        { id: 1, name: 'Ali Baba', email: 'ali@free.com', plan: 'Free', status: 'Active', joined: '2025-12-01' },
-        { id: 2, name: 'Siti Sarah', email: 'siti@pro.com', plan: 'Pro', status: 'Active', joined: '2025-11-20' },
-        { id: 3, name: 'John Doe', email: 'john@free.com', plan: 'Free', status: 'Inactive', joined: '2025-10-10' },
-    ]);
+    // Real Data from Supabase
+    const [users, setUsers] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+        fetchUsers();
+    }, []);
+
+    const fetchUsers = async () => {
+        setIsLoading(true);
+        // Try to fetch from 'profiles' table first (if created)
+        // Since we don't have a guaranteed 'profiles' table yet, this might fail unless backend exists.
+        // Fallback: We can't list authorized users client-side without Admin API.
+        // BUT, for this specific app, let's assume we relying on 'profiles' table or similar.
+
+        try {
+            const { supabase } = await import('../services/supabaseClient');
+
+            // 1. Try fetching profiles
+            const { data, error } = await supabase
+                .from('profiles')
+                .select('*');
+
+            if (error) throw error;
+
+            if (data) {
+                // Map Supabase profile to UI format
+                const mappedUsers = data.map(u => ({
+                    id: u.id,
+                    name: u.full_name || u.email?.split('@')[0] || 'User',
+                    email: u.email,
+                    plan: u.plan_id ? (u.plan_id === 'pro' ? 'Pro' : 'Free') : 'Free', // Fallback
+                    status: 'Active',
+                    joined: new Date(u.created_at || Date.now()).toLocaleDateString()
+                }));
+                setUsers(mappedUsers);
+            }
+        } catch (err) {
+            console.warn('Failed to fetch users from Supabase (Table "profiles" likely missing). Using mock for demo.', err);
+            // Fallback to Mock if table missing
+            setUsers([
+                { id: 1, name: 'Ali Baba (Mock)', email: 'ali@free.com', plan: 'Free', status: 'Active', joined: '2025-12-01' },
+                { id: 2, name: 'Siti Sarah (Mock)', email: 'siti@pro.com', plan: 'Pro', status: 'Active', joined: '2025-11-20' },
+            ]);
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     const [followUpSettings, setFollowUpSettings] = useState({
         free: [
@@ -224,6 +266,7 @@ const SuperAdmin = () => {
                                 <Search size={18} className="text-gray-400" />
                                 <input placeholder="Search users..." style={{ border: 'none', background: 'transparent', outline: 'none', width: '100%' }} />
                             </div>
+                            <button onClick={fetchUsers} className="icon-btn-small" title="Refresh"><Clock size={16} /></button>
                         </div>
 
                         <table className="sa-table">

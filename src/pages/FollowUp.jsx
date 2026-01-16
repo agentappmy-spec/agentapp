@@ -181,27 +181,47 @@ const EditNodeModal = ({ node, onClose, onSave }) => {
 
 const FollowUpCard = ({ step, prevStep, index, isLast, onEdit, onDelete }) => {
     // Calculate relative delay
-    // If it's the first step (index 0), delay is 0 (Instant).
-    // If index > 0, delay = step.day - prevStep.day.
     const delay = index === 0 ? 0 : (step.day - (prevStep ? prevStep.day : 0));
-
-    // Display text logic
-    let delayText = '';
-    if (index === 0) {
-        delayText = 'Instant'; // First message is always immediate
-    } else {
-        delayText = `Wait ${delay} day${delay !== 1 ? 's' : ''}`;
-    }
-
-    // Determine cumulative label ("Day X")
+    let delayText = index === 0 ? 'Instant' : `Wait ${delay} day${delay !== 1 ? 's' : ''}`;
     const dayLabel = `Day ${step.day}`;
-
-    // Get a preview content (prioritize SMS for preview if available)
     const previewContent = step.contentSms || step.content || step.contentWhatsapp || step.contentEmail || 'No content';
 
+    // Swipe Logic
+    const [touchStart, setTouchStart] = useState(null);
+    const [touchEnd, setTouchEnd] = useState(null);
+    const [isSwiped, setIsSwiped] = useState(false);
+
+    const minSwipeDistance = 50;
+
+    const onTouchStart = (e) => {
+        setTouchEnd(null);
+        setTouchStart(e.targetTouches[0].clientX);
+    };
+
+    const onTouchMove = (e) => setTouchEnd(e.targetTouches[0].clientX);
+
+    const onTouchEnd = () => {
+        if (!touchStart || !touchEnd) return;
+        const distance = touchStart - touchEnd;
+        const isLeftSwipe = distance > minSwipeDistance;
+        const isRightSwipe = distance < -minSwipeDistance;
+
+        if (isLeftSwipe) setIsSwiped(true);
+        if (isRightSwipe) setIsSwiped(false);
+    };
+
     return (
-        <div className="flow-step-wrapper">
-            <div className="flow-card">
+        <div className="flow-step-wrapper" style={{ overflow: 'hidden' }}>
+            <div
+                className="flow-card"
+                onTouchStart={onTouchStart}
+                onTouchMove={onTouchMove}
+                onTouchEnd={onTouchEnd}
+                style={{
+                    transform: isSwiped ? 'translateX(-100px)' : 'translateX(0)',
+                    transition: 'transform 0.3s ease'
+                }}
+            >
                 <div className="step-indicator">
                     <div className={`step-circle ${index === 0 ? 'start-node' : ''}`}>
                         {index === 0 ? <Check size={24} /> : (index + 1)}
@@ -224,6 +244,7 @@ const FollowUpCard = ({ step, prevStep, index, isLast, onEdit, onDelete }) => {
                     </div>
 
                     <div className="card-footer">
+                        {/* Icons ... */}
                         <div className="channel-icons">
                             <div className="channel-icon" style={{ background: 'var(--primary)' }} title="SMS Enabled">
                                 <MessageSquare size={14} />
@@ -236,14 +257,14 @@ const FollowUpCard = ({ step, prevStep, index, isLast, onEdit, onDelete }) => {
                             </div>
                         </div>
 
-                        <div className="card-actions">
+                        {/* Desktop Actions (always visible) */}
+                        <div className="card-actions desktop-only-actions">
                             <button className="action-btn" onClick={() => onEdit(step)}>
                                 <Edit2 size={14} /> Edit
                             </button>
                             <button
                                 className="action-btn delete"
                                 disabled={!isLast}
-                                title={!isLast ? "Can only delete the last step" : "Delete step"}
                                 style={{ opacity: !isLast ? 0.4 : 1 }}
                                 onClick={() => onDelete(step)}
                             >
@@ -252,6 +273,25 @@ const FollowUpCard = ({ step, prevStep, index, isLast, onEdit, onDelete }) => {
                         </div>
                     </div>
                 </div>
+            </div>
+
+            {/* Swipe Actions Background (Mobile) */}
+            <div className="swipe-actions" style={{
+                position: 'absolute', top: 0, right: 0, bottom: 0, width: '100px',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px',
+                opacity: isSwiped ? 1 : 0
+            }}>
+                <button onClick={() => onEdit(step)} className="mobile-swipe-btn edit" style={{ background: '#3b82f6' }}>
+                    <Edit2 size={18} color="white" />
+                </button>
+                <button
+                    onClick={() => onDelete(step)}
+                    className="mobile-swipe-btn delete"
+                    style={{ background: '#ef4444', opacity: !isLast ? 0.5 : 1 }}
+                    disabled={!isLast}
+                >
+                    <Trash2 size={18} color="white" />
+                </button>
             </div>
         </div>
     );

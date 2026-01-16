@@ -48,3 +48,8 @@ A verification run was performed to confirm:
     - *Note*: Default Supabase settings require **Email Verification** before login. Dashboard will not load until you click the link in your email.
 
 **Status**: ✅ Login UI Redesign & Supabase Integration Complete.
+
+### 6. Deployment
+- **Frontend**: Deployed to Cloudflare Pages (`agentapp.pages.dev`).
+- **Backend**: Simplified architecture by removing custom backend. Now relying entirely on Supabase for Auth & Email.
+

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useOutletContext, useSearchParams } from 'react-router-dom';
-import { User, Mail, Phone, Save, Tag, Package, Plus, Trash2, Edit2, MessageCircle, MessageSquare, Target, Facebook, Instagram, AtSign, Video, FileText, Globe } from 'lucide-react';
+import { User, Mail, Phone, Save, Tag, Package, Plus, Trash2, Edit2, MessageCircle, MessageSquare, Target, Facebook, Instagram, AtSign, Video, FileText, Globe, LogOut } from 'lucide-react';
+import { supabase } from '../services/supabaseClient';
 import './Settings.css';
 
 const Settings = () => {
@@ -202,6 +203,18 @@ const Settings = () => {
                             <small style={{ color: '#888', fontWeight: 600 }}>ADMIN</small>
                         </div>
                     )}
+
+                    <button
+                        className="settings-nav-item danger-text"
+                        onClick={async () => {
+                            await supabase.auth.signOut();
+                            localStorage.removeItem('agent_user_profile');
+                            window.location.href = '/login';
+                        }}
+                        style={{ marginTop: 'auto', color: '#ef4444' }}
+                    >
+                        <LogOut size={18} /> Sign Out
+                    </button>
                 </div>
 
                 <div className={`settings-content ${mobileView === 'menu' ? 'hidden-on-mobile' : ''}`}>

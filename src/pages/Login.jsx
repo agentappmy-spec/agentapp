@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { ShieldCheck, ArrowRight, Loader, ArrowLeft, Mail, Lock, User } from 'lucide-react';
 import { supabase } from '../services/supabaseClient'; // Now valid
-import { sendWelcomeEmail } from '../services/emailService';
 import './Login.css';
 
 const Login = () => {
@@ -117,12 +116,7 @@ const Login = () => {
 
             if (data.session) {
                 // 2. Send Welcome Email (Fire & Forget)
-                try {
-                    const { sendWelcomeEmail } = await import('../services/emailService');
-                    await sendWelcomeEmail(regEmail, regName);
-                } catch (err) {
-                    console.error("Failed to send welcome email", err);
-                }
+
 
                 loginSuccess(data.session);
             } else if (data.user && !data.session) {

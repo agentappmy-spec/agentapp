@@ -394,3 +394,49 @@
     border-color: #ef4444;
     outline: none;
 }
+
+/* Swipe Actions */
+.flow-step-wrapper {
+    position: relative;
+    /* Ensure swipe actions are behind or laid out correctly */
+}
+
+.swipe-actions {
+    z-index: 0;
+}
+
+.flow-card {
+    z-index: 2;
+    background: white;
+}
+
+.mobile-swipe-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.desktop-only-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+@media (max-width: 768px) {
+    .desktop-only-actions {
+        display: none !important;
+        /* Hide default buttons on mobile if using swipe, verified */
+    }
+
+    .settings-nav-item.danger-text {
+        color: #ef4444 !important;
+        background: #fef2f2;
+        margin-top: 2rem !important;
+        justify-content: center;
+    }
+}
