@@ -11,7 +11,8 @@ import LandingPage from './pages/LandingPage';
 import PublicLanding from './pages/PublicLanding';
 import LinkWhatsApp from './pages/LinkWhatsApp';
 import Settings from './pages/Settings';
-import Login from './pages/Login';
+// ... (existing imports)
+import ResetPassword from './pages/ResetPassword';
 import SuperAdmin from './pages/SuperAdmin';
 import './App.css';
 import './MobileStyles.css';
@@ -420,6 +421,7 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/login" element={<Login />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
         {/* Public Landing (if kept separate) */}
         <Route path="/p/public" element={<PublicLanding />} />
 
