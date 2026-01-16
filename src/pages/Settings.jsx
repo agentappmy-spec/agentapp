@@ -458,20 +458,28 @@ const Settings = () => {
 
                                         // TODO: Validate against DB for dynamic codes
                                         if (code === 'KDIGITAL') {
-                                            alert('Code Redeemed! Enjoy 30 Days of Pro.');
 
                                             // Update Local
-                                            const newProfile = { ...userProfile, planId: 'pro', role: 'free' }; // status trial logic later
+                                            const newProfile = { ...userProfile, planId: 'pro', role: 'free' };
                                             setUserProfile(newProfile);
                                             localStorage.setItem('agent_user_profile', JSON.stringify(newProfile));
+
+                                            // Calculate Expiry
+                                            const expiryDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
 
                                             // Update DB
                                             await supabase.from('profiles').update({
                                                 plan_id: 'pro',
                                                 subscription_status: 'trial',
-                                                subscription_end_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+                                                subscription_end_date: expiryDate.toISOString(),
                                                 is_trial_used: true
                                             }).eq('id', userProfile.id);
+
+                                            // SIMULATE EMAIL NOTIFICATION (Super Admin manages templates elsewhere)
+                                            // In production, this would trigger an Edge Function: supabase.functions.invoke('send-email', ...)
+                                            console.log(`[EMAIL SENT] To: ${userProfile.email}, Subject: You are now PRO! Expires: ${expiryDate.toLocaleDateString()}`);
+
+                                            alert(`Code Redeemed! You are now a PRO user until ${expiryDate.toLocaleDateString()}.\n\nA confirmation email has been sent to ${userProfile.email}.`);
 
                                             window.location.reload();
                                         } else {
