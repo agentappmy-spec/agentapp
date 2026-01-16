@@ -27,6 +27,9 @@ const Login = () => {
             const { data: { session } } = await supabase.auth.getSession();
             if (session) {
                 navigate('/');
+            } else {
+                // Clear any stale local state if Supabase says we aren't logged in
+                localStorage.removeItem('agent_user_profile');
             }
         };
         checkSession();

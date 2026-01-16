@@ -132,10 +132,10 @@ const Dashboard = () => {
                         <div className="content-section glass-panel" style={{ minHeight: 'auto' }}>
                             <h2 className="section-title">Quick Actions</h2>
                             <div className="quick-actions-grid">
-                                <button className="action-btn" onClick={() => navigate('/super-admin')}>
+                                <button className="action-btn" onClick={() => navigate('/super-admin', { state: { activeTab: 'users' } })}>
                                     <Users size={16} style={{ marginRight: '8px', display: 'inline' }} /> User Management
                                 </button>
-                                <button className="action-btn" onClick={() => navigate('/super-admin')}>
+                                <button className="action-btn" onClick={() => navigate('/super-admin', { state: { activeTab: 'followup' } })}>
                                     <MessageCheck size={16} style={{ marginRight: '8px', display: 'inline' }} /> Configure Automation
                                 </button>
                             </div>

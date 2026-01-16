@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import {
     Users,
     MessageCircle,
@@ -124,7 +125,14 @@ const EditUserModal = ({ user, onClose, onSave }) => {
 
 
 const SuperAdmin = () => {
-    const [activeTab, setActiveTab] = useState('users');
+    const location = useLocation();
+    const [activeTab, setActiveTab] = useState(location.state?.activeTab || 'users');
+
+    useEffect(() => {
+        if (location.state?.activeTab) {
+            setActiveTab(location.state.activeTab);
+        }
+    }, [location.state]);
 
     // Real Data from Supabase
     const [users, setUsers] = useState([]);
