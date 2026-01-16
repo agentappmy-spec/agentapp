@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useOutletContext, useSearchParams } from 'react-router-dom';
-import { User, Mail, Phone, Save, Tag, Package, Plus, Trash2, Edit2, MessageCircle, MessageSquare, Target, Facebook, Instagram, AtSign, Video, FileText, Globe, LogOut } from 'lucide-react';
+import { User, Mail, Phone, Save, Tag, Package, Plus, Trash2, Edit2, MessageCircle, MessageSquare, Target, Facebook, Instagram, AtSign, Video, FileText, Globe, LogOut, Check, X, Star } from 'lucide-react';
 import { supabase } from '../services/supabaseClient';
 import './Settings.css';
 
@@ -87,6 +87,51 @@ const Settings = () => {
             alert('Failed to start payment. Server might be busy.');
         } finally {
             setIsProcessingPayment(false);
+        }
+    };
+
+    // Promo Code Logic
+    const [promoCode, setPromoCode] = useState('');
+    const handleRedeemCode = async () => {
+        if (!promoCode.trim()) return;
+
+        // MVP: Hardcoded legacy check + Server-side validation preference
+        // Ideally we should move this to an edge function if we want to hide logics,
+        // but for now we keep the existing logic structure.
+        if (promoCode === 'KDIGITAL') {
+            const expiryDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+
+            // Update DB
+            const { error } = await supabase.from('profiles').update({
+                plan_id: 'pro',
+                subscription_status: 'trial',
+                subscription_end_date: expiryDate.toISOString(),
+                is_trial_used: true
+            }).eq('id', userProfile.id);
+
+            if (error) {
+                alert('Redemption failed. Please try again.');
+                return;
+            }
+
+            // Update Local State
+            const newProfile = { ...userProfile, planId: 'pro', role: 'free' }; // role stays free technically or update to pro? usually we check planId
+            // Let's assume planId is source of truth for features
+            setUserProfile(prev => ({
+                ...prev,
+                planId: 'pro',
+                subscription_end_date: expiryDate.toISOString()
+            }));
+            localStorage.setItem('agent_user_profile', JSON.stringify({
+                ...newProfile,
+                planId: 'pro',
+                subscription_end_date: expiryDate.toISOString()
+            }));
+
+            alert(`Code Redeemed! You are now a PRO user until ${expiryDate.toLocaleDateString()}.`);
+            setPromoCode('');
+        } else {
+            alert('Invalid or expired code.');
         }
     };
 
@@ -409,406 +454,412 @@ const Settings = () => {
                                                 <label><AtSign size={14} /> Threads</label>
                                                 <input
                                                     type="text"
-                                                    placeholder="@username"
-                                                    value={userProfile.social?.threads || ''}
-                                                    onChange={e => setUserProfile(prev => ({ ...prev, social: { ...prev.social, threads: e.target.value } }))}
-                                                />
+                                            </div>
+                                            <button className="primary-btn" style={{ marginTop: '2rem', width: '100%', opacity: 0.8, cursor: 'default' }} disabled>
+                                                <Save size={18} style={{ marginRight: '8px' }} /> Changes Saved Automatically
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                    )}
+
+                            {activeTab === 'billing' && (
+                                <div className="animate-fade-in">
+                                    <div className="pricing-header">
+                                        <h2 className="pricing-title">Simple, transparent pricing</h2>
+                                        <p className="pricing-subtitle">Everything you need to grow your agency business.</p>
+
+                                        <div className="pricing-toggle-container">
+                                            <div className="pricing-toggle">
+                                                <div
+                                                    className={`toggle-option ${upgradePlan === 'monthly' ? 'active' : ''}`}
+                                                    onClick={() => setUpgradePlan('monthly')}
+                                                >
+                                                    Monthly
+                                                </div>
+                                                <div
+                                                    className={`toggle-option ${upgradePlan === 'yearly' ? 'active' : ''}`}
+                                                    onClick={() => setUpgradePlan('yearly')}
+                                                >
+                                                    Annual
+                                                </div>
+                                                <div className="discount-badge">Save ~17%</div>
                                             </div>
                                         </div>
+                                    </div>
 
-                                        <button className="primary-btn" style={{ marginTop: '2rem', width: '100%', opacity: 0.8, cursor: 'default' }} disabled>
-                                            <Save size={18} style={{ marginRight: '8px' }} /> Changes Saved Automatically
+                                    <div className="pricing-grid">
+                                        {/* Free Plan */}
+                                        <div className="pricing-card">
+                                            <div className="plan-name">Basic</div>
+                                            <div className="plan-desc">Essential tools to manage your leads, perfect for individuals.</div>
+                                            <div className="plan-price">
+                                                RM 0<small>/ mo</small>
+                                            </div>
+
+                                            <ul className="plan-features">
+                                                <li className="feature-item">
+                                                    <Check size={18} className="check-icon" />
+                                                    <span>50 Contacts Limit</span>
+                                                </li>
+                                                <li className="feature-item">
+                                                    <Check size={18} className="check-icon" />
+                                                    <span>Basic Analytics</span>
+                                                </li>
+                                                <li className="feature-item">
+                                                    <Check size={18} className="check-icon" />
+                                                    <span>Goal Tracking</span>
+                                                </li>
+                                                <li className="feature-item text-muted" style={{ opacity: 0.5 }}>
+                                                    <X size={18} />
+                                                    <span>No WhatsApp Automation</span>
+                                                </li>
+                                            </ul>
+
+                                            <button className="plan-btn outline" disabled>
+                                                {userProfile.planId === 'pro' ? 'Downgrade' : 'Current Plan'}
+                                            </button>
+                                        </div>
+
+                                        {/* Pro Plan */}
+                                        <div className="pricing-card popular">
+                                            <div className="popular-badge"><Star size={12} fill="white" /> Most Popular</div>
+                                            <div className="plan-name">Pro</div>
+                                            <div className="plan-desc">Advanced features to track and grow your sales with ease.</div>
+                                            <div className="plan-price">
+                                                {upgradePlan === 'yearly' && <span className="old-price">RM 220</span>}
+                                                RM {upgradePlan === 'yearly' ? '220' : '22'}
+                                                <small>{upgradePlan === 'yearly' ? '/ year' : '/ mo'}</small>
+                                            </div>
+
+                                            <ul className="plan-features">
+                                                <li className="feature-item">
+                                                    <Check size={18} className="check-icon" />
+                                                    <span><strong>Unlimited</strong> Contacts</span>
+                                                </li>
+                                                <li className="feature-item">
+                                                    <Check size={18} className="check-icon" />
+                                                    <span>WhatsApp Auto-Follow up</span>
+                                                </li>
+                                                <li className="feature-item">
+                                                    <Check size={18} className="check-icon" />
+                                                    <span>Publish Landing Pages</span>
+                                                </li>
+                                                <li className="feature-item">
+                                                    <Check size={18} className="check-icon" />
+                                                    <span>Advanced Analytics</span>
+                                                </li>
+                                                <li className="feature-item">
+                                                    <Check size={18} className="check-icon" />
+                                                    <span>Priority Support</span>
+                                                </li>
+                                            </ul>
+
+                                            {userProfile.planId === 'pro' ? (
+                                                <button className="plan-btn outline" disabled>Current Plan</button>
+                                            ) : (
+                                                <button
+                                                    className="plan-btn primary"
+                                                    onClick={handleUpgradePayment}
+                                                    disabled={isProcessingPayment}
+                                                >
+                                                    {isProcessingPayment ? 'Processing...' : 'Upgrade to Pro'}
+                                                </button>
+                                            )}
+
+                                            <div className="guarantee-text">30-day money-back guarantee</div>
+                                        </div>
+                                    </div>
+
+                                    {/* Promo Code Section */}
+                                    <div className="promo-section">
+                                        <div style={{ fontWeight: 600, marginBottom: '0.5rem' }}>Have a promo code?</div>
+                                        <div style={{ color: '#64748b', fontSize: '0.9rem' }}>Enter your code below to redeem special offers.</div>
+                                        <div className="promo-input-group">
+                                            <input
+                                                type="text"
+                                                className="promo-input"
+                                                placeholder="e.g. KDIGITAL"
+                                                value={promoCode}
+                                                onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
+                                            />
+                                            <button className="promo-btn" onClick={handleRedeemCode}>
+                                                Redeem
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+
+
+                            {activeTab === 'config' && (
+                                <div className="config-section fade-in">
+                                    <h2 className="section-title">Reference Data Configuration</h2>
+
+                                    <div className="config-tabs">
+                                        <button
+                                            className={`tab-pill ${managerTab === 'products' ? 'active' : ''}`}
+                                            onClick={() => setManagerTab('products')}
+                                        >
+                                            Products
+                                        </button>
+                                        <button
+                                            className={`tab-pill ${managerTab === 'tags' ? 'active' : ''}`}
+                                            onClick={() => setManagerTab('tags')}
+                                        >
+                                            Behavior Tags
+                                        </button>
+                                    </div>
+
+                                    <div className="manager-toolbar">
+                                        <form onSubmit={handleAddItem} className="add-item-row">
+                                            <input
+                                                type="text"
+                                                placeholder={`Add new ${managerTab === 'products' ? 'product' : 'tag'}...`}
+                                                value={newItemName}
+                                                onChange={e => setNewItemName(e.target.value)}
+                                            />
+                                            <button type="submit" className="icon-btn-primary">
+                                                <Plus size={18} />
+                                            </button>
+                                        </form>
+                                    </div>
+
+                                    <ul className="config-list">
+                                        {(managerTab === 'products' ? availableProducts : availableTags).map((item, idx) => (
+                                            <li key={idx} className="config-item">
+                                                {editingId === item ? (
+                                                    <div className="edit-mode-inline">
+                                                        <input
+                                                            autoFocus
+                                                            value={editName}
+                                                            onChange={e => setEditName(e.target.value)}
+                                                        />
+                                                        <button onClick={saveEdit} className="save-btn-sm"><Save size={14} /></button>
+                                                    </div>
+                                                ) : (
+                                                    <>
+                                                        <span>{item}</span>
+                                                        <div className="item-actions">
+                                                            <button onClick={() => startEditing(item)} className="action-btn-sm" title="Edit">
+                                                                <Edit2 size={16} />
+                                                            </button>
+                                                            <button onClick={() => handleDeleteItem(item)} className="action-btn-sm danger" title="Delete">
+                                                                <Trash2 size={16} />
+                                                            </button>
+                                                        </div>
+                                                    </>
+                                                )}
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            )}
+
+                            {activeTab === 'goals' && (
+                                <div className="goals-section fade-in">
+                                    <h2 className="section-title">Business Goals & KPIs</h2>
+                                    <p className="section-subtitle text-muted" style={{ marginBottom: '1.5rem' }}>Set your magic numbers to track your progress on the dashboard.</p>
+
+                                    <div className="profile-form">
+                                        <div className="form-group">
+                                            <label>Monthly Revenue Target (RM)</label>
+                                            <input
+                                                type="number"
+                                                value={userGoals.monthlyRevenue}
+                                                onChange={e => setUserGoals(prev => ({ ...prev, monthlyRevenue: Number(e.target.value) }))}
+                                                placeholder="5000"
+                                            />
+                                            <small className="text-muted">Target commission/profit per month.</small>
+                                        </div>
+                                        <div className="form-group">
+                                            <label>Monthly Case Count Target</label>
+                                            <input
+                                                type="number"
+                                                value={userGoals.monthlyCases}
+                                                onChange={e => setUserGoals(prev => ({ ...prev, monthlyCases: Number(e.target.value) }))}
+                                                placeholder="5"
+                                            />
+                                            <small className="text-muted">Number of new policies closed.</small>
+                                        </div>
+                                        <div className="form-group">
+                                            <label>Yearly MDRT / Production Goal (RM)</label>
+                                            <input
+                                                type="number"
+                                                value={userGoals.mdrtGoal}
+                                                onChange={e => setUserGoals(prev => ({ ...prev, mdrtGoal: Number(e.target.value) }))}
+                                                placeholder="600000"
+                                            />
+                                            <small className="text-muted">Target for Million Dollar Round Table.</small>
+                                        </div>
+                                        <button className="primary-btn" style={{ marginTop: '1rem', opacity: 0.7, cursor: 'default' }} disabled>
+                                            <Save size={18} style={{ marginRight: '8px' }} /> Auto-Saved
                                         </button>
                                     </div>
                                 </div>
-                            </div>
-                        </div>
-                    )}
-
-                    {activeTab === 'billing' && (
-                        <div className="billing-section fade-in">
-                            <h2 className="section-title">Billing & Plan</h2>
-
-                            <div className="glass-panel" style={{ padding: '2rem', marginBottom: '2rem', borderLeft: userProfile.planId === 'pro' ? '4px solid #10b981' : '4px solid #3b82f6' }}>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                    <div>
-                                        <div style={{ textTransform: 'uppercase', fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.05em', color: '#64748b' }}>Current Plan</div>
-                                        <h3 style={{ fontSize: '1.5rem', marginTop: '0.25rem' }}>{userProfile.planId === 'pro' ? 'Pro Agent' : 'Free Starter'}</h3>
-                                        <p style={{ color: '#64748b', marginTop: '0.5rem' }}>
-                                            {userProfile.planId === 'pro'
-                                                ? 'Unlimited contacts & full automation suite.'
-                                                : 'Limited to 10 contacts. Basic features only.'}
-                                        </p>
-                                    </div>
-                                    <div style={{ textAlign: 'right' }}>
-                                        <div style={{ fontSize: '1.5rem', fontWeight: 700, color: userProfile.planId === 'pro' ? '#10b981' : '#3b82f6' }}>
-                                            {userProfile.planId === 'pro' ? 'RM 22' : 'RM 0'}
-                                        </div>
-                                        <small style={{ color: '#94a3b8' }}>/ month</small>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {userProfile.planId !== 'pro' && (
-                                <div className="glass-panel" style={{ padding: '2rem', background: 'linear-gradient(135deg, #eff6ff 0%, #ffffff 100%)' }}>
-                                    <h3 style={{ marginBottom: '1rem' }}>Upgrade to Pro</h3>
-                                    <ul style={{ listStyle: 'none', padding: 0, marginBottom: '2rem' }}>
-                                        <li style={{ marginBottom: '0.5rem', display: 'flex', gap: '10px' }}>✅ Unlimited Contacts</li>
-                                        <li style={{ marginBottom: '0.5rem', display: 'flex', gap: '10px' }}>✅ WhatsApp Automation</li>
-                                        <li style={{ marginBottom: '0.5rem', display: 'flex', gap: '10px' }}>✅ Publish Landing Page</li>
-                                        <li style={{ marginBottom: '0.5rem', display: 'flex', gap: '10px' }}>✅ Advanced Analytics</li>
-                                    </ul>
-                                    <div style={{ display: 'flex', gap: '1rem', flexDirection: 'column' }}>
-                                        {/* Plan Selection */}
-                                        <div style={{ display: 'flex', gap: '1rem' }}>
-                                            <button
-                                                className={`tab-btn-sm ${upgradePlan === 'monthly' ? 'active' : ''}`}
-                                                style={{ background: upgradePlan === 'monthly' ? '#2563eb' : '#f1f5f9', color: upgradePlan === 'monthly' ? 'white' : '#64748b', border: 'none', padding: '0.5rem 1rem', borderRadius: '6px', cursor: 'pointer' }}
-                                                onClick={() => setUpgradePlan('monthly')}
-                                            >
-                                                Monthly (RM 22)
-                                            </button>
-                                            <button
-                                                className={`tab-btn-sm ${upgradePlan === 'yearly' ? 'active' : ''}`}
-                                                style={{ background: upgradePlan === 'yearly' ? '#2563eb' : '#f1f5f9', color: upgradePlan === 'yearly' ? 'white' : '#64748b', border: 'none', padding: '0.5rem 1rem', borderRadius: '6px', cursor: 'pointer' }}
-                                                onClick={() => setUpgradePlan('yearly')}
-                                            >
-                                                Yearly (RM 220)
-                                            </button>
-                                        </div>
-
-                                        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', marginTop: '1rem' }}>
-                                            <button
-                                                onClick={handleUpgradePayment}
-                                                className="primary-btn"
-                                                disabled={isProcessingPayment}
-                                                style={{ minWidth: '160px', justifyContent: 'center' }}
-                                            >
-                                                {isProcessingPayment ? 'Processing...' : 'Upgrade to PRO'}
-                                            </button>
-                                            <span style={{ fontSize: '0.85rem', color: '#64748b' }}>
-                                                Secure payment via Chip In
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
                             )}
 
-                            <div className="glass-panel" style={{ marginTop: '2rem', padding: '2rem' }}>
-                                <h3>Redeem Code</h3>
-                                <p style={{ color: '#64748b', fontSize: '0.9rem', marginBottom: '1rem' }}>
-                                    Have a promo code? Enter it below to activate your Pro plan.
-                                </p>
-                                <form
-                                    onSubmit={async (e) => {
-                                        e.preventDefault();
-                                        const code = e.target.code.value.trim().toUpperCase();
-
-                                        // TODO: Validate against DB for dynamic codes
-                                        if (code === 'KDIGITAL') {
-
-                                            // Update Local
-                                            const newProfile = { ...userProfile, planId: 'pro', role: 'free' };
-                                            setUserProfile(newProfile);
-                                            localStorage.setItem('agent_user_profile', JSON.stringify(newProfile));
-
-                                            // Calculate Expiry
-                                            const expiryDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
-
-                                            // Update DB
-                                            await supabase.from('profiles').update({
-                                                plan_id: 'pro',
-                                                subscription_status: 'trial',
-                                                subscription_end_date: expiryDate.toISOString(),
-                                                is_trial_used: true
-                                            }).eq('id', userProfile.id);
-
-                                            // SIMULATE EMAIL NOTIFICATION (Super Admin manages templates elsewhere)
-                                            // In production, this would trigger an Edge Function: supabase.functions.invoke('send-email', ...)
-                                            console.log(`[EMAIL SENT] To: ${userProfile.email}, Subject: You are now PRO! Expires: ${expiryDate.toLocaleDateString()}`);
-
-                                            alert(`Code Redeemed! You are now a PRO user until ${expiryDate.toLocaleDateString()}.\n\nA confirmation email has been sent to ${userProfile.email}.`);
-
-                                            window.location.reload();
-                                        } else {
-                                            alert('Invalid Code.');
-                                        }
-                                    }}
-                                    style={{ display: 'flex', gap: '10px' }}
-                                >
-                                    <input name="code" type="text" placeholder="ENTER CODE" style={{ textTransform: 'uppercase', letterSpacing: '1px' }} />
-                                    <button type="submit" className="secondary-btn">Apply</button>
-                                </form>
-                            </div>
-                        </div>
-                    )}
-
-                    {activeTab === 'config' && (
-                        <div className="config-section fade-in">
-                            <h2 className="section-title">Reference Data Configuration</h2>
-
-                            <div className="config-tabs">
-                                <button
-                                    className={`tab-pill ${managerTab === 'products' ? 'active' : ''}`}
-                                    onClick={() => setManagerTab('products')}
-                                >
-                                    Products
-                                </button>
-                                <button
-                                    className={`tab-pill ${managerTab === 'tags' ? 'active' : ''}`}
-                                    onClick={() => setManagerTab('tags')}
-                                >
-                                    Behavior Tags
-                                </button>
-                            </div>
-
-                            <div className="manager-toolbar">
-                                <form onSubmit={handleAddItem} className="add-item-row">
-                                    <input
-                                        type="text"
-                                        placeholder={`Add new ${managerTab === 'products' ? 'product' : 'tag'}...`}
-                                        value={newItemName}
-                                        onChange={e => setNewItemName(e.target.value)}
-                                    />
-                                    <button type="submit" className="icon-btn-primary">
-                                        <Plus size={18} />
-                                    </button>
-                                </form>
-                            </div>
-
-                            <ul className="config-list">
-                                {(managerTab === 'products' ? availableProducts : availableTags).map((item, idx) => (
-                                    <li key={idx} className="config-item">
-                                        {editingId === item ? (
-                                            <div className="edit-mode-inline">
+                            {activeTab === 'integrations' && (
+                                <div className="integrations-section fade-in">
+                                    <h2 className="section-title">External Integrations</h2>
+                                    <div className="settings-grid">
+                                        <SettingsCard
+                                            icon={MessageCircle}
+                                            title="WhatsApp Integration"
+                                            description="Send automated messages via WhatsApp API (e.g. Waha, Twilio)."
+                                            enabled={integrations.whatsapp.enabled}
+                                            onToggle={() => toggleIntegration('whatsapp')}
+                                            locked={!checkPermission('whatsapp')}
+                                        >
+                                            <div className="form-group">
+                                                <label>API Endpoint</label>
                                                 <input
-                                                    autoFocus
-                                                    value={editName}
-                                                    onChange={e => setEditName(e.target.value)}
+                                                    type="text"
+                                                    placeholder="https://api.waha.dev/..."
+                                                    value={integrations.whatsapp.endpoint || ''}
+                                                    onChange={(e) => setIntegrations(prev => ({ ...prev, whatsapp: { ...prev.whatsapp, endpoint: e.target.value } }))}
                                                 />
-                                                <button onClick={saveEdit} className="save-btn-sm"><Save size={14} /></button>
                                             </div>
-                                        ) : (
-                                            <>
-                                                <span>{item}</span>
-                                                <div className="item-actions">
-                                                    <button onClick={() => startEditing(item)} className="action-btn-sm" title="Edit">
-                                                        <Edit2 size={16} />
-                                                    </button>
-                                                    <button onClick={() => handleDeleteItem(item)} className="action-btn-sm danger" title="Delete">
-                                                        <Trash2 size={16} />
-                                                    </button>
-                                                </div>
-                                            </>
-                                        )}
-                                    </li>
-                                ))}
-                            </ul>
-                        </div>
-                    )}
+                                            <div className="form-group">
+                                                <label>API Key / Token</label>
+                                                <input
+                                                    type="password"
+                                                    placeholder="••••••••••••••"
+                                                    value={integrations.whatsapp.apiKey || ''}
+                                                    onChange={(e) => setIntegrations(prev => ({ ...prev, whatsapp: { ...prev.whatsapp, apiKey: e.target.value } }))}
+                                                />
+                                            </div>
+                                        </SettingsCard>
 
-                    {activeTab === 'goals' && (
-                        <div className="goals-section fade-in">
-                            <h2 className="section-title">Business Goals & KPIs</h2>
-                            <p className="section-subtitle text-muted" style={{ marginBottom: '1.5rem' }}>Set your magic numbers to track your progress on the dashboard.</p>
+                                        <SettingsCard
+                                            icon={Mail}
+                                            title="Email Service"
+                                            description="Connect via SMTP or API (Resend, SendGrid) for newsletters."
+                                            enabled={integrations.email.enabled}
+                                            onToggle={() => toggleIntegration('email')}
+                                        >
+                                            <div className="form-group">
+                                                <label>SMTP Host</label>
+                                                <input
+                                                    type="text"
+                                                    placeholder="smtp.gmail.com"
+                                                    value={integrations.email.host || ''}
+                                                    onChange={(e) => setIntegrations(prev => ({ ...prev, email: { ...prev.email, host: e.target.value } }))}
+                                                />
+                                            </div>
+                                            <div className="form-group">
+                                                <label>Sender Email</label>
+                                                <input
+                                                    type="email"
+                                                    value={integrations.email.sender || ''}
+                                                    onChange={(e) => setIntegrations(prev => ({ ...prev, email: { ...prev.email, sender: e.target.value } }))}
+                                                />
+                                            </div>
+                                        </SettingsCard>
 
-                            <div className="profile-form">
-                                <div className="form-group">
-                                    <label>Monthly Revenue Target (RM)</label>
-                                    <input
-                                        type="number"
-                                        value={userGoals.monthlyRevenue}
-                                        onChange={e => setUserGoals(prev => ({ ...prev, monthlyRevenue: Number(e.target.value) }))}
-                                        placeholder="5000"
-                                    />
-                                    <small className="text-muted">Target commission/profit per month.</small>
-                                </div>
-                                <div className="form-group">
-                                    <label>Monthly Case Count Target</label>
-                                    <input
-                                        type="number"
-                                        value={userGoals.monthlyCases}
-                                        onChange={e => setUserGoals(prev => ({ ...prev, monthlyCases: Number(e.target.value) }))}
-                                        placeholder="5"
-                                    />
-                                    <small className="text-muted">Number of new policies closed.</small>
-                                </div>
-                                <div className="form-group">
-                                    <label>Yearly MDRT / Production Goal (RM)</label>
-                                    <input
-                                        type="number"
-                                        value={userGoals.mdrtGoal}
-                                        onChange={e => setUserGoals(prev => ({ ...prev, mdrtGoal: Number(e.target.value) }))}
-                                        placeholder="600000"
-                                    />
-                                    <small className="text-muted">Target for Million Dollar Round Table.</small>
-                                </div>
-                                <button className="primary-btn" style={{ marginTop: '1rem', opacity: 0.7, cursor: 'default' }} disabled>
-                                    <Save size={18} style={{ marginRight: '8px' }} /> Auto-Saved
-                                </button>
-                            </div>
-                        </div>
-                    )}
-
-                    {activeTab === 'integrations' && (
-                        <div className="integrations-section fade-in">
-                            <h2 className="section-title">External Integrations</h2>
-                            <div className="settings-grid">
-                                <SettingsCard
-                                    icon={MessageCircle}
-                                    title="WhatsApp Integration"
-                                    description="Send automated messages via WhatsApp API (e.g. Waha, Twilio)."
-                                    enabled={integrations.whatsapp.enabled}
-                                    onToggle={() => toggleIntegration('whatsapp')}
-                                    locked={!checkPermission('whatsapp')}
-                                >
-                                    <div className="form-group">
-                                        <label>API Endpoint</label>
-                                        <input
-                                            type="text"
-                                            placeholder="https://api.waha.dev/..."
-                                            value={integrations.whatsapp.endpoint || ''}
-                                            onChange={(e) => setIntegrations(prev => ({ ...prev, whatsapp: { ...prev.whatsapp, endpoint: e.target.value } }))}
-                                        />
+                                        <SettingsCard
+                                            icon={MessageSquare}
+                                            title="SMS Gateway"
+                                            description="Traditional SMS for high-priority notifications."
+                                            enabled={integrations.sms.enabled}
+                                            onToggle={() => toggleIntegration('sms')}
+                                        >
+                                            <div className="form-group">
+                                                <label>Provider URL</label>
+                                                <input
+                                                    type="text"
+                                                    placeholder="https://sms-provider.com/api"
+                                                    value={integrations.sms.url || ''}
+                                                    onChange={(e) => setIntegrations(prev => ({ ...prev, sms: { ...prev.sms, url: e.target.value } }))}
+                                                />
+                                            </div>
+                                            <div className="form-group">
+                                                <label>API Key</label>
+                                                <input
+                                                    type="password"
+                                                    placeholder="••••••••"
+                                                    value={integrations.sms.apiKey || ''}
+                                                    onChange={(e) => setIntegrations(prev => ({ ...prev, sms: { ...prev.sms, apiKey: e.target.value } }))}
+                                                />
+                                            </div>
+                                        </SettingsCard>
                                     </div>
-                                    <div className="form-group">
-                                        <label>API Key / Token</label>
-                                        <input
-                                            type="password"
-                                            placeholder="••••••••••••••"
-                                            value={integrations.whatsapp.apiKey || ''}
-                                            onChange={(e) => setIntegrations(prev => ({ ...prev, whatsapp: { ...prev.whatsapp, apiKey: e.target.value } }))}
-                                        />
-                                    </div>
-                                </SettingsCard>
-
-                                <SettingsCard
-                                    icon={Mail}
-                                    title="Email Service"
-                                    description="Connect via SMTP or API (Resend, SendGrid) for newsletters."
-                                    enabled={integrations.email.enabled}
-                                    onToggle={() => toggleIntegration('email')}
-                                >
-                                    <div className="form-group">
-                                        <label>SMTP Host</label>
-                                        <input
-                                            type="text"
-                                            placeholder="smtp.gmail.com"
-                                            value={integrations.email.host || ''}
-                                            onChange={(e) => setIntegrations(prev => ({ ...prev, email: { ...prev.email, host: e.target.value } }))}
-                                        />
-                                    </div>
-                                    <div className="form-group">
-                                        <label>Sender Email</label>
-                                        <input
-                                            type="email"
-                                            value={integrations.email.sender || ''}
-                                            onChange={(e) => setIntegrations(prev => ({ ...prev, email: { ...prev.email, sender: e.target.value } }))}
-                                        />
-                                    </div>
-                                </SettingsCard>
-
-                                <SettingsCard
-                                    icon={MessageSquare}
-                                    title="SMS Gateway"
-                                    description="Traditional SMS for high-priority notifications."
-                                    enabled={integrations.sms.enabled}
-                                    onToggle={() => toggleIntegration('sms')}
-                                >
-                                    <div className="form-group">
-                                        <label>Provider URL</label>
-                                        <input
-                                            type="text"
-                                            placeholder="https://sms-provider.com/api"
-                                            value={integrations.sms.url || ''}
-                                            onChange={(e) => setIntegrations(prev => ({ ...prev, sms: { ...prev.sms, url: e.target.value } }))}
-                                        />
-                                    </div>
-                                    <div className="form-group">
-                                        <label>API Key</label>
-                                        <input
-                                            type="password"
-                                            placeholder="••••••••"
-                                            value={integrations.sms.apiKey || ''}
-                                            onChange={(e) => setIntegrations(prev => ({ ...prev, sms: { ...prev.sms, apiKey: e.target.value } }))}
-                                        />
-                                    </div>
-                                </SettingsCard>
-                            </div>
-                        </div>
-                    )}
-
-                    {activeTab === 'whatsapp' && (
-                        <div className="whatsapp-section fade-in">
-                            <h2 className="section-title">Link WhatsApp Device</h2>
-                            {checkPermission('whatsapp') ? (
-                                <div className="glass-panel" style={{ padding: '2rem', textAlign: 'center' }}>
-                                    <div style={{ marginBottom: '1.5rem' }}>
-                                        <div style={{ width: '200px', height: '200px', background: '#f0f0f0', margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                            <span className="text-muted">QR Code Placeholder</span>
-                                        </div>
-                                    </div>
-                                    <h3>Scan to Link Device</h3>
-                                    <p className="text-muted" style={{ maxWidth: '400px', margin: '1rem auto' }}>
-                                        Open WhatsApp on your mobile phone, go to Settings &gt; Linked Devices &gt; Link a Device, and scan the QR code above.
-                                    </p>
-                                    <div className="status-indicator">
-                                        <span className={`status-dot dot-lapsed`}></span>
-                                        <span>Disconnected</span>
-                                    </div>
-                                </div>
-                            ) : (
-                                <div className="detail-lock-screen" style={{ textAlign: 'center', padding: '4rem 1rem' }}>
-                                    <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🔒</div>
-                                    <h2>Pro Feature Locked</h2>
-                                    <p style={{ maxWidth: '400px', margin: '1rem auto', color: '#666' }}>
-                                        WhatsApp integration is only available on the Pro plan. Upgrade now to automate your messages and link your device.
-                                    </p>
-                                    <button className="primary-btn">Upgrade to Pro</button>
                                 </div>
                             )}
 
-                            <div style={{ marginTop: '3rem', borderTop: '1px solid #e2e8f0', paddingTop: '2rem' }}>
-                                <h3 className="section-title" style={{ fontSize: '1.1rem', marginBottom: '1rem' }}>Message Template Shortcodes</h3>
-                                <div className="glass-panel" style={{ padding: '0', overflow: 'hidden' }}>
-                                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem' }}>
-                                        <thead style={{ background: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
-                                            <tr>
-                                                <th style={{ padding: '12px 16px', textAlign: 'left', color: '#64748b' }}>Shortcode</th>
-                                                <th style={{ padding: '12px 16px', textAlign: 'left', color: '#64748b' }}>Description</th>
-                                                <th style={{ padding: '12px 16px', textAlign: 'left', color: '#64748b' }}>Example Output</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {[
-                                                { code: '{name}', desc: 'Contact Full Name', example: 'Ahmad Albab' },
-                                                { code: '{phone}', desc: 'Contact Phone Number', example: '60123456789' },
-                                                { code: '{email}', desc: 'Contact Email', example: 'ahmad@example.com' },
-                                                { code: '{occupation}', desc: 'Contact Occupation', example: 'Government Servant' },
-                                                { code: '{birthday}', desc: 'Contact Birthday', example: '1990-05-15' },
-                                                { code: '{products}', desc: 'Interested Products', example: 'Hibah, Medical Card' },
-                                                { code: '{dealValue}', desc: 'Deal/Budget Value', example: 'RM 1200' },
-                                                { code: '{agent_name}', desc: 'Your Name', example: 'Dzulfaqar Hashim' },
-                                                { code: '{agent_phone}', desc: 'Your Phone', example: '60123456789' },
-                                                { code: '{renewalDate}', desc: 'Policy Renewal Date', example: '2026-10-12' },
-                                                { code: '{years}', desc: 'Years since signup', example: '2' },
-                                            ].map((row, i) => (
-                                                <tr key={i} style={{ borderBottom: i < 10 ? '1px solid #f1f5f9' : 'none' }}>
-                                                    <td style={{ padding: '12px 16px', fontFamily: 'monospace', color: '#7c3aed', fontWeight: 600 }}>{row.code}</td>
-                                                    <td style={{ padding: '12px 16px', color: '#334155' }}>{row.desc}</td>
-                                                    <td style={{ padding: '12px 16px', color: '#64748b', fontStyle: 'italic' }}>{row.example}</td>
-                                                </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
+                            {activeTab === 'whatsapp' && (
+                                <div className="whatsapp-section fade-in">
+                                    <h2 className="section-title">Link WhatsApp Device</h2>
+                                    {checkPermission('whatsapp') ? (
+                                        <div className="glass-panel" style={{ padding: '2rem', textAlign: 'center' }}>
+                                            <div style={{ marginBottom: '1.5rem' }}>
+                                                <div style={{ width: '200px', height: '200px', background: '#f0f0f0', margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                    <span className="text-muted">QR Code Placeholder</span>
+                                                </div>
+                                            </div>
+                                            <h3>Scan to Link Device</h3>
+                                            <p className="text-muted" style={{ maxWidth: '400px', margin: '1rem auto' }}>
+                                                Open WhatsApp on your mobile phone, go to Settings &gt; Linked Devices &gt; Link a Device, and scan the QR code above.
+                                            </p>
+                                            <div className="status-indicator">
+                                                <span className={`status-dot dot-lapsed`}></span>
+                                                <span>Disconnected</span>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <div className="detail-lock-screen" style={{ textAlign: 'center', padding: '4rem 1rem' }}>
+                                            <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🔒</div>
+                                            <h2>Pro Feature Locked</h2>
+                                            <p style={{ maxWidth: '400px', margin: '1rem auto', color: '#666' }}>
+                                                WhatsApp integration is only available on the Pro plan. Upgrade now to automate your messages and link your device.
+                                            </p>
+                                            <button className="primary-btn">Upgrade to Pro</button>
+                                        </div>
+                                    )}
+
+                                    <div style={{ marginTop: '3rem', borderTop: '1px solid #e2e8f0', paddingTop: '2rem' }}>
+                                        <h3 className="section-title" style={{ fontSize: '1.1rem', marginBottom: '1rem' }}>Message Template Shortcodes</h3>
+                                        <div className="glass-panel" style={{ padding: '0', overflow: 'hidden' }}>
+                                            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem' }}>
+                                                <thead style={{ background: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
+                                                    <tr>
+                                                        <th style={{ padding: '12px 16px', textAlign: 'left', color: '#64748b' }}>Shortcode</th>
+                                                        <th style={{ padding: '12px 16px', textAlign: 'left', color: '#64748b' }}>Description</th>
+                                                        <th style={{ padding: '12px 16px', textAlign: 'left', color: '#64748b' }}>Example Output</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {[
+                                                        { code: '{name}', desc: 'Contact Full Name', example: 'Ahmad Albab' },
+                                                        { code: '{phone}', desc: 'Contact Phone Number', example: '60123456789' },
+                                                        { code: '{email}', desc: 'Contact Email', example: 'ahmad@example.com' },
+                                                        { code: '{occupation}', desc: 'Contact Occupation', example: 'Government Servant' },
+                                                        { code: '{birthday}', desc: 'Contact Birthday', example: '1990-05-15' },
+                                                        { code: '{products}', desc: 'Interested Products', example: 'Hibah, Medical Card' },
+                                                        { code: '{dealValue}', desc: 'Deal/Budget Value', example: 'RM 1200' },
+                                                        { code: '{agent_name}', desc: 'Your Name', example: 'Dzulfaqar Hashim' },
+                                                        { code: '{agent_phone}', desc: 'Your Phone', example: '60123456789' },
+                                                        { code: '{renewalDate}', desc: 'Policy Renewal Date', example: '2026-10-12' },
+                                                        { code: '{years}', desc: 'Years since signup', example: '2' },
+                                                    ].map((row, i) => (
+                                                        <tr key={i} style={{ borderBottom: i < 10 ? '1px solid #f1f5f9' : 'none' }}>
+                                                            <td style={{ padding: '12px 16px', fontFamily: 'monospace', color: '#7c3aed', fontWeight: 600 }}>{row.code}</td>
+                                                            <td style={{ padding: '12px 16px', color: '#334155' }}>{row.desc}</td>
+                                                            <td style={{ padding: '12px 16px', color: '#64748b', fontStyle: 'italic' }}>{row.example}</td>
+                                                        </tr>
+                                                    ))}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
+                            )}
                         </div>
-                    )}
-                </div>
-            </div>
-        </div>
-    );
+            </div >
+            </div >
+            );
 };
 
-export default Settings;
+            export default Settings;
