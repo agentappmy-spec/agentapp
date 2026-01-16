@@ -419,68 +419,66 @@ function App() {
   };
 
   return (
-import ErrorBoundary from './components/ErrorBoundary';
+    <ErrorBoundary>
+      <BrowserRouter>
+        {/* ... existing Router content ... */}
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
+          {/* Public Landing (if kept separate) */}
+          <Route path="/p/public" element={<PublicLanding />} />
 
-  <ErrorBoundary>
-    <BrowserRouter>
-      {/* ... existing Router content ... */}
-      <Routes>
-        <Route path="/login" element={<Login />} />
-        <Route path="/reset-password" element={<ResetPassword />} />
-        {/* Public Landing (if kept separate) */}
-        <Route path="/p/public" element={<PublicLanding />} />
-
-        {/* Protected Routes */}
-        <Route
-          path="/"
-          element={
-            <AuthGuard>
-              <AppLayout
-                context={contextValue}
-                userProfile={userProfile}
-                openAddModal={openAddModal}
-                checkPermission={checkPermission}
-                setUserProfile={setUserProfile}
-              />
-            </AuthGuard>
-          }
-        >
-          <Route index element={<Dashboard />} />
-          <Route path="dashboard" element={<Dashboard />} />
-          <Route path="databases" element={<Databases />} />
-          <Route path="contacts" element={<Databases />} />
-          <Route path="follow-up" element={<FollowUp />} />
-          <Route path="landing-page" element={<LandingPage />} />
-          <Route path="link-whatsapp" element={<LinkWhatsApp />} />
-
-          {/* Super Admin Route */}
+          {/* Protected Routes */}
           <Route
-            path="super-admin"
+            path="/"
             element={
-              <AuthGuard requiredRole="super_admin">
-                <SuperAdmin />
+              <AuthGuard>
+                <AppLayout
+                  context={contextValue}
+                  userProfile={userProfile}
+                  openAddModal={openAddModal}
+                  checkPermission={checkPermission}
+                  setUserProfile={setUserProfile}
+                />
               </AuthGuard>
             }
-          />
+          >
+            <Route index element={<Dashboard />} />
+            <Route path="dashboard" element={<Dashboard />} />
+            <Route path="databases" element={<Databases />} />
+            <Route path="contacts" element={<Databases />} />
+            <Route path="follow-up" element={<FollowUp />} />
+            <Route path="landing-page" element={<LandingPage />} />
+            <Route path="link-whatsapp" element={<LinkWhatsApp />} />
 
-          <Route path="settings" element={<Settings />} />
-          <Route path="*" element={<div className="flex-center" style={{ height: '100%' }}>Page Not Found</div>} />
-        </Route>
-      </Routes>
+            {/* Super Admin Route */}
+            <Route
+              path="super-admin"
+              element={
+                <AuthGuard requiredRole="super_admin">
+                  <SuperAdmin />
+                </AuthGuard>
+              }
+            />
 
-      {/* ... Modal remains ... */}
+            <Route path="settings" element={<Settings />} />
+            <Route path="*" element={<div className="flex-center" style={{ height: '100%' }}>Page Not Found</div>} />
+          </Route>
+        </Routes>
+
+        {/* ... Modal remains ... */}
 
 
-      <AddContactModal
-        isOpen={isContactModalOpen}
-        onClose={() => setIsContactModalOpen(false)}
-        onSave={handleSaveContact}
-        availableTags={availableTags}
-        availableProducts={availableProducts}
-        initialData={editingContact}
-      />
-    </BrowserRouter >
-  </ErrorBoundary>
+        <AddContactModal
+          isOpen={isContactModalOpen}
+          onClose={() => setIsContactModalOpen(false)}
+          onSave={handleSaveContact}
+          availableTags={availableTags}
+          availableProducts={availableProducts}
+          initialData={editingContact}
+        />
+      </BrowserRouter >
+    </ErrorBoundary>
   );
 }
 
