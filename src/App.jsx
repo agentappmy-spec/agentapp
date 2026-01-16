@@ -11,6 +11,7 @@ import LandingPage from './pages/LandingPage';
 import PublicLanding from './pages/PublicLanding';
 import LinkWhatsApp from './pages/LinkWhatsApp';
 import Settings from './pages/Settings';
+import ErrorBoundary from './components/ErrorBoundary';
 // ... (existing imports)
 import ResetPassword from './pages/ResetPassword';
 import SuperAdmin from './pages/SuperAdmin';
@@ -418,7 +419,11 @@ function App() {
   };
 
   return (
+import ErrorBoundary from './components/ErrorBoundary';
+
+  <ErrorBoundary>
     <BrowserRouter>
+      {/* ... existing Router content ... */}
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/reset-password" element={<ResetPassword />} />
@@ -475,6 +480,7 @@ function App() {
         initialData={editingContact}
       />
     </BrowserRouter >
+  </ErrorBoundary>
   );
 }
 
