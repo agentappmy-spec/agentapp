@@ -451,9 +451,12 @@ const Settings = () => {
                                                 />
                                             </div>
                                             <div className="form-group">
-                                                <label><AtSign size={14} /> Threads</label>
                                                 <input
                                                     type="text"
+                                                    placeholder="@username"
+                                                    value={userProfile.social?.threads || ''}
+                                                    onChange={e => setUserProfile(prev => ({ ...prev, social: { ...prev.social, threads: e.target.value } }))}
+                                                />
                                             </div>
                                             <button className="primary-btn" style={{ marginTop: '2rem', width: '100%', opacity: 0.8, cursor: 'default' }} disabled>
                                                 <Save size={18} style={{ marginRight: '8px' }} /> Changes Saved Automatically
