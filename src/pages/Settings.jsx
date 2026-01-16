@@ -207,12 +207,9 @@ const Settings = () => {
                     {userProfile.role === 'super_admin' && (
                         <div style={{ padding: '1rem', marginTop: '1rem', borderTop: '1px solid #eee' }}>
                             <small style={{ color: '#888', fontWeight: 600 }}>ADMIN</small>
-                            <button
-                                className={`settings-nav-item ${activeTab === 'admin_codes' ? 'active' : ''}`}
-                                onClick={() => handleTabChange('admin_codes')}
-                            >
-                                <Tag size={18} /> Promo Codes
-                            </button>
+                            <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '0.5rem' }}>
+                                Switch to Admin Dashboard for global settings.
+                            </div>
                         </div>
                     )}
 

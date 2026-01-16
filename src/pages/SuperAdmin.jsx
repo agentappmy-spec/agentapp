@@ -11,7 +11,8 @@ import {
     Plus,
     X,
     Clock,
-    Send
+    Send,
+    Tag
 } from 'lucide-react';
 import './SuperAdmin.css';
 
@@ -319,6 +320,18 @@ const SuperAdmin = () => {
                 >
                     <MessageCircle size={18} /> Auto Follow-Up
                 </button>
+                <button
+                    className={`sa-tab-item ${activeTab === 'promocodes' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('promocodes')}
+                >
+                    <Tag size={18} /> Promo Codes
+                </button>
+                <button
+                    className={`sa-tab-item ${activeTab === 'plans' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('plans')}
+                >
+                    <Settings size={18} /> Plans & Billing
+                </button>
             </div>
 
             <div className="sa-content">
@@ -405,6 +418,108 @@ const SuperAdmin = () => {
                             <button className="add-step-btn" onClick={handleAddNode}>
                                 <Plus size={24} /> Add Step
                             </button>
+                        </div>
+                    </div>
+                )}
+
+                {activeTab === 'promocodes' && (
+                    <div className="promocodes-view fade-in">
+                        <div className="glass-panel" style={{ padding: '2rem' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
+                                <h3>Active Promo Codes</h3>
+                                <button className="primary-btn small-btn" onClick={() => alert('Feature coming soon: Add dynamic codes to DB')}>+ New Code</button>
+                            </div>
+                            <table className="sa-table">
+                                <thead>
+                                    <tr>
+                                        <th>Code</th>
+                                        <th>Reward</th>
+                                        <th>Status</th>
+                                        <th>Expiry</th>
+                                        <th>Usage</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td style={{ fontWeight: 'bold', fontFamily: 'monospace', color: '#10b981' }}>KDIGITAL</td>
+                                        <td>30 Days Pro Trial</td>
+                                        <td><span className="badge pro">Active</span></td>
+                                        <td>Never</td>
+                                        <td>Unlimited</td>
+                                        <td>
+                                            <button className="icon-btn-small"><Edit2 size={14} /></button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style={{ fontWeight: 'bold', fontFamily: 'monospace', color: '#64748b' }}>WELCOME50</td>
+                                        <td>50% Off First Month</td>
+                                        <td><span className="badge" style={{ background: '#cbd5e1', color: '#475569' }}>Inactive</span></td>
+                                        <td>2025-12-31</td>
+                                        <td>0/100</td>
+                                        <td>
+                                            <button className="icon-btn-small"><Edit2 size={14} /></button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                )}
+
+                {activeTab === 'plans' && (
+                    <div className="plans-view fade-in">
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
+                            {/* Pro Plan Config */}
+                            <div className="glass-panel" style={{ padding: '2rem', borderTop: '4px solid #10b981' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
+                                    <h3>Pro Plan</h3>
+                                    <button className="icon-btn-small"><Edit2 size={16} /></button>
+                                </div>
+                                <div className="form-group">
+                                    <label>Monthly Price (RM)</label>
+                                    <input type="number" value={22} disabled style={{ background: '#f8fafc' }} />
+                                </div>
+                                <div className="form-group">
+                                    <label>Yearly Price (RM)</label>
+                                    <input type="number" value={220} disabled style={{ background: '#f8fafc' }} />
+                                </div>
+                                <div className="form-group">
+                                    <label>Contact Limit</label>
+                                    <input type="text" value="Unlimited" disabled style={{ background: '#f8fafc' }} />
+                                </div>
+                                <div className="form-group">
+                                    <label>Features</label>
+                                    <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                                        <span className="badge pro">WhatsApp</span>
+                                        <span className="badge pro">Landing Page</span>
+                                        <span className="badge pro">Analytics</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Free Plan Config */}
+                            <div className="glass-panel" style={{ padding: '2rem', borderTop: '4px solid #3b82f6' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
+                                    <h3>Free Starter</h3>
+                                    <button className="icon-btn-small"><Edit2 size={16} /></button>
+                                </div>
+                                <div className="form-group">
+                                    <label>Monthly Price (RM)</label>
+                                    <input type="number" value={0} disabled style={{ background: '#f8fafc' }} />
+                                </div>
+                                <div className="form-group">
+                                    <label>Contact Limit</label>
+                                    <input type="number" value={10} disabled style={{ background: '#f8fafc' }} />
+                                </div>
+                                <div className="form-group">
+                                    <label>Features</label>
+                                    <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                                        <span className="badge">Email Only</span>
+                                        <span className="badge">Dashboard</span>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 )}
