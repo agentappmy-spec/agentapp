@@ -70,6 +70,19 @@
 }
 
 @media (max-width: 640px) {
+    .modal-overlay {
+        align-items: flex-end;
+        /* Align to bottom */
+    }
+
+    .modal-container {
+        width: 100%;
+        max-width: 100%;
+        border-radius: 20px 20px 0 0;
+        max-height: 85vh;
+        animation: slideUp 0.3s ease-out;
+    }
+
     .form-row {
         flex-direction: column;
         gap: 0.75rem;

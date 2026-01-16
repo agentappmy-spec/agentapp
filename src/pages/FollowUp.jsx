@@ -26,7 +26,7 @@ const DeleteConfirmationModal = ({ isOpen, onClose, onConfirm }) => {
 
     return (
         <div className="modal-overlay">
-            <div className="modal-content glass-panel" style={{ width: '400px', textAlign: 'center' }}>
+            <div className="modal-content glass-panel" style={{ width: '90%', maxWidth: '400px', textAlign: 'center' }}>
                 <div style={{ margin: '0 auto', width: '50px', height: '50px', borderRadius: '50%', background: '#fee2e2', color: '#ef4444', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1rem' }}>
                     <AlertTriangle size={24} />
                 </div>
@@ -90,7 +90,7 @@ const EditNodeModal = ({ node, onClose, onSave }) => {
 
     return (
         <div className="modal-overlay">
-            <div className="modal-content glass-panel" style={{ width: '600px' }}>
+            <div className="modal-content glass-panel" style={{ width: '90%', maxWidth: '600px' }}>
                 <h2 className="modal-title">Edit Follow Up Step</h2>
 
                 <div className="form-group" style={{ display: node.trigger ? 'none' : 'flex' }}>
