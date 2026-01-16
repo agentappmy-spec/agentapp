@@ -85,7 +85,10 @@ const EditNodeModal = ({ node, onClose, onSave }) => {
 // --- User Management Components ---
 
 const EditUserModal = ({ user, onClose, onSave }) => {
-    const [formData, setFormData] = useState({ ...user });
+    const [formData, setFormData] = useState({
+        ...user,
+        expiryDate: user.expiryDate ? new Date(user.expiryDate).toISOString().split('T')[0] : ''
+    });
 
     return (
         <div className="modal-overlay">
@@ -107,6 +110,20 @@ const EditUserModal = ({ user, onClose, onSave }) => {
                             <option value="Pro">Pro</option>
                         </select>
                     </div>
+
+                    {formData.plan === 'Pro' && (
+                        <div>
+                            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600' }}>Subscription Expiry</label>
+                            <input
+                                type="date"
+                                value={formData.expiryDate}
+                                onChange={e => setFormData({ ...formData, expiryDate: e.target.value })}
+                                style={{ width: '100%', padding: '0.75rem', border: '1px solid #e2e8f0', borderRadius: '8px' }}
+                            />
+                            <small style={{ color: '#64748b' }}>Set when this user's Pro plan ends.</small>
+                        </div>
+                    )}
+
                     <div>
                         <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600' }}>Status</label>
                         <select value={formData.status} onChange={e => setFormData({ ...formData, status: e.target.value })} style={{ width: '100%', padding: '0.75rem', border: '1px solid #e2e8f0', borderRadius: '8px' }}>
@@ -168,6 +185,7 @@ const SuperAdmin = () => {
                     email: u.email,
                     plan: u.plan_id ? (u.plan_id === 'pro' ? 'Pro' : 'Free') : 'Free', // Fallback
                     status: 'Active',
+                    expiryDate: u.subscription_end_date, // Mapped from DB
                     joined: new Date(u.created_at || Date.now()).toLocaleDateString()
                 }));
                 setUsers(mappedUsers);
@@ -281,7 +299,8 @@ const SuperAdmin = () => {
                     .from('profiles')
                     .update({
                         full_name: userData.name,
-                        plan_id: userData.plan.toLowerCase()
+                        plan_id: userData.plan.toLowerCase(),
+                        subscription_end_date: userData.plan === 'Pro' && userData.expiryDate ? new Date(userData.expiryDate).toISOString() : null
                     })
                     .eq('id', userData.id);
 
