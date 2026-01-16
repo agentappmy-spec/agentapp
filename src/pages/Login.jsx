@@ -110,7 +110,11 @@ const Login = () => {
             }
         } catch (error) {
             console.error('Login Error:', error.message);
-            setError(error.message || 'Failed to sign in.');
+            let msg = error.message;
+            if (msg.includes('Invalid login credentials')) {
+                msg = 'Invalid credentials. If you just signed up, please verify your email first.';
+            }
+            setError(msg || 'Failed to sign in.');
             setIsLoading(false);
         }
     };
