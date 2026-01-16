@@ -28,19 +28,46 @@ const AuthGuard = ({ children, requiredRole }) => {
   useEffect(() => {
     // Check both local storage AND supabase session to be sure
     const check = async () => {
-      const localProfile = JSON.parse(localStorage.getItem('agent_user_profile') || 'null');
-      if (localProfile) {
-        setProfile(localProfile);
-        setIsChecking(false);
-        return;
+      try {
+        const localProfile = JSON.parse(localStorage.getItem('agent_user_profile') || 'null');
+        if (localProfile) {
+          setProfile(localProfile);
+          setIsChecking(false);
+          return;
+        }
+
+        // Fallback: Check Supabase session directly (slower but more accurate)
+        const { data: sessionData } = await supabase.auth.getSession();
+        if (sessionData?.session) {
+          console.log('Session found, recovering profile...');
+          const user = sessionData.session.user;
+
+          // 1. Try fetching from profiles table
+          const { data: profileData } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', user.id)
+            .single();
+
+          // 2. Construct profile object
+          const recoveredProfile = {
+            name: profileData?.full_name || user.user_metadata?.full_name || user.email?.split('@')[0] || 'Agent',
+            role: profileData?.role || 'free',
+            planId: profileData?.plan_id || 'free',
+            email: user.email,
+            id: user.id
+          };
+
+          // 3. Save and Proceed
+          localStorage.setItem('agent_user_profile', JSON.stringify(recoveredProfile));
+          setProfile(recoveredProfile);
+          setIsChecking(false);
+          return;
+        }
+      } catch (error) {
+        console.error("Auth Guard Error:", error);
       }
 
-      // Fallback: Check Supabase session directly (slower but more accurate)
-      const { data } = await supabase.auth.getSession();
-      if (data.session) {
-        // If session exists but no local profile, we might be mid-login or state lost
-        // For now, redirect to login to force a clean re-sync is safer
-      }
       setIsChecking(false);
     };
     check();

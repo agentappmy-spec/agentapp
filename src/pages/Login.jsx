@@ -54,22 +54,25 @@ const Login = () => {
             name = 'Super Admin';
         }
 
-        // 1. Sync to Supabase 'profiles' table
         try {
-            const { error: upsertError } = await supabase.from('profiles').upsert({
+            // 1. Sync to Supabase 'profiles' table (with timeout)
+            // We await this but catch errors so login doesn't fail
+            const upsertPromise = supabase.from('profiles').upsert({
                 id: user.id,
                 email: user.email,
                 full_name: name,
                 role: role,
                 plan_id: planId,
-                // updated_at: new Date() // Let Supabase handle timestamps if configured, or add if needed
+                updated_at: new Date()
             });
-            if (upsertError) {
-                console.error('Supabase profile sync warning:', upsertError);
-                // Don't block login on this, but log it.
-            }
+
+            // Timeout after 2 seconds - don't let DB lag block entry
+            const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject("Timeout"), 2000));
+
+            await Promise.race([upsertPromise, timeoutPromise]);
+
         } catch (err) {
-            console.error('Supabase profile sync error:', err);
+            console.warn('Profile sync skipped or timed out:', err);
         }
 
         // 2. Local Storage Setup (Legacy/Fast Access)
