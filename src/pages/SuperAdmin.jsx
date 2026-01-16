@@ -164,12 +164,9 @@ const SuperAdmin = () => {
                 setUsers(mappedUsers);
             }
         } catch (err) {
-            console.warn('Failed to fetch users from Supabase (Table "profiles" likely missing). Using mock for demo.', err);
-            // Fallback to Mock if table missing
-            setUsers([
-                { id: 1, name: 'Ali Baba (Mock)', email: 'ali@free.com', plan: 'Free', status: 'Active', joined: '2025-12-01' },
-                { id: 2, name: 'Siti Sarah (Mock)', email: 'siti@pro.com', plan: 'Pro', status: 'Active', joined: '2025-11-20' },
-            ]);
+            console.warn('Failed to fetch users from Supabase (Table "profiles" likely missing).', err);
+            // Fallback: No users if connection fails or table missing.
+            setUsers([]);
         } finally {
             setIsLoading(false);
         }

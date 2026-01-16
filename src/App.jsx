@@ -34,121 +34,7 @@ const AuthGuard = ({ children, requiredRole }) => {
 };
 
 // Takaful-specific data structure
-const INITIAL_DATA = [
-  // --- CLIENTS (12) ---
-  {
-    id: 1, name: 'Haji Rahim', phone: '60123456781', email: 'rahim@example.com',
-    role: 'Client', status: 'Active', products: ['Hibah', 'Medical Card'], tags: ['VIP', 'Good Paymaster'],
-    occupation: 'Retired Teacher', nextAction: 'Greeting (Eid)', dealValue: 5000, autoFollowUp: true
-  },
-  {
-    id: 2, name: 'Pn. Salmah', phone: '60123456782', email: 'salmah@example.com',
-    role: 'Client', status: 'Active', products: ['Medical Card'], tags: ['Referral'],
-    occupation: 'Nurse', nextAction: 'Policy Review', dealValue: 2400, autoFollowUp: true
-  },
-  {
-    id: 3, name: 'Zack Lee', phone: '60123456783', email: 'zack@example.com',
-    role: 'Client', status: 'Grace Period', products: ['Medical Card'], tags: ['Late Payer'],
-    occupation: 'Freelancer', nextAction: 'Payment Reminder', dealValue: 1800, autoFollowUp: true
-  },
-  {
-    id: 4, name: 'Tan Mei Ling', phone: '60123456784', email: 'mei@example.com',
-    role: 'Client', status: 'Active', products: ['Savings', 'Investment'], tags: ['VIP'],
-    occupation: 'Director', nextAction: 'Birthday Wish', dealValue: 12000, autoFollowUp: true
-  },
-  {
-    id: 5, name: 'Muthu Sami', phone: '60123456785', email: 'muthu@example.com',
-    role: 'Client', status: 'Lapsed', products: ['Takaful'], tags: ['Late Payer'],
-    occupation: 'Driver', nextAction: 'Revival Offer', dealValue: 1200, autoFollowUp: false
-  },
-  {
-    id: 6, name: 'Dr. Aiman', phone: '60123456786', email: 'aiman@example.com',
-    role: 'Client', status: 'Active', products: ['Investment'], tags: ['Good Paymaster'],
-    occupation: 'Doctor', nextAction: 'Upgrade Plan', dealValue: 6000, autoFollowUp: true
-  },
-  {
-    id: 7, name: 'Cikgu Murni', phone: '60123456787', email: 'murni@example.com',
-    role: 'Client', status: 'Active', products: ['Takaful'], tags: ['Referral'],
-    occupation: 'Teacher', nextAction: 'None', dealValue: 1500, autoFollowUp: true
-  },
-  {
-    id: 8, name: 'Abang Bomba', phone: '60123456788', email: 'bomba@example.com',
-    role: 'Client', status: 'Active', products: ['Hibah'], tags: ['Good Paymaster'],
-    occupation: 'Firefighter', nextAction: 'Yearly Review', dealValue: 2400, autoFollowUp: true
-  },
-  {
-    id: 9, name: 'Nurul Izzah', phone: '60123456789', email: 'izzah@example.com',
-    role: 'Client', status: 'Grace Period', products: ['Savings'], tags: ['Late Payer'],
-    occupation: 'Student', nextAction: 'Payment Reminder', dealValue: 1200, autoFollowUp: true
-  },
-  {
-    id: 10, name: 'Jason Wong', phone: '60123456790', email: 'jason@example.com',
-    role: 'Client', status: 'Active', products: ['Investment', 'Medical Card'], tags: ['VIP'],
-    occupation: 'IT Manager', nextAction: 'Policy Review', dealValue: 8500, autoFollowUp: true
-  },
-  {
-    id: 11, name: 'Pn. Fatimah', phone: '60123456791', email: 'fatimah@example.com',
-    role: 'Client', status: 'Lapsed', products: ['Takaful'], tags: ['Low Budget'],
-    occupation: 'Housewife', nextAction: 'WhatsApp Greeting', dealValue: 600, autoFollowUp: false
-  },
-  {
-    id: 12, name: 'En. Razak', phone: '60123456792', email: 'razak@example.com',
-    role: 'Client', status: 'Active', products: ['Medical Card'], tags: ['Good Paymaster'],
-    occupation: 'Engineer', nextAction: 'None', dealValue: 3000, autoFollowUp: true
-  },
-
-  // --- PROSPECTS (10) ---
-  {
-    id: 13, name: 'Siti Nurhaliza', phone: '60123456793', email: 'siti@example.com',
-    role: 'Prospect', status: 'Warm', products: ['Hibah'], tags: ['VIP'],
-    occupation: 'Singer', nextAction: 'Send Quotation', dealValue: 5000, autoFollowUp: true
-  },
-  {
-    id: 14, name: 'Aaron Aziz', phone: '60123456794', email: 'aaron@example.com',
-    role: 'Prospect', status: 'New', products: ['Takaful'], tags: ['Referral'],
-    occupation: 'Actor', nextAction: 'First Call', dealValue: 2000, autoFollowUp: true
-  },
-  {
-    id: 15, name: 'Janna Nick', phone: '60123456795', email: 'janna@example.com',
-    role: 'Prospect', status: 'KIV', products: ['Medical Card'], tags: ['Low Budget'],
-    occupation: 'Host', nextAction: 'Follow up Jan', dealValue: 1200, autoFollowUp: true
-  },
-  {
-    id: 16, name: 'Hairul Azreen', phone: '60123456796', email: 'hairul@example.com',
-    role: 'Prospect', status: 'Warm', products: ['Investment'], tags: ['AgentApp Leads'],
-    occupation: 'Stuntman', nextAction: 'Meeting Set', dealValue: 10000, autoFollowUp: true
-  },
-  {
-    id: 17, name: 'Nelydia Senrose', phone: '60123456797', email: 'nelydia@example.com',
-    role: 'Prospect', status: 'New', products: ['Savings'], tags: ['Referral'],
-    occupation: 'Actress', nextAction: 'WhatsApp Intro', dealValue: 3000, autoFollowUp: true
-  },
-  {
-    id: 18, name: 'Zizan Razak', phone: '60123456798', email: 'zizan@example.com',
-    role: 'Prospect', status: 'KIV', products: ['Hibah'], tags: ['Low Budget'],
-    occupation: 'Comedian', nextAction: 'Send Brochure', dealValue: 1000, autoFollowUp: true
-  },
-  {
-    id: 19, name: 'Shaheizy Sam', phone: '60123456799', email: 'sam@example.com',
-    role: 'Prospect', status: 'Warm', products: ['Investment'], tags: ['VIP'],
-    occupation: 'Actor', nextAction: 'Closing Meeting', dealValue: 15000, autoFollowUp: true
-  },
-  {
-    id: 20, name: 'Mira Filzah', phone: '60123456800', email: 'mira@example.com',
-    role: 'Prospect', status: 'New', products: ['Takaful'], tags: ['AgentApp Leads'],
-    occupation: 'Model', nextAction: 'Intro Call', dealValue: 2000, autoFollowUp: true
-  },
-  {
-    id: 21, name: 'Remy Ishak', phone: '60123456801', email: 'remy@example.com',
-    role: 'Prospect', status: 'Warm', products: ['Medical Card'], tags: ['Referral'],
-    occupation: 'Actor', nextAction: 'Sign Policy', dealValue: 2500, autoFollowUp: true
-  },
-  {
-    id: 22, name: 'Neelofa', phone: '60123456802', email: 'neelofa@example.com',
-    role: 'Prospect', status: 'KIV', products: ['Savings'], tags: ['VIP'],
-    occupation: 'Entrepreneur', nextAction: 'Revisit in Q3', dealValue: 8000, autoFollowUp: true
-  }
-];
+const INITIAL_DATA = [];
 
 const AppLayout = ({ context, userProfile, openAddModal, checkPermission, setUserProfile }) => {
   return (
@@ -180,13 +66,19 @@ function App() {
   });
 
   // Force Seed Demo Data (v3)
+  // Force Seed Demo Data (Disabled for Production)
   useEffect(() => {
-    const hasSeeded = localStorage.getItem('demo_seeded_v3');
-    if (!hasSeeded) {
-      setContacts(INITIAL_DATA);
-      setAvailableProducts(['Takaful', 'Hibah', 'Medical Card', 'Investment', 'Savings']);
-      setAvailableTags(['Referral', 'VIP', 'Good Paymaster', 'Late Payer', 'Low Budget', 'AgentApp Leads']);
-      localStorage.setItem('demo_seeded_v3', 'true');
+    // const hasSeeded = localStorage.getItem('demo_seeded_v3');
+    // if (!hasSeeded) {
+    //   setContacts(INITIAL_DATA);
+    //   setAvailableProducts(['Takaful', 'Hibah', 'Medical Card', 'Investment', 'Savings']);
+    //   setAvailableTags(['Referral', 'VIP', 'Good Paymaster', 'Late Payer', 'Low Budget', 'AgentApp Leads']);
+    //   localStorage.setItem('demo_seeded_v3', 'true');
+    // }
+
+    // Ensure we start clean if no local storage
+    if (!localStorage.getItem('agent_contacts')) {
+      setContacts([]);
     }
   }, []);
 
