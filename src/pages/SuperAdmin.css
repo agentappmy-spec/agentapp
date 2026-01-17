@@ -285,7 +285,23 @@
     background: #f0fdf4;
 }
 
-/* Improved Toolbar for SuperAdmin */
+/* --- RECENTLY ADDED ENHANCED STYLES --- */
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.animate-spin {
+    animation: spin 1s linear infinite;
+}
+
+/* Toolbar & Search */
 .sa-toolbar-enhanced {
     display: flex;
     justify-content: space-between;
@@ -349,68 +365,229 @@
     transition: all 0.2s;
 }
 
-.icon-btn-filter:hover {
-    background: #f8fafc;
-    color: #1e293b;
-}
-
 .icon-btn-filter.active {
     background: #2563eb;
     color: white;
     border-color: #2563eb;
 }
 
-/* Filter Panel */
-.sa-filter-panel {
-    background: #f8fafc;
-    border: 1px solid #e2e8f0;
-    border-radius: 12px;
-    padding: 1.25rem;
-    margin-bottom: 1.5rem;
-    border-left: 4px solid #2563eb;
+/* Premium Plans UI */
+.sa-plans-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #f1f5f9;
 }
 
-.filter-group {
-    display: flex;
-    align-items: center;
+.sa-section-info h3 {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: #1e293b;
+    margin: 0 0 0.25rem 0;
+}
+
+.sa-section-info p {
+    font-size: 0.9rem;
+    color: #64748b;
+    margin: 0;
+}
+
+.sa-plans-grid-modern {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
     gap: 1.5rem;
 }
 
-.filter-group label {
-    font-weight: 700;
-    font-size: 0.9rem;
-    color: #475569;
+.sa-plan-card {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 20px;
+    padding: 1.75rem;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
 }
 
-.filter-pills {
+.sa-plan-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+    border-color: #3b82f6;
+}
+
+.sa-plan-card.pro {
+    border-left: 6px solid #2563eb;
+}
+
+.sa-plan-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.sa-plan-title-group {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.sa-plan-icon {
+    width: 48px;
+    height: 48px;
+    background: #f1f5f9;
+    color: #64748b;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.sa-plan-card.pro .sa-plan-icon {
+    background: #dbeafe;
+    color: #2563eb;
+}
+
+.sa-plan-title-group h4 {
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: #1e293b;
+    margin: 0;
+}
+
+.sa-plan-status-badge {
+    font-size: 0.7rem;
+    font-weight: 800;
+    padding: 2px 8px;
+    border-radius: 6px;
+    background: #f1f5f9;
+    color: #64748b;
+    margin-top: 4px;
+    display: inline-block;
+}
+
+.sa-plan-status-badge.active {
+    background: #dcfce7;
+    color: #15803d;
+}
+
+.sa-plan-actions {
     display: flex;
     gap: 0.5rem;
 }
 
-.filter-pill {
-    padding: 0.4rem 1.25rem;
-    border-radius: 20px;
-    border: 1px solid #cbd5e1;
-    background: white;
-    color: #64748b;
-    font-size: 0.85rem;
-    font-weight: 600;
+.sa-action-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    background: transparent;
+    color: #94a3b8;
     cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     transition: all 0.2s;
 }
 
-.filter-pill:hover {
-    border-color: #2563eb;
-    color: #2563eb;
+.sa-plan-pricing {
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
 }
 
-.filter-pill.active {
-    background: #2563eb;
-    color: white;
-    border-color: #2563eb;
+.sa-plan-pricing .currency {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #1e293b;
 }
 
-/* Modern Table Enhancements */
+.sa-plan-pricing .amount {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: #1e293b;
+    letter-spacing: -1px;
+}
+
+.sa-plan-pricing .period {
+    color: #64748b;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.sa-plan-features-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    padding: 1rem;
+    background: #f8fafc;
+    border-radius: 12px;
+}
+
+.sa-feature-stat {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.stat-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.stat-value {
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: #1e293b;
+}
+
+.stat-label {
+    font-size: 0.75rem;
+    color: #64748b;
+    text-transform: uppercase;
+    font-weight: 600;
+}
+
+.sa-plan-features-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.feature-list-title {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #475569;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.feature-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.feature-tag {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    background: #f1f5f9;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    color: #475569;
+    font-weight: 500;
+}
+
+.feature-tag svg {
+    color: #22c55e;
+}
+
+/* Modern Table */
 .sa-table-modern {
     width: 100%;
     border-collapse: separate;
@@ -425,13 +602,11 @@
     font-size: 0.85rem;
     color: #64748b;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
     border-bottom: 2px solid #e2e8f0;
 }
 
 .sa-table-modern td {
     padding: 1rem;
-    vertical-align: middle;
     border-bottom: 1px solid #f1f5f9;
 }
 
@@ -451,9 +626,6 @@
     align-items: center;
     justify-content: center;
     font-weight: 700;
-    font-size: 1.1rem;
-    flex-shrink: 0;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 .sa-avatar.pro {
@@ -461,24 +633,7 @@
     color: white;
 }
 
-.sa-user-info {
-    display: flex;
-    flex-direction: column;
-}
-
-.sa-user-name {
-    font-weight: 700;
-    color: #1e293b;
-    font-size: 0.95rem;
-}
-
-.sa-user-email {
-    font-size: 0.85rem;
-    color: #64748b;
-}
-
 .sa-badge {
-    display: inline-flex;
     padding: 0.25rem 0.75rem;
     border-radius: 6px;
     font-size: 0.75rem;
@@ -517,20 +672,6 @@
     background: #94a3b8;
 }
 
-.sa-status-text {
-    font-size: 0.9rem;
-    font-weight: 600;
-    color: #475569;
-}
-
-.sa-date-cell {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    color: #64748b;
-    font-size: 0.85rem;
-}
-
 .sa-row-actions {
     display: flex;
     justify-content: center;
@@ -546,214 +687,24 @@
     border-radius: 8px;
     border: 1px solid #e2e8f0;
     background: white;
-    color: #64748b;
     cursor: pointer;
     transition: all 0.2s;
 }
 
-.sa-icon-btn:hover {
-    background: #f1f5f9;
-    color: #1e293b;
-    transform: translateY(-1px);
-}
-
-.sa-icon-btn.text-danger:hover {
-    background: #fef2f2;
-    color: #ef4444;
-}
-
-/* Empty State */
-.empty-state {
-    padding: 4rem 1rem !important;
-    text-align: center;
-    color: #94a3b8;
-}
-
-.empty-icon {
-    margin-bottom: 1rem;
-    opacity: 0.2;
-}
-
-/* Toolbar Styles */
-.sa-toolbar {
-    margin-bottom: 3.5rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 1rem;
-}
-
-.sa-toolbar .search-bar {
-    background: #f1f5f9;
-    padding: 0.5rem 1rem;
-    border-radius: 8px;
-    display: flex;
-    gap: 0.5rem;
-    width: 300px;
-    align-items: center;
-}
-
-.sa-toolbar .search-bar input {
-    border: none;
-    background: transparent;
-    outline: none;
-    width: 100%;
-}
-
-.toolbar-actions {
-    display: flex;
-    gap: 0.5rem;
-}
-
-/* Plans Grid */
-.sa-plans-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 2rem;
-}
-
-/* Responsive Improvements */
+/* Responsive Overrides */
 @media (max-width: 768px) {
-    .super-admin-container {
-        padding: 1rem;
-    }
-
-    .sa-header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 0.5rem;
-        margin-bottom: 1.5rem;
-    }
-
-    .sa-header h1 {
-        font-size: 1.5rem;
-    }
-
-    /* Scrollable Tabs - Hidden Scrollbar */
-    .sa-tabs-modern {
-        width: 100%;
-        overflow-x: auto;
-        white-space: nowrap;
-        padding-bottom: 0px;
-        scrollbar-width: none;
-        /* Firefox */
-        margin-bottom: 1.5rem;
-        background: transparent;
-        padding-left: 0;
-    }
-
-    .sa-tabs-modern::-webkit-scrollbar {
-        display: none;
-        /* Chrome/Safari */
-    }
-
-    .sa-tab-item {
-        padding: 0.6rem 1rem;
-        flex-shrink: 0;
-        background: white;
-        border: 1px solid #e2e8f0;
-        font-size: 0.9rem;
-    }
-
-    .sa-tab-item.active {
-        background: #1e293b;
-        color: white;
-        border-color: #1e293b;
-    }
-
-    /* Responsive Table Wrapper */
-    .table-responsive-wrapper {
-        width: 100%;
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-        margin-bottom: 1rem;
-        border-radius: 8px;
-        border: 1px solid #f1f5f9;
-    }
-
-    .sa-table {
-        min-width: 600px;
-    }
-
-    /* Improved Toolbar for Mobile */
-    .sa-toolbar {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 1rem;
-        margin-bottom: 1.5rem;
-    }
-
-    .sa-toolbar .search-bar {
-        width: 100%;
-        /* Full width search */
-    }
-
-    .toolbar-actions {
-        display: grid;
-        grid-template-columns: auto 1fr;
-        /* Refresh button small, Add button fills rest */
-    }
-
-    .toolbar-actions .primary-btn {
-        width: 100%;
-        justify-content: center;
-    }
-
-    .role-selector {
-        flex-wrap: wrap;
-    }
-
-    .role-pill {
-        flex: 1;
-        text-align: center;
-        padding: 0.5rem;
-        font-size: 0.85rem;
-    }
-
-    /* Follow Up Cards */
-    .flow-card-admin {
-        flex-direction: column;
-        gap: 1rem;
-    }
-
-    .flow-actions {
-        width: 100%;
-        justify-content: flex-end;
-        padding-top: 1rem;
-        border-top: 1px dashed #e2e8f0;
-    }
-
-    /* Plans Grid Mobile */
-    .sa-plans-grid {
+    .sa-plans-grid-modern {
         grid-template-columns: 1fr;
-        /* Stack vertically */
-        gap: 1.5rem;
     }
 
-    /* Responsive Table Overrides */
-    .sa-toolbar-enhanced {
-        flex-direction: column;
-        align-items: stretch;
-    }
-
-    .sa-search-wrapper {
-        max-width: none;
-    }
-
-    .sa-toolbar-actions {
-        display: grid;
-        grid-template-columns: auto auto 1fr;
-    }
-
-    .icon-btn-filter,
-    .sa-toolbar-actions .secondary-btn {
-        width: 100%;
-    }
-
-    .filter-group {
+    .sa-plans-header {
         flex-direction: column;
         align-items: flex-start;
-        gap: 0.75rem;
+        gap: 1rem;
+    }
+
+    .sa-plans-header button {
+        width: 100%;
     }
 
     .sa-table-modern thead {
@@ -767,7 +718,6 @@
         border-radius: 16px;
         margin-bottom: 1.25rem;
         padding: 1.25rem;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
     }
 
     .sa-table-modern td {
@@ -776,78 +726,20 @@
         align-items: center;
         padding: 0.6rem 0;
         border: none;
-        width: 100%;
-        box-sizing: border-box;
     }
 
     .sa-table-modern td:first-child {
-        padding-top: 0;
         border-bottom: 1px solid #f1f5f9;
         margin-bottom: 0.5rem;
         padding-bottom: 1rem;
         display: block;
-        /* Stack profile info */
     }
 
-    .sa-user-cell {
-        width: 100%;
-        gap: 0.75rem;
-    }
-
-    .sa-avatar {
-        width: 40px;
-        height: 40px;
-        font-size: 1.1rem;
-    }
-
-    .sa-user-name {
-        font-size: 1rem;
-    }
-
-    .sa-user-email {
-        font-size: 0.8rem;
-        word-break: break-all;
-    }
-
-    /* Labels for mobile table values */
     .sa-table-modern td:not(:first-child)::before {
         content: attr(data-label);
         font-weight: 700;
         font-size: 0.75rem;
         color: #94a3b8;
         text-transform: uppercase;
-        margin-right: 1rem;
-    }
-
-    .sa-row-actions {
-        width: 100%;
-        justify-content: flex-end;
-        padding-top: 0.75rem;
-        border-top: 1px dashed #e2e8f0;
-        margin-top: 0.5rem;
-        gap: 0.75rem;
-    }
-
-    .sa-icon-btn {
-        width: 40px;
-        /* Larger icons for mobile touch */
-        height: 40px;
-    }
-
-    /* Plans Grid Mobile */
-    .sa-plans-header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 1rem;
-    }
-
-    .sa-plans-header .primary-btn {
-        width: 100%;
-        justify-content: center;
-    }
-
-    .sa-plans-grid-modern {
-        grid-template-columns: 1fr;
-        /* Stack vertically on mobile */
     }
 }
