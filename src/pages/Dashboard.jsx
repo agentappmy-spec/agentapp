@@ -403,13 +403,26 @@ const Dashboard = () => {
 
                 </div>
                 <button
-                    className="icon-btn-glass"
+                    className="mobile-logout-btn"
                     onClick={async () => {
                         await supabase.auth.signOut();
                         localStorage.removeItem('agent_user_profile');
                         window.location.href = '/login';
                     }}
-                    style={{ marginLeft: 'auto', background: 'rgba(255,255,255,0.2)', border: 'none', color: 'white' }}
+                    style={{
+                        marginLeft: 'auto',
+                        background: 'white',
+                        border: 'none',
+                        color: '#0f172a',
+                        width: '40px',
+                        height: '40px',
+                        borderRadius: '50%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                        cursor: 'pointer'
+                    }}
                 >
                     <LogOut size={20} />
                 </button>
