@@ -404,11 +404,19 @@ const SuperAdmin = () => {
                 if (error) throw error;
                 fetchUsers();
             } else {
-                const { data, error } = await supabase.from('profiles').update({
+                const updates = {
                     full_name: userData.name,
-                    plan_id: userData.plan.toLowerCase(),
+                    plan_id: userData.plan === 'Pro' ? 'pro' : 'free',
                     subscription_end_date: userData.plan === 'Pro' && userData.expiryDate ? new Date(userData.expiryDate).toISOString() : null
-                }).eq('id', userData.id).select();
+                };
+
+                // If switching to free, ensure expiry is null
+                if (updates.plan_id === 'free') {
+                    updates.subscription_end_date = null;
+                }
+
+                const { data, error } = await supabase.from('profiles').update(updates).eq('id', userData.id).select();
+
                 if (error) throw error;
                 if (!data || data.length === 0) {
                     alert('Update failed: Check permissions.');

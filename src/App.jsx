@@ -121,6 +121,10 @@ function App() {
     const saved = localStorage.getItem('agent_tags');
     return saved ? JSON.parse(saved) : ['Referral', 'VIP', 'Good Paymaster', 'Late Payer', 'Low Budget', 'AgentApp Leads'];
   });
+  const [landingConfig, setLandingConfig] = useState(() => {
+    const saved = localStorage.getItem('agent_landing_config');
+    return saved ? JSON.parse(saved) : null;
+  });
 
   // Fetch Contacts from Supabase
   useEffect(() => {
@@ -226,12 +230,15 @@ function App() {
               return prev;
             });
 
-            // 2. Sync Configs (Products & Tags) if they exist in DB
+            // 2. Sync Configs (Products & Tags & Landing) if they exist in DB
             if (dbProfile.products && Array.isArray(dbProfile.products) && dbProfile.products.length > 0) {
               setAvailableProducts(dbProfile.products);
             }
             if (dbProfile.tags && Array.isArray(dbProfile.tags) && dbProfile.tags.length > 0) {
               setAvailableTags(dbProfile.tags);
+            }
+            if (dbProfile.landing_config) {
+              setLandingConfig(dbProfile.landing_config);
             }
           }
         }
@@ -268,6 +275,16 @@ function App() {
       });
     }
   }, [availableTags, userProfile?.id]);
+
+  // Persist Landing Config to DB
+  useEffect(() => {
+    localStorage.setItem('agent_landing_config', JSON.stringify(landingConfig));
+    if (userProfile?.id && landingConfig) {
+      supabase.from('profiles').update({ landing_config: landingConfig }).eq('id', userProfile.id).then(({ error }) => {
+        if (error) console.warn('Failed to save landing config to DB:', error.message);
+      });
+    }
+  }, [landingConfig, userProfile?.id]);
 
   const [integrations, setIntegrations] = useState({
     whatsapp: { enabled: true, apiKey: '', instanceId: '' },
@@ -582,6 +599,8 @@ function App() {
     setAvailableProducts,
     availableTags,
     setAvailableTags,
+    landingConfig,
+    setLandingConfig,
     userProfile,
     setUserProfile,
     integrations,

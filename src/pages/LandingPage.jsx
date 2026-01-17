@@ -81,19 +81,19 @@ const TEMPLATES = {
 };
 
 const LandingPage = () => {
-    const { setContacts } = useOutletContext();
-    const [pageConfig, setPageConfig] = useState(() => {
-        const saved = localStorage.getItem('agent_landing_config');
-        return saved ? JSON.parse(saved) : TEMPLATES.pro;
-    });
-
+    const { setContacts, landingConfig, setLandingConfig } = useOutletContext();
     const [selectedSectionId, setSelectedSectionId] = useState(null);
     const [previewMode, setPreviewMode] = useState('desktop');
 
-    // Auto-save
+    // Initialize with template if no config exists
     useEffect(() => {
-        localStorage.setItem('agent_landing_config', JSON.stringify(pageConfig));
-    }, [pageConfig]);
+        if (!landingConfig) {
+            setLandingConfig(TEMPLATES.pro);
+        }
+    }, [landingConfig, setLandingConfig]);
+
+    // Use landingConfig from context (synced with DB)
+    const pageConfig = landingConfig || TEMPLATES.pro;
 
     // Handle leads
     useEffect(() => {
@@ -121,7 +121,7 @@ const LandingPage = () => {
     }, [setContacts]);
 
     const handleUpdateSection = (id, newContent) => {
-        setPageConfig(prev => ({
+        setLandingConfig(prev => ({
             ...prev,
             sections: prev.sections.map(s => s.id === id ? { ...s, content: { ...s.content, ...newContent } } : s)
         }));
@@ -142,7 +142,7 @@ const LandingPage = () => {
 
         const newSection = { id: newId, type, name: `New ${type}`, content: baseContent };
 
-        setPageConfig(prev => ({
+        setLandingConfig(prev => ({
             ...prev,
             sections: [...prev.sections, newSection]
         }));
@@ -151,7 +151,7 @@ const LandingPage = () => {
 
     const handleDeleteSection = (id) => {
         if (window.confirm('Delete this section?')) {
-            setPageConfig(prev => ({
+            setLandingConfig(prev => ({
                 ...prev,
                 sections: prev.sections.filter(s => s.id !== id)
             }));
@@ -161,7 +161,7 @@ const LandingPage = () => {
 
     const applyTemplate = (templateKey) => {
         // Direct switch for better UX - User can always switch back
-        setPageConfig(JSON.parse(JSON.stringify(TEMPLATES[templateKey])));
+        setLandingConfig(JSON.parse(JSON.stringify(TEMPLATES[templateKey])));
         setSelectedSectionId(null);
     };
 

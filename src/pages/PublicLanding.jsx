@@ -1,19 +1,44 @@
 import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
+import { supabase } from '../services/supabaseClient';
 import LandingRenderer from '../components/landing/LandingRenderer';
 
 const PublicLanding = () => {
     const [config, setConfig] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [searchParams] = useSearchParams();
 
     useEffect(() => {
-        // Simulate fetching from database
-        // In a real app, we would fetch /api/agents/:id/landing-config
-        const saved = localStorage.getItem('agent_landing_config');
-        if (saved) {
-            setConfig(JSON.parse(saved));
-        }
-        setLoading(false);
-    }, []);
+        const fetchConfig = async () => {
+            try {
+                // Get user_id from URL query parameter
+                const userId = searchParams.get('user_id');
+
+                if (!userId) {
+                    setLoading(false);
+                    return;
+                }
+
+                // Fetch landing config from Supabase
+                const { data, error } = await supabase
+                    .from('profiles')
+                    .select('landing_config')
+                    .eq('id', userId)
+                    .single();
+
+                if (error) {
+                    console.error('Error fetching landing config:', error);
+                } else if (data?.landing_config) {
+                    setConfig(data.landing_config);
+                }
+            } catch (err) {
+                console.error('Failed to load landing page:', err);
+            }
+            setLoading(false);
+        };
+
+        fetchConfig();
+    }, [searchParams]);
 
     if (loading) return <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>Loading...</div>;
 
