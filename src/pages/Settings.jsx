@@ -508,34 +508,42 @@ const Settings = () => {
 
                     {activeTab === 'billing' && (
                         <div className="animate-fade-in">
-                            <div className="pricing-header">
-                                <h2 className="pricing-title">Simple, transparent pricing</h2>
-                                <p className="pricing-subtitle">Everything you need to grow your agency business.</p>
+                            <div className="animate-fade-in">
+                                <h2 className="section-title">Billing & Subscription</h2>
 
                                 {/* Current Plan Summary */}
-                                <div className="glass-panel" style={{ margin: '2rem auto', padding: '1.5rem', maxWidth: '600px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderLeft: `6px solid ${userProfile.planId === 'pro' ? '#10b981' : '#cbd5e1'}` }}>
-                                    <div>
-                                        <div style={{ textTransform: 'uppercase', fontSize: '0.75rem', fontWeight: '700', color: '#64748b', letterSpacing: '1px' }}>Current Plan</div>
-                                        <h3 style={{ fontSize: '1.5rem', margin: '0.2rem 0', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                            {userProfile.planId === 'pro' ? 'Pro Plan' : 'Free Starter'}
-                                            {userProfile.planId === 'pro' && <span className="badge pro">Active</span>}
-                                        </h3>
-                                        <p style={{ color: '#64748b', fontSize: '0.9rem', margin: 0 }}>
-                                            {userProfile.planId === 'pro' && userProfile.subscription_end_date
-                                                ? `Renews on ${new Date(userProfile.subscription_end_date).toLocaleDateString()}`
-                                                : 'Free forever. Upgrade anytime.'}
-                                        </p>
+                                <div className="glass-panel" style={{ padding: '2rem', marginBottom: '2rem', borderLeft: `6px solid ${userProfile.planId === 'pro' ? '#10b981' : '#cbd5e1'}` }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem' }}>
+                                        <div>
+                                            <div style={{ textTransform: 'uppercase', fontSize: '0.75rem', fontWeight: '700', color: '#64748b', letterSpacing: '1px', marginBottom: '0.5rem' }}>Current Plan</div>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '0.5rem' }}>
+                                                <h3 style={{ fontSize: '1.75rem', fontWeight: '800', margin: 0, color: '#1e293b' }}>
+                                                    {userProfile.planId === 'pro' ? 'Pro Plan' : 'Free Starter'}
+                                                </h3>
+                                                <span className={`badge ${userProfile.planId === 'pro' ? 'pro' : ''}`} style={{ fontSize: '0.8rem', padding: '0.25rem 0.75rem' }}>
+                                                    {userProfile.planId === 'pro' ? 'ACTIVE' : 'FREE'}
+                                                </span>
+                                            </div>
+                                            <p style={{ color: '#64748b', fontSize: '0.95rem', margin: 0, maxWidth: '500px' }}>
+                                                {userProfile.planId === 'pro'
+                                                    ? (userProfile.subscription_end_date
+                                                        ? `Your subscription renews automatically on ${new Date(userProfile.subscription_end_date).toLocaleDateString()}.`
+                                                        : 'Your Pro subscription is active.')
+                                                    : 'You are currently on the Free Starter plan. seamless upgrade available below.'}
+                                            </p>
+                                        </div>
+
+                                        <div style={{ alignSelf: 'center' }}>
+                                            {userProfile.planId === 'pro' ? (
+                                                <button className="secondary-btn" onClick={() => alert('Manage subscription via Portal (Coming Soon)')} style={{ border: '1px solid #e2e8f0' }}>Manage Subscription</button>
+                                            ) : (
+                                                <div style={{ textAlign: 'right', display: 'none' }}></div>
+                                            )}
+                                        </div>
                                     </div>
-                                    {userProfile.planId === 'pro' ? (
-                                        <div style={{ textAlign: 'right' }}>
-                                            <button className="secondary-btn small-btn" onClick={() => alert('Manage subscription via Portal (Coming Soon)')}>Manage</button>
-                                        </div>
-                                    ) : (
-                                        <div style={{ textAlign: 'right' }}>
-                                            <div style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>RM 0<span style={{ fontSize: '0.9rem', fontWeight: 'normal' }}>/mo</span></div>
-                                        </div>
-                                    )}
                                 </div>
+
+                                <h3 className="subsection-title" style={{ marginBottom: '1.5rem', marginTop: '3rem' }}>Available Plans</h3>
 
                                 <div className="pricing-toggle-container">
                                     <div className="pricing-toggle">
