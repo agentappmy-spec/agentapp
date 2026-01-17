@@ -81,7 +81,7 @@ const TEMPLATES = {
 };
 
 const LandingPage = () => {
-    const { setContacts, landingConfig, setLandingConfig } = useOutletContext();
+    const { setContacts, landingConfig, setLandingConfig, checkPermission, userProfile } = useOutletContext();
     const [selectedSectionId, setSelectedSectionId] = useState(null);
     const [previewMode, setPreviewMode] = useState('desktop');
 
@@ -94,6 +94,17 @@ const LandingPage = () => {
 
     // Use landingConfig from context (synced with DB)
     const pageConfig = landingConfig || TEMPLATES.pro;
+
+    const handlePublish = () => {
+        if (!checkPermission('landing_page')) {
+            if (window.confirm("📢 Publishing your Landing Page is a Pro feature.\n\nFree users can design and edit, but only Pro users can publish their page for the public to see.\n\nUpgrade now to share your professional landing page!\n\nClick OK to view upgrade options.")) {
+                window.location.href = '/settings?tab=billing';
+            }
+        } else {
+            // TODO: Implement actual publish logic
+            alert(`✅ Your landing page is published!\n\nPublic URL: ${window.location.origin}/p/public?user_id=${userProfile?.id}`);
+        }
+    };
 
     // Handle leads
     useEffect(() => {
@@ -274,9 +285,9 @@ const LandingPage = () => {
                         </button>
                     </div>
 
-                    <button className="primary-btn save-btn">
+                    <button className="primary-btn save-btn" onClick={handlePublish}>
                         <Save size={18} />
-                        <span>Save</span>
+                        <span>Publish</span>
                     </button>
                 </div>
             </header>

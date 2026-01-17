@@ -5,15 +5,6 @@ import '../MobileStyles.css';
 
 const BottomNav = ({ onAddContact, checkPermission }) => {
 
-    const handleLockedClick = (e) => {
-        if (!checkPermission('landing_page')) {
-            e.preventDefault();
-            if (window.confirm("🚀 Landing Page Builder is a Pro feature.\n\nUpgrade now to create your professional landing page and grow your business!\n\nClick OK to view upgrade options.")) {
-                window.location.href = '/settings?tab=billing';
-            }
-        }
-    };
-
     return (
         <nav className="bottom-nav mobile-only">
             <NavLink to="/" className={({ isActive }) => `nav-item-mobile ${isActive ? 'active' : ''}`}>
@@ -37,11 +28,7 @@ const BottomNav = ({ onAddContact, checkPermission }) => {
                 <span>Follow Up</span>
             </NavLink>
 
-            <NavLink
-                to={checkPermission('landing_page') ? "/landing-page" : "#"}
-                onClick={handleLockedClick}
-                className={({ isActive }) => `nav-item-mobile ${isActive && checkPermission('landing_page') ? 'active' : ''}`}
-            >
+            <NavLink to="/landing-page" className={({ isActive }) => `nav-item-mobile ${isActive ? 'active' : ''}`}>
                 <Calendar size={24} />
                 <span>Your Page</span>
             </NavLink>
