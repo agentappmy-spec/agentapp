@@ -5,13 +5,6 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   plugins: [react()],
   server: {
-    proxy: {
-      '/api/resend': {
-        target: 'https://api.resend.com',
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api\/resend/, ''),
-        secure: true,
-      }
-    }
+    // Proxy removed (email moved to Supabase Edge Function)
   }
 })

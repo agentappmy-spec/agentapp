@@ -1,12 +1,9 @@
-import { Resend } from 'resend';
-
-// We use the proxy path defined in vite.config.js
-// This prevents CORS issues during local development
-const RESEND_API_URL = '/api/resend/emails';
-const API_KEY = 're_X1HM7cz6_PrsUE2wmMkJGj9PvTM45oNJ3';
+import { supabase } from './supabaseClient';
 
 /**
- * Send an email via Resend
+ * Send an email securely via Supabase Edge Function
+ * This removes the need for client-side API keys and proxies.
+ * 
  * @param {string} to - Recipient email
  * @param {string} subject - Email subject
  * @param {string} html - HTML content
@@ -14,26 +11,25 @@ const API_KEY = 're_X1HM7cz6_PrsUE2wmMkJGj9PvTM45oNJ3';
  */
 export const sendEmail = async (to, subject, html) => {
     try {
-        const response = await fetch(RESEND_API_URL, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${API_KEY}`
-            },
-            body: JSON.stringify({
-                from: 'AgentApp <system@mail.agentapp.my>', // Verified domain
-                to: [to],
-                subject: subject,
-                html: html
-            })
+        const { data, error } = await supabase.functions.invoke('send-email', {
+            body: {
+                to,
+                subject,
+                html
+            }
         });
 
-        if (!response.ok) {
-            const error = await response.json();
-            throw new Error(error.message || 'Failed to send email');
+        if (error) {
+            console.error('Supabase Function Error:', error);
+            throw new Error(error.message || 'Failed to invoke email function');
         }
 
-        return await response.json();
+        // The function might return { error: ... } in the data body if logic failed
+        if (data && data.error) {
+            throw new Error(data.error);
+        }
+
+        return data;
     } catch (error) {
         console.error('Email Service Error:', error);
         throw error;
@@ -160,6 +156,9 @@ export const sendOtpEmail = async (email, otp) => {
  * @param {string} name 
  */
 export const sendWelcomeEmail = async (email, name) => {
+    // Dynamic URL for environment compatibility
+    const dashboardUrl = window.location.origin;
+
     const html = getEmailTemplate('Welcome!', `
         <p style="font-family: sans-serif; font-size: 14px; font-weight: normal; margin: 0; margin-bottom: 15px;">Welcome, <b>${name}</b>! 🎉</p>
         <p style="font-family: sans-serif; font-size: 14px; font-weight: normal; margin: 0; margin-bottom: 15px;">We are thrilled to have you on board. AgentApp is designed to help you organize your contacts, track deals, and close more sales.</p>
@@ -177,7 +176,7 @@ export const sendWelcomeEmail = async (email, name) => {
                             <tbody>
                                 <tr>
                                     <td style="font-family: sans-serif; font-size: 14px; vertical-align: top; background-color: #4f46e5; border-radius: 5px; text-align: center;">
-                                        <a href="http://localhost:5173" target="_blank" style="display: inline-block; color: #ffffff; background-color: #4f46e5; border: solid 1px #4f46e5; border-radius: 5px; box-sizing: border-box; cursor: pointer; text-decoration: none; font-size: 14px; font-weight: bold; margin: 0; padding: 12px 25px; text-transform: capitalize; border-color: #4f46e5;">Go to Dashboard</a>
+                                        <a href="${dashboardUrl}" target="_blank" style="display: inline-block; color: #ffffff; background-color: #4f46e5; border: solid 1px #4f46e5; border-radius: 5px; box-sizing: border-box; cursor: pointer; text-decoration: none; font-size: 14px; font-weight: bold; margin: 0; padding: 12px 25px; text-transform: capitalize; border-color: #4f46e5;">Go to Dashboard</a>
                                     </td>
                                 </tr>
                             </tbody>
