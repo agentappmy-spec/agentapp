@@ -411,20 +411,19 @@ const Dashboard = () => {
                     }}
                     style={{
                         marginLeft: 'auto',
-                        background: 'white',
-                        border: 'none',
-                        color: '#0f172a',
-                        width: '40px',
-                        height: '40px',
-                        borderRadius: '50%',
+                        background: 'rgba(255, 255, 255, 0.1)',
+                        border: '1px solid rgba(255, 255, 255, 0.2)',
+                        color: 'white',
+                        width: '36px',
+                        height: '36px',
+                        borderRadius: '8px',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
                         cursor: 'pointer'
                     }}
                 >
-                    <LogOut size={20} />
+                    <LogOut size={16} />
                 </button>
             </div>
 

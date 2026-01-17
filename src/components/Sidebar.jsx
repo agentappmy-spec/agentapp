@@ -74,27 +74,25 @@ const Sidebar = () => {
                         alignItems: 'center',
                         gap: '12px',
                         padding: '12px',
-                        background: '#0f172a', /* Premium Dark */
-                        border: '1px solid #0f172a',
+                        background: 'transparent',
+                        border: 'none',
                         borderRadius: '12px',
-                        color: 'white',
+                        color: '#64748b', /* Muted gray */
                         cursor: 'pointer',
                         transition: 'all 0.2s ease',
                         fontWeight: 500,
-                        justifyContent: 'center'
+                        justifyContent: 'flex-start' /* Align left like other nav items */
                     }}
                     onMouseOver={(e) => {
-                        e.currentTarget.style.background = '#1e293b';
-                        e.currentTarget.style.transform = 'translateY(-1px)';
-                        e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)';
+                        e.currentTarget.style.background = '#f1f5f9';
+                        e.currentTarget.style.color = '#0f172a';
                     }}
                     onMouseOut={(e) => {
-                        e.currentTarget.style.background = '#0f172a';
-                        e.currentTarget.style.transform = 'none';
-                        e.currentTarget.style.boxShadow = 'none';
+                        e.currentTarget.style.background = 'transparent';
+                        e.currentTarget.style.color = '#64748b';
                     }}
                 >
-                    <LogOut size={18} />
+                    <LogOut size={20} />
                     <span>Sign Out</span>
                 </button>
             </div>
