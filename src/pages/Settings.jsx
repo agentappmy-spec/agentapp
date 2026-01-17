@@ -29,17 +29,6 @@ const Settings = () => {
 
     // Helper to switch tabs
     const handleTabChange = (tab) => {
-        // Feature Gating: Show upgrade prompt for restricted features
-        if (tab === 'whatsapp' && !checkPermission('whatsapp')) {
-            if (window.confirm("📱 WhatsApp Integration is a Pro feature.\n\nUpgrade now to automate your follow-ups and connect with clients seamlessly!\n\nClick OK to view upgrade options.")) {
-                setActiveTab('billing');
-                if (window.innerWidth <= 900) {
-                    setMobileView('content');
-                }
-            }
-            return;
-        }
-
         setActiveTab(tab);
         if (window.innerWidth <= 900) {
             setMobileView('content');
@@ -321,12 +310,6 @@ const Settings = () => {
                         onClick={() => handleTabChange('integrations')}
                     >
                         <MessageCircle size={18} /> Integrations
-                    </button>
-                    <button
-                        className={`settings-nav-item ${activeTab === 'whatsapp' ? 'active' : ''}`}
-                        onClick={() => handleTabChange('whatsapp')}
-                    >
-                        <MessageSquare size={18} /> Link WhatsApp
                     </button>
 
                     {userProfile.role === 'super_admin' && (
@@ -838,63 +821,6 @@ const Settings = () => {
                                         />
                                     </div>
                                 </SettingsCard>
-                            </div>
-                        </div>
-                    )}
-
-                    {activeTab === 'whatsapp' && (
-                        <div className="whatsapp-section fade-in">
-                            <h2 className="section-title">Link WhatsApp Device</h2>
-                            <div className="glass-panel" style={{ padding: '2rem', textAlign: 'center' }}>
-                                <div style={{ marginBottom: '1.5rem' }}>
-                                    <div style={{ width: '200px', height: '200px', background: '#f0f0f0', margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                        <span className="text-muted">QR Code Placeholder</span>
-                                    </div>
-                                </div>
-                                <h3>Scan to Link Device</h3>
-                                <p className="text-muted" style={{ maxWidth: '400px', margin: '1rem auto' }}>
-                                    Open WhatsApp on your mobile phone, go to Settings &gt; Linked Devices &gt; Link a Device, and scan the QR code above.
-                                </p>
-                                <div className="status-indicator">
-                                    <span className={`status-dot dot-lapsed`}></span>
-                                    <span>Disconnected</span>
-                                </div>
-                            </div>
-
-                            <div style={{ marginTop: '3rem', borderTop: '1px solid #e2e8f0', paddingTop: '2rem' }}>
-                                <h3 className="section-title" style={{ fontSize: '1.1rem', marginBottom: '1rem' }}>Message Template Shortcodes</h3>
-                                <div className="glass-panel" style={{ padding: '0', overflow: 'hidden' }}>
-                                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem' }}>
-                                        <thead style={{ background: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
-                                            <tr>
-                                                <th style={{ padding: '12px 16px', textAlign: 'left', color: '#64748b' }}>Shortcode</th>
-                                                <th style={{ padding: '12px 16px', textAlign: 'left', color: '#64748b' }}>Description</th>
-                                                <th style={{ padding: '12px 16px', textAlign: 'left', color: '#64748b' }}>Example Output</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {[
-                                                { code: '{name}', desc: 'Contact Full Name', example: 'Ahmad Albab' },
-                                                { code: '{phone}', desc: 'Contact Phone Number', example: '60123456789' },
-                                                { code: '{email}', desc: 'Contact Email', example: 'ahmad@example.com' },
-                                                { code: '{occupation}', desc: 'Contact Occupation', example: 'Government Servant' },
-                                                { code: '{birthday}', desc: 'Contact Birthday', example: '1990-05-15' },
-                                                { code: '{products}', desc: 'Interested Products', example: 'Hibah, Medical Card' },
-                                                { code: '{dealValue}', desc: 'Deal/Budget Value', example: 'RM 1200' },
-                                                { code: '{agent_name}', desc: 'Your Name', example: 'Dzulfaqar Hashim' },
-                                                { code: '{agent_phone}', desc: 'Your Phone', example: '60123456789' },
-                                                { code: '{renewalDate}', desc: 'Policy Renewal Date', example: '2026-10-12' },
-                                                { code: '{years}', desc: 'Years since signup', example: '2' },
-                                            ].map((row, i) => (
-                                                <tr key={i} style={{ borderBottom: i < 10 ? '1px solid #f1f5f9' : 'none' }}>
-                                                    <td style={{ padding: '12px 16px', fontFamily: 'monospace', color: '#7c3aed', fontWeight: 600 }}>{row.code}</td>
-                                                    <td style={{ padding: '12px 16px', color: '#334155' }}>{row.desc}</td>
-                                                    <td style={{ padding: '12px 16px', color: '#64748b', fontStyle: 'italic' }}>{row.example}</td>
-                                                </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
-                                </div>
                             </div>
                         </div>
                     )}

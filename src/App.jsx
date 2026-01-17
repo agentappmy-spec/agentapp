@@ -9,7 +9,6 @@ import Databases from './pages/Databases';
 import FollowUp from './pages/FollowUp';
 import LandingPage from './pages/LandingPage';
 import PublicLanding from './pages/PublicLanding';
-import LinkWhatsApp from './pages/LinkWhatsApp';
 import Settings from './pages/Settings';
 import Login from './pages/Login';
 import ErrorBoundary from './components/ErrorBoundary';
@@ -648,7 +647,6 @@ function App() {
             <Route path="contacts" element={<Databases />} />
             <Route path="follow-up" element={<FollowUp />} />
             <Route path="landing-page" element={<LandingPage />} />
-            <Route path="link-whatsapp" element={<LinkWhatsApp />} />
 
             {/* Super Admin Route */}
             <Route
