@@ -143,7 +143,33 @@ const EditNodeModal = ({ node, onClose, onSave }) => {
                 </div>
 
                 <div className="form-group">
-                    <label>Message Content ({activeChannel.toUpperCase()})</label>
+                    <div className="shortcode-bar">
+                        <span className="shortcode-label">Shortcodes:</span>
+                        <div className="shortcode-chips">
+                            {['{name}', '{title}', '{phone}', '{email}', '{agency}', '{license}', '{bio}'].map(code => (
+                                <button
+                                    key={code}
+                                    type="button"
+                                    className="shortcode-chip"
+                                    onClick={(e) => {
+                                        navigator.clipboard.writeText(code);
+                                        const btn = e.currentTarget;
+                                        const original = btn.innerText;
+                                        btn.innerText = 'Copied!';
+                                        btn.classList.add('copied');
+                                        setTimeout(() => {
+                                            btn.innerText = original;
+                                            btn.classList.remove('copied');
+                                        }, 1000);
+                                    }}
+                                    title="Click to copy"
+                                >
+                                    {code}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
                     <textarea
                         rows="8"
                         value={currentText}
@@ -152,7 +178,7 @@ const EditNodeModal = ({ node, onClose, onSave }) => {
                         style={{ fontFamily: 'monospace', fontSize: '0.9rem', lineHeight: '1.4' }}
                     ></textarea>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '6px', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                        <span>Use {'{name}'} to customize with contact's name.</span>
+                        <span style={{ fontStyle: 'italic' }}>Tip: Click a shortcode above to copy it.</span>
                         <span>
                             {charCount} chars
                             {activeChannel === 'sms' && <span style={{ color: isTooLong ? '#ef4444' : 'inherit', marginLeft: '6px' }}>({smsCount} SMS)</span>}

@@ -377,6 +377,7 @@
     border-radius: 999px;
     position: relative;
     border: 1px solid #e2e8f0;
+    width: fit-content;
 }
 
 .toggle-option {
@@ -599,6 +600,8 @@
     .pricing-toggle {
         /* Keep horizontal but adjust badge */
         overflow: visible;
+        width: fit-content;
+        margin: 0 auto;
     }
 
     .discount-badge {

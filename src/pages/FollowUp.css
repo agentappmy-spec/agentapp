@@ -459,3 +459,50 @@
         justify-content: center;
     }
 }
+
+/* Shortcodes Bar in Modal */
+.shortcode-bar {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.shortcode-label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+.shortcode-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.shortcode-chip {
+    padding: 4px 10px;
+    background: #f1f5f9;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-family: monospace;
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: all 0.2s;
+    user-select: none;
+}
+
+.shortcode-chip:hover {
+    background: #e2e8f0;
+    border-color: #cbd5e1;
+    transform: translateY(-1px);
+}
+
+.shortcode-chip:active,
+.shortcode-chip.copied {
+    background: #10b981;
+    color: white;
+    border-color: #059669;
+    transform: translateY(0);
+}

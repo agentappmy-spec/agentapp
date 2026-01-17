@@ -377,23 +377,7 @@ const Settings = () => {
                                         </div>
                                     </div>
 
-                                    <div className="glass-panel" style={{ marginTop: '1rem', padding: '1.5rem' }}>
-                                        <h4 style={{ fontSize: '0.9rem', marginBottom: '1rem', display: 'flex', alignItems: 'center' }}>
-                                            <FileText size={16} style={{ marginRight: '8px' }} /> Shortcodes
-                                        </h4>
-                                        <p style={{ fontSize: '0.7rem', color: '#666', marginBottom: '1rem' }}>
-                                            Use these in your messages and landing page:
-                                        </p>
-                                        <div className="shortcode-list">
-                                            <code>{`{name}`}</code>
-                                            <code>{`{title}`}</code>
-                                            <code>{`{phone}`}</code>
-                                            <code>{`{email}`}</code>
-                                            <code>{`{agency}`}</code>
-                                            <code>{`{license}`}</code>
-                                            <code>{`{bio}`}</code>
-                                        </div>
-                                    </div>
+
                                 </div>
 
                                 {/* Right Column: Details */}
