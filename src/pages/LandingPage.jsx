@@ -82,9 +82,11 @@ const TEMPLATES = {
 };
 
 const LandingPage = () => {
-    const { setContacts, landingConfig, setLandingConfig, checkPermission, userProfile } = useOutletContext();
+    const { setContacts, landingConfig, setLandingConfig, checkPermission, userProfile, setUserProfile } = useOutletContext();
     const [selectedSectionId, setSelectedSectionId] = useState(null);
     const [previewMode, setPreviewMode] = useState('desktop');
+    const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+    const [isSaving, setIsSaving] = useState(false);
 
     // Initialize with template if no config exists
     useEffect(() => {
@@ -93,10 +95,81 @@ const LandingPage = () => {
         }
     }, [landingConfig, setLandingConfig]);
 
+    // Track changes to mark as unsaved
+    useEffect(() => {
+        if (landingConfig) {
+            setHasUnsavedChanges(true);
+        }
+    }, [landingConfig]);
+
     // Use landingConfig from context (synced with DB)
     const pageConfig = landingConfig || TEMPLATES.pro;
 
+    const handleSave = async () => {
+        setIsSaving(true);
+        try {
+            const { error } = await supabase
+                .from('profiles')
+                .update({ landing_config: landingConfig })
+                .eq('id', userProfile.id);
+
+            if (error) {
+                alert('❌ Failed to save. Please try again.');
+                console.error('Save error:', error);
+            } else {
+                setHasUnsavedChanges(false);
+                alert('✅ Changes saved successfully!');
+            }
+        } catch (err) {
+            console.error('Save error:', err);
+            alert('❌ Something went wrong. Please try again.');
+        }
+        setIsSaving(false);
+    };
+
+    const handleCopyLink = () => {
+        const url = `${window.location.origin}/@${userProfile.username}`;
+        navigator.clipboard.writeText(url);
+        alert('✅ Link copied to clipboard!');
+    };
+
+    const handleOpenInNewTab = () => {
+        const url = `${window.location.origin}/@${userProfile.username}`;
+        window.open(url, '_blank');
+    };
+
+    const handleUnpublish = async () => {
+        if (!window.confirm('📝 Unpublish your landing page?\n\nYour page will no longer be publicly accessible until you publish it again.')) {
+            return;
+        }
+
+        try {
+            const { error } = await supabase
+                .from('profiles')
+                .update({ is_published: false })
+                .eq('id', userProfile.id);
+
+            if (error) {
+                alert('❌ Failed to unpublish. Please try again.');
+                console.error('Unpublish error:', error);
+                return;
+            }
+
+            setUserProfile(prev => ({ ...prev, is_published: false }));
+            alert('📝 Your landing page has been unpublished.\n\nYou can now make changes.');
+        } catch (err) {
+            console.error('Unpublish error:', err);
+            alert('❌ Something went wrong. Please try again.');
+        }
+    };
+
     const handlePublish = async () => {
+        // Check for unsaved changes
+        if (hasUnsavedChanges) {
+            alert('⚠️ You have unsaved changes!\n\nPlease save your changes before publishing.');
+            return;
+        }
+
         // Check permission (super admins bypass this)
         if (userProfile?.role !== 'super_admin' && !checkPermission('landing_page')) {
             if (window.confirm("📢 Publishing your Landing Page is a Pro feature.\n\nFree users can design and edit, but only Pro users can publish their page for the public to see.\n\nUpgrade now to share your professional landing page!\n\nClick OK to view upgrade options.")) {
@@ -303,11 +376,32 @@ const LandingPage = () => {
                 </div>
 
                 <div className="header-controls">
+                    {/* Status Badge */}
+                    <div className="status-badge">
+                        {userProfile?.is_published ? (
+                            <span className="badge-published">● Published</span>
+                        ) : (
+                            <span className="badge-draft">○ Draft</span>
+                        )}
+                    </div>
+
                     <div className="template-switcher">
                         <span className="label-text">Template:</span>
                         <div className="btn-group">
-                            <button className="secondary-btn small-btn" onClick={() => applyTemplate('basic')}>Basic</button>
-                            <button className="secondary-btn small-btn" onClick={() => applyTemplate('pro')}>Pro</button>
+                            <button
+                                className="secondary-btn small-btn"
+                                onClick={() => applyTemplate('basic')}
+                                disabled={userProfile?.is_published}
+                            >
+                                Basic
+                            </button>
+                            <button
+                                className="secondary-btn small-btn"
+                                onClick={() => applyTemplate('pro')}
+                                disabled={userProfile?.is_published}
+                            >
+                                Pro
+                            </button>
                         </div>
                     </div>
 
@@ -322,16 +416,61 @@ const LandingPage = () => {
                         </button>
                     </div>
 
-                    <button className="primary-btn save-btn" onClick={handlePublish}>
-                        <Save size={18} />
-                        <span>{userProfile?.is_published ? 'Unpublish' : 'Publish'}</span>
-                    </button>
+                    {/* Action Buttons - Different based on publish status */}
+                    {!userProfile?.is_published ? (
+                        <>
+                            <button
+                                className="secondary-btn save-btn"
+                                onClick={handleSave}
+                                disabled={!hasUnsavedChanges || isSaving}
+                            >
+                                <Save size={18} />
+                                <span>{isSaving ? 'Saving...' : hasUnsavedChanges ? 'Save *' : 'Saved'}</span>
+                            </button>
+                            <button
+                                className="primary-btn save-btn"
+                                onClick={handlePublish}
+                                disabled={hasUnsavedChanges}
+                            >
+                                <Save size={18} />
+                                <span>Publish</span>
+                            </button>
+                        </>
+                    ) : (
+                        <>
+                            <button className="secondary-btn save-btn" onClick={handleCopyLink}>
+                                <LinkIcon size={18} />
+                                <span className="btn-text-desktop">Copy Link</span>
+                                <span className="btn-text-mobile">Copy</span>
+                            </button>
+                            <button className="secondary-btn save-btn" onClick={handleOpenInNewTab}>
+                                <Grid size={18} />
+                                <span className="btn-text-desktop">Open Page</span>
+                                <span className="btn-text-mobile">Open</span>
+                            </button>
+                            <button className="primary-btn save-btn" onClick={handleUnpublish}>
+                                <Save size={18} />
+                                <span>Unpublish</span>
+                            </button>
+                        </>
+                    )}
                 </div>
             </header>
 
             <div className="builder-body">
+                {/* Edit Lock Overlay */}
+                {userProfile?.is_published && (
+                    <div className="edit-lock-overlay">
+                        <div className="lock-message">
+                            <div className="lock-icon">🔒</div>
+                            <h3>Page is Published</h3>
+                            <p>Unpublish to make changes</p>
+                        </div>
+                    </div>
+                )}
+
                 {/* Left Sidebar */}
-                <aside className="builder-sidebar">
+                <aside className={`builder-sidebar ${userProfile?.is_published ? 'locked' : ''}`}>
                     {selectedSection ? (
                         <div className="section-editor">
                             <div className="sidebar-header">
