@@ -372,6 +372,7 @@ const Settings = () => {
                                         </p>
                                         <div className="shortcode-list">
                                             <code>{`{name}`}</code>
+                                            <code>{`{title}`}</code>
                                             <code>{`{phone}`}</code>
                                             <code>{`{email}`}</code>
                                             <code>{`{agency}`}</code>

@@ -252,14 +252,22 @@ const LandingPage = () => {
         const newId = `${type}-${Date.now()}`;
         let baseContent = {};
 
-        // Defaults
-        if (type === 'bg_hero') baseContent = { title: "New Title", subtitle: "Subtitle...", buttonText: "Click Me" }; // Old hero style fallback
-        if (type === 'profile_hero') baseContent = { name: "Name", role: "Role", primaryColor: pageConfig.theme.primaryColor };
-        if (type === 'bio') baseContent = { text: "Your bio goes here." };
-        if (type === 'links') baseContent = { items: [{ label: 'New Link', url: '#' }], buttonColor: pageConfig.theme.primaryColor };
-        if (type === 'products_grid') baseContent = { title: "My Products", items: [{ name: "New Product", description: "Desc" }] };
-        if (type === 'form') baseContent = { title: "Contact Us", buttonText: "Send", fields: ['name', 'phone'] };
-        if (type === 'footer') baseContent = { text: "Copyright text" };
+        // Defaults using Profile Data
+        if (type === 'bg_hero') baseContent = { title: userProfile?.name || "Welcome", subtitle: userProfile?.title || "Professional Advisor", buttonText: "Contact Me" };
+        if (type === 'profile_hero') baseContent = {
+            name: userProfile?.name || "Your Name",
+            role: userProfile?.title || "Professional Advisor",
+            primaryColor: pageConfig.theme.primaryColor,
+            imageUrl: userProfile?.photoUrl || ''
+        };
+        if (type === 'bio') baseContent = { text: userProfile?.bio || "Hello! I am here to help you." };
+        if (type === 'links') baseContent = {
+            items: [{ label: 'WhatsApp Me', url: `https://wa.me/${userProfile?.phone || ''}`, iconType: 'whatsapp' }],
+            buttonColor: pageConfig.theme.primaryColor
+        };
+        if (type === 'products_grid') baseContent = { title: "My Services", items: [{ name: "Service Name", description: "Service Description" }] };
+        if (type === 'form') baseContent = { title: "Get in Touch", buttonText: "Submit", fields: ['name', 'phone'] };
+        if (type === 'footer') baseContent = { text: `© ${new Date().getFullYear()} ${userProfile?.name || 'AgentApp'}. All rights reserved.` };
 
         const newSection = { id: newId, type, name: `New ${type}`, content: baseContent };
 
@@ -281,8 +289,31 @@ const LandingPage = () => {
     };
 
     const applyTemplate = (templateKey) => {
-        // Direct switch for better UX - User can always switch back
-        setLandingConfig(JSON.parse(JSON.stringify(TEMPLATES[templateKey])));
+        const template = JSON.parse(JSON.stringify(TEMPLATES[templateKey]));
+
+        // Inject Profile Data into sections
+        template.sections = template.sections.map(section => {
+            if (section.type === 'profile_hero' || section.type === 'hero') {
+                return {
+                    ...section,
+                    content: {
+                        ...section.content,
+                        name: userProfile?.name || section.content.name,
+                        role: userProfile?.title || section.content.role,
+                        imageUrl: userProfile?.photoUrl || section.content.imageUrl
+                    }
+                };
+            }
+            if (section.type === 'bio' && userProfile?.bio) {
+                return { ...section, content: { ...section.content, text: userProfile.bio } };
+            }
+            if (section.type === 'footer') {
+                return { ...section, content: { ...section.content, text: `© ${new Date().getFullYear()} ${userProfile?.name || 'AgentApp'}. All rights reserved.` } };
+            }
+            return section;
+        });
+
+        setLandingConfig(template);
         setSelectedSectionId(null);
     };
 
