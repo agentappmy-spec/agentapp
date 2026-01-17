@@ -166,3 +166,67 @@ button {
   background: var(--bg-secondary);
   border-color: var(--border-hover);
 }
+
+/* Standardized Tabs (Segment Control Style) */
+.std-tabs-container {
+  display: flex;
+  gap: 0.25rem;
+  background: #f1f5f9;
+  /* Slate 100 */
+  padding: 0.25rem;
+  /* Padding for the container */
+  border-radius: 10px;
+  width: fit-content;
+  overflow-x: auto;
+  scrollbar-width: none;
+  /* Hide scrollbar */
+  margin-bottom: 1.5rem;
+  border: 1px solid var(--border-color);
+}
+
+.std-tabs-container::-webkit-scrollbar {
+  display: none;
+}
+
+.std-tab-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  border: none;
+  font-weight: 500;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+  background: transparent;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.std-tab-item:hover {
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.std-tab-item.active {
+  background: white;
+  color: var(--primary);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  font-weight: 600;
+}
+
+/* Mobile Response for Standard Tabs */
+@media (max-width: 640px) {
+  .std-tabs-container {
+    width: 100%;
+    border-radius: 8px;
+  }
+
+  .std-tab-item {
+    flex: 1;
+    /* Stretch on mobile or keeping fit-content depends on preference, usually swipe is better */
+    justify-content: center;
+    border-radius: 6px;
+  }
+}

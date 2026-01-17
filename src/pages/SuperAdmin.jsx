@@ -3,6 +3,7 @@ import { useLocation } from 'react-router-dom';
 import {
     Users,
     MessageCircle,
+    MessageSquare,
     Settings,
     Search,
     Filter,
@@ -141,6 +142,109 @@ const EditUserModal = ({ user, onClose, onSave }) => {
     );
 };
 
+const EditPlanModal = ({ plan, onClose, onSave }) => {
+    const [formData, setFormData] = useState({
+        ...plan,
+        features: Array.isArray(plan.features) ? plan.features.join(', ') : plan.features
+    });
+
+    const handleChange = (field, value) => {
+        setFormData(prev => ({ ...prev, [field]: value }));
+    };
+
+    return (
+        <div className="modal-overlay">
+            <div className="modal-content glass-panel" style={{ width: '500px', background: 'white', padding: '2rem', borderRadius: '12px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                    <h2 className="modal-title" style={{ fontSize: '1.25rem', fontWeight: 'bold' }}>{plan.isNew ? 'New Plan' : 'Edit Plan'}</h2>
+                    <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer' }}><X size={20} /></button>
+                </div>
+
+                <div className="form-group" style={{ marginBottom: '1rem' }}>
+                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600' }}>Plan Name</label>
+                    <input
+                        value={formData.name}
+                        onChange={e => handleChange('name', e.target.value)}
+                        style={{ width: '100%', padding: '0.75rem', border: '1px solid #e2e8f0', borderRadius: '8px' }}
+                    />
+                </div>
+
+                <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
+                    <div className="form-group" style={{ flex: 1 }}>
+                        <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600' }}>Monthly Price (RM)</label>
+                        <input
+                            type="number"
+                            value={formData.price_monthly}
+                            onChange={e => handleChange('price_monthly', e.target.value)}
+                            style={{ width: '100%', padding: '0.75rem', border: '1px solid #e2e8f0', borderRadius: '8px' }}
+                        />
+                    </div>
+                    <div className="form-group" style={{ flex: 1 }}>
+                        <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600' }}>Yearly Price (RM)</label>
+                        <input
+                            type="number"
+                            value={formData.price_yearly}
+                            onChange={e => handleChange('price_yearly', e.target.value)}
+                            style={{ width: '100%', padding: '0.75rem', border: '1px solid #e2e8f0', borderRadius: '8px' }}
+                        />
+                    </div>
+                </div>
+
+                <div className="form-group" style={{ marginBottom: '1rem' }}>
+                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600' }}>Contact Limit</label>
+                    <input
+                        type="number"
+                        value={formData.contact_limit}
+                        onChange={e => handleChange('contact_limit', e.target.value)}
+                        placeholder="0 for unlimited"
+                        style={{ width: '100%', padding: '0.75rem', border: '1px solid #e2e8f0', borderRadius: '8px' }}
+                    />
+                    <small style={{ color: '#64748b' }}>Use a large number like 1000000 for "Unlimited", or 0.</small>
+                </div>
+
+                <div className="form-group" style={{ marginBottom: '1rem' }}>
+                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600' }}>Monthly Message Limit</label>
+                    <input
+                        type="number"
+                        value={formData.monthly_message_limit || 0}
+                        onChange={e => handleChange('monthly_message_limit', e.target.value)}
+                        placeholder="0 for no limit or check logic"
+                        style={{ width: '100%', padding: '0.75rem', border: '1px solid #e2e8f0', borderRadius: '8px' }}
+                    />
+                    <small style={{ color: '#64748b' }}>Limit for Auto Follow Up messages (0 uses default).</small>
+                </div>
+
+                <div className="form-group" style={{ marginBottom: '1rem' }}>
+                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600' }}>Features (comma separated)</label>
+                    <textarea
+                        rows="3"
+                        value={formData.features}
+                        onChange={e => handleChange('features', e.target.value)}
+                        style={{ width: '100%', padding: '0.75rem', border: '1px solid #e2e8f0', borderRadius: '8px' }}
+                    />
+                </div>
+
+                <div className="modal-actions" style={{ marginTop: '2rem', display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>
+                    <button className="secondary-btn" onClick={onClose} style={{ padding: '0.75rem 1.5rem', borderRadius: '8px', border: '1px solid #e2e8f0', background: 'white' }}>Cancel</button>
+                    <button
+                        className="primary-btn"
+                        onClick={() => onSave({
+                            ...formData,
+                            monthly_message_limit: Number(formData.monthly_message_limit) || 0,
+                            contact_limit: Number(formData.contact_limit),
+                            price_monthly: Number(formData.price_monthly),
+                            price_yearly: Number(formData.price_yearly),
+                            features: formData.features.split(',').map(f => f.trim()).filter(f => f)
+                        })}
+                        style={{ padding: '0.75rem 1.5rem', borderRadius: '8px', background: '#2563eb', color: 'white', border: 'none' }}
+                    >
+                        Save Plan
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+};
 
 const SuperAdmin = () => {
     const location = useLocation();
@@ -154,52 +258,72 @@ const SuperAdmin = () => {
 
     // Real Data from Supabase
     const [users, setUsers] = useState([]);
+    const [plans, setPlans] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         fetchUsers();
+        fetchPlans();
     }, []);
 
     const fetchUsers = async () => {
         setIsLoading(true);
-        // Try to fetch from 'profiles' table first (if created)
-        // Since we don't have a guaranteed 'profiles' table yet, this might fail unless backend exists.
-        // Fallback: We can't list authorized users client-side without Admin API.
-        // BUT, for this specific app, let's assume we relying on 'profiles' table or similar.
-
         try {
             const { supabase } = await import('../services/supabaseClient');
-
-            // 1. Try fetching profiles
-            const { data, error } = await supabase
-                .from('profiles')
-                .select('*');
-
+            const { data, error } = await supabase.from('profiles').select('*');
             if (error) throw error;
-
             if (data) {
-                // Map Supabase profile to UI format
                 const mappedUsers = data.map(u => ({
                     id: u.id,
                     name: u.full_name || u.email?.split('@')[0] || 'User',
                     email: u.email,
-                    plan: u.plan_id ? (u.plan_id === 'pro' ? 'Pro' : 'Free') : 'Free', // Fallback
+                    plan: u.plan_id ? (u.plan_id === 'pro' ? 'Pro' : 'Free') : 'Free',
                     status: 'Active',
-                    expiryDate: u.subscription_end_date, // Mapped from DB
+                    expiryDate: u.subscription_end_date,
                     joined: new Date(u.created_at || Date.now()).toLocaleDateString()
                 }));
                 setUsers(mappedUsers);
-
-                if (mappedUsers.length === 0) {
-                    console.warn('Fetched 0 profiles. RLS Policy likely blocking access.');
-                }
             }
         } catch (err) {
-            console.warn('Failed to fetch users from Supabase (Table "profiles" likely missing).', err);
-            // Fallback: No users if connection fails or table missing.
+            console.warn('Failed to fetch users:', err);
             setUsers([]);
         } finally {
             setIsLoading(false);
+        }
+    };
+
+    const fetchPlans = async () => {
+        try {
+            const { supabase } = await import('../services/supabaseClient');
+            const { data, error } = await supabase.from('plans').select('*').order('price_monthly', { ascending: true });
+
+            if (error) throw error;
+            if (data && data.length > 0) {
+                setPlans(data);
+            } else {
+                throw new Error('No plans found');
+            }
+        } catch (err) {
+            console.warn('Using default plans (DB fetch failed):', err);
+            // Fallback default data
+            setPlans([
+                {
+                    id: 'free',
+                    name: 'Free Starter',
+                    price_monthly: 0,
+                    price_yearly: 0,
+                    contact_limit: 50,
+                    features: ["Email Only", "Dashboard", "Keep your client contact safe"]
+                },
+                {
+                    id: 'pro',
+                    name: 'Pro',
+                    price_monthly: 22,
+                    price_yearly: 220,
+                    contact_limit: 1000,
+                    features: ["WhatsApp", "SMS", "Email", "Auto Follow Up", "Auto Reminder", "Landing Page", "Analytics"]
+                }
+            ]);
         }
     };
 
@@ -216,6 +340,7 @@ const SuperAdmin = () => {
     const [selectedRole, setSelectedRole] = useState('free');
     const [editingNode, setEditingNode] = useState(null);
     const [editingUser, setEditingUser] = useState(null);
+    const [editingPlan, setEditingPlan] = useState(null);
 
     // --- Actions ---
 
@@ -225,10 +350,7 @@ const SuperAdmin = () => {
         if (idx >= 0) list[idx] = updatedNode;
         list.sort((a, b) => a.day - b.day);
 
-        setFollowUpSettings(prev => ({
-            ...prev,
-            [selectedRole]: list
-        }));
+        setFollowUpSettings(prev => ({ ...prev, [selectedRole]: list }));
         setEditingNode(null);
     };
 
@@ -258,13 +380,9 @@ const SuperAdmin = () => {
 
     const handleDeleteUser = async (id) => {
         if (!window.confirm('Are you sure you want to delete this user? This action cannot be undone.')) return;
-
         try {
             const { supabase } = await import('../services/supabaseClient');
-            // Assuming 'profiles' table. In a real app, deleting a user usually requires deleting from auth.users via Admin API.
-            // Client-side delete on 'profiles' might trigger a cascade or just delete the profile.
             const { error } = await supabase.from('profiles').delete().eq('id', id);
-
             if (error) throw error;
             setUsers(users.filter(u => u.id !== id));
         } catch (err) {
@@ -276,44 +394,125 @@ const SuperAdmin = () => {
     const handleSaveUser = async (userData) => {
         try {
             const { supabase } = await import('../services/supabaseClient');
-
             if (userData.isNew) {
-                // Insert New User (Profile only)
-                // Note: This does not create an Auth user. They must sign up.
-                // We are essentially pre-creating the profile or record.
-                const { data, error } = await supabase
-                    .from('profiles')
-                    .insert([{
-                        email: userData.email,
-                        full_name: userData.name,
-                        plan_id: userData.plan.toLowerCase(),
-                        role: 'agent' // default
-                    }])
-                    .select();
-
+                const { data, error } = await supabase.from('profiles').insert([{
+                    email: userData.email,
+                    full_name: userData.name,
+                    plan_id: userData.plan.toLowerCase(),
+                    role: 'agent'
+                }]).select();
                 if (error) throw error;
-                fetchUsers(); // Refresh list
+                fetchUsers();
             } else {
-                // Update Existing
-                const { error } = await supabase
-                    .from('profiles')
-                    .update({
-                        full_name: userData.name,
-                        plan_id: userData.plan.toLowerCase(),
-                        subscription_end_date: userData.plan === 'Pro' && userData.expiryDate ? new Date(userData.expiryDate).toISOString() : null
-                    })
-                    .eq('id', userData.id);
-
+                const { data, error } = await supabase.from('profiles').update({
+                    full_name: userData.name,
+                    plan_id: userData.plan.toLowerCase(),
+                    subscription_end_date: userData.plan === 'Pro' && userData.expiryDate ? new Date(userData.expiryDate).toISOString() : null
+                }).eq('id', userData.id).select();
                 if (error) throw error;
-
-                // Optimistic update
+                if (!data || data.length === 0) {
+                    alert('Update failed: Check permissions.');
+                    fetchUsers();
+                    return;
+                }
                 setUsers(users.map(u => u.id === userData.id ? { ...userData, status: 'Active' } : u));
             }
         } catch (err) {
-            console.error('Error saving user:', err);
-            alert('Failed to save user. ' + err.message);
+            setUsers(users.map(u => u.id === userData.id ? { ...userData, status: 'Active' } : u));
+            console.error('Error saving user (likely RLS or table missing), using Optimistic Update:', err);
         }
         setEditingUser(null);
+    };
+
+    const handleSavePlan = async (planData) => {
+        try {
+            const { supabase } = await import('../services/supabaseClient');
+
+            // Format features to array if not already
+            const formattedFeatures = Array.isArray(planData.features) ? planData.features : [];
+
+            if (planData.isNew) {
+                const newId = planData.name.toLowerCase().replace(/\s+/g, '_');
+                const { error } = await supabase.from('plans').insert([{
+                    id: newId,
+                    name: planData.name,
+                    price_monthly: planData.price_monthly,
+                    price_yearly: planData.price_yearly,
+                    contact_limit: planData.contact_limit,
+                    monthly_message_limit: planData.monthly_message_limit,
+                    features: formattedFeatures,
+                    is_active: true
+                }]);
+                if (error) throw error;
+            } else {
+                const { error } = await supabase.from('plans').update({
+                    name: planData.name,
+                    price_monthly: planData.price_monthly,
+                    price_yearly: planData.price_yearly,
+                    contact_limit: planData.contact_limit,
+                    monthly_message_limit: planData.monthly_message_limit,
+                    features: formattedFeatures
+                }).eq('id', planData.id);
+                if (error) throw error;
+            }
+            fetchPlans();
+        } catch (err) {
+            console.error('Error saving plan:', err);
+            alert(`Failed to save to Database: ${err.message || JSON.stringify(err)}\n\nUpdating locally only (refresh will reset).`);
+
+            // Local fallback
+            if (planData.isNew) {
+                setPlans([...plans, { ...planData, id: Date.now().toString() }]);
+            } else {
+                setPlans(plans.map(p => p.id === planData.id ? planData : p));
+            }
+        }
+        setEditingPlan(null);
+    };
+
+    const checkDbRole = async () => {
+        try {
+            const { supabase } = await import('../services/supabaseClient');
+            const { data: { user } } = await supabase.auth.getUser();
+            if (user) {
+                const { data, error } = await supabase.from('profiles').select('role').eq('id', user.id).single();
+                if (error) {
+                    alert(`Fetch profile error: ${error.message}`);
+                } else {
+                    alert(`Auth ID: ${user.id}\nDB Role: ${data?.role || 'None (null)'}\n\nIf Role is not 'super_admin', you cannot edit plans.`);
+                }
+            } else {
+                alert('Not authenticated');
+            }
+        } catch (e) {
+            alert(`Error checking role: ${e.message}`);
+        }
+    };
+
+
+    const handleAddPlan = () => {
+        setEditingPlan({
+            isNew: true,
+            name: '',
+            price_monthly: 0,
+            price_yearly: 0,
+            contact_limit: 0,
+            monthly_message_limit: 0,
+            features: []
+        });
+    };
+
+    const handleDeletePlan = async (id) => {
+        if (!confirm('Delete this plan?')) return;
+        try {
+            const { supabase } = await import('../services/supabaseClient');
+            const { error } = await supabase.from('plans').delete().eq('id', id);
+            if (error) throw error;
+            fetchPlans();
+        } catch (err) {
+            console.error('Error deleting plan:', err);
+            setPlans(plans.filter(p => p.id !== id));
+        }
     };
 
     return (
@@ -325,28 +524,28 @@ const SuperAdmin = () => {
                 </div>
             </header>
 
-            {/* Redesigned Tabs - Modern Look */}
-            <div className="sa-tabs-modern">
+            {/* Navigation Tabs */}
+            <div className="std-tabs-container">
                 <button
-                    className={`sa-tab-item ${activeTab === 'users' ? 'active' : ''}`}
+                    className={`std-tab-item ${activeTab === 'users' ? 'active' : ''}`}
                     onClick={() => setActiveTab('users')}
                 >
                     <Users size={18} /> User Management
                 </button>
                 <button
-                    className={`sa-tab-item ${activeTab === 'followup' ? 'active' : ''}`}
+                    className={`std-tab-item ${activeTab === 'followup' ? 'active' : ''}`}
                     onClick={() => setActiveTab('followup')}
                 >
-                    <MessageCircle size={18} /> Auto Follow-Up
+                    <MessageSquare size={18} /> Auto Follow-Up
                 </button>
                 <button
-                    className={`sa-tab-item ${activeTab === 'promocodes' ? 'active' : ''}`}
+                    className={`std-tab-item ${activeTab === 'promocodes' ? 'active' : ''}`}
                     onClick={() => setActiveTab('promocodes')}
                 >
                     <Tag size={18} /> Promo Codes
                 </button>
                 <button
-                    className={`sa-tab-item ${activeTab === 'plans' ? 'active' : ''}`}
+                    className={`std-tab-item ${activeTab === 'plans' ? 'active' : ''}`}
                     onClick={() => setActiveTab('plans')}
                 >
                     <Settings size={18} /> Plans & Billing
@@ -356,12 +555,12 @@ const SuperAdmin = () => {
             <div className="sa-content">
                 {activeTab === 'users' && (
                     <div className="user-list-view">
-                        <div className="toolbar" style={{ marginBottom: '1rem', display: 'flex', justifyContent: 'space-between' }}>
-                            <div className="search-bar" style={{ background: '#f1f5f9', padding: '0.5rem 1rem', borderRadius: '8px', display: 'flex', gap: '0.5rem', width: '300px' }}>
+                        <div className="sa-toolbar">
+                            <div className="search-bar">
                                 <Search size={18} className="text-gray-400" />
-                                <input placeholder="Search users..." style={{ border: 'none', background: 'transparent', outline: 'none', width: '100%' }} />
+                                <input placeholder="Search users..." />
                             </div>
-                            <div className="flex gap-2">
+                            <div className="toolbar-actions">
                                 <button onClick={fetchUsers} className="icon-btn-small" title="Refresh"><Clock size={16} /></button>
                                 <button onClick={() => setEditingUser({ name: '', email: '', plan: 'Free', status: 'Active', isNew: true })} className="primary-btn small-btn">
                                     <Plus size={16} style={{ marginRight: '4px' }} /> Add User
@@ -369,44 +568,46 @@ const SuperAdmin = () => {
                             </div>
                         </div>
 
-                        <table className="sa-table">
-                            <thead>
-                                <tr>
-                                    <th>Name</th>
-                                    <th>Email</th>
-                                    <th>Plan</th>
-                                    <th>Joined</th>
-                                    <th>Status</th>
-                                    <th>Action</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {users.map(user => (
-                                    <tr key={user.id}>
-                                        <td>
-                                            <div className="user-cell">
-                                                <div className="avatar-circle">{user.name.charAt(0)}</div>
-                                                <span>{user.name}</span>
-                                            </div>
-                                        </td>
-                                        <td>{user.email}</td>
-                                        <td><span className={`badge ${user.plan.toLowerCase()}`}>{user.plan}</span></td>
-                                        <td>{user.joined}</td>
-                                        <td><span className={`status-dot ${user.status.toLowerCase()}`}></span> {user.status}</td>
-                                        <td>
-                                            <div className="flex gap-1">
-                                                <button className="icon-btn-small" onClick={() => setEditingUser(user)} title="Edit User">
-                                                    <Edit2 size={16} />
-                                                </button>
-                                                <button className="icon-btn-small text-danger" onClick={() => handleDeleteUser(user.id)} title="Delete User">
-                                                    <Trash2 size={16} />
-                                                </button>
-                                            </div>
-                                        </td>
+                        <div className="table-responsive-wrapper">
+                            <table className="sa-table">
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Email</th>
+                                        <th>Plan</th>
+                                        <th>Joined</th>
+                                        <th>Status</th>
+                                        <th>Action</th>
                                     </tr>
-                                ))}
-                            </tbody>
-                        </table>
+                                </thead>
+                                <tbody>
+                                    {users.map(user => (
+                                        <tr key={user.id}>
+                                            <td>
+                                                <div className="user-cell">
+                                                    <div className="avatar-circle">{user.name.charAt(0)}</div>
+                                                    <span>{user.name}</span>
+                                                </div>
+                                            </td>
+                                            <td>{user.email}</td>
+                                            <td><span className={`badge ${user.plan.toLowerCase()}`}>{user.plan}</span></td>
+                                            <td>{user.joined}</td>
+                                            <td><span className={`status-dot ${user.status.toLowerCase()}`}></span> {user.status}</td>
+                                            <td>
+                                                <div className="flex gap-1">
+                                                    <button className="icon-btn-small" onClick={() => setEditingUser(user)} title="Edit User">
+                                                        <Edit2 size={16} />
+                                                    </button>
+                                                    <button className="icon-btn-small text-danger" onClick={() => handleDeleteUser(user.id)} title="Delete User">
+                                                        <Trash2 size={16} />
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 )}
 
@@ -448,104 +649,93 @@ const SuperAdmin = () => {
                                 <h3>Active Promo Codes</h3>
                                 <button className="primary-btn small-btn" onClick={() => alert('Feature coming soon: Add dynamic codes to DB')}>+ New Code</button>
                             </div>
-                            <table className="sa-table">
-                                <thead>
-                                    <tr>
-                                        <th>Code</th>
-                                        <th>Reward</th>
-                                        <th>Status</th>
-                                        <th>Expiry</th>
-                                        <th>Usage</th>
-                                        <th>Action</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td style={{ fontWeight: 'bold', fontFamily: 'monospace', color: '#10b981' }}>KDIGITAL</td>
-                                        <td>30 Days Pro Trial</td>
-                                        <td><span className="badge pro">Active</span></td>
-                                        <td>Never</td>
-                                        <td>Unlimited</td>
-                                        <td>
-                                            <button className="icon-btn-small"><Edit2 size={14} /></button>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td style={{ fontWeight: 'bold', fontFamily: 'monospace', color: '#64748b' }}>WELCOME50</td>
-                                        <td>50% Off First Month</td>
-                                        <td><span className="badge" style={{ background: '#cbd5e1', color: '#475569' }}>Inactive</span></td>
-                                        <td>2025-12-31</td>
-                                        <td>0/100</td>
-                                        <td>
-                                            <button className="icon-btn-small"><Edit2 size={14} /></button>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                            <div className="table-responsive-wrapper">
+                                <table className="sa-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Code</th>
+                                            <th>Reward</th>
+                                            <th>Status</th>
+                                            <th>Expiry</th>
+                                            <th>Usage</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td style={{ fontWeight: 'bold', fontFamily: 'monospace', color: '#10b981' }}>KDIGITAL</td>
+                                            <td>30 Days Pro Trial</td>
+                                            <td><span className="badge pro">Active</span></td>
+                                            <td>Never</td>
+                                            <td>Unlimited</td>
+                                            <td>
+                                                <button className="icon-btn-small"><Edit2 size={14} /></button>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td style={{ fontWeight: 'bold', fontFamily: 'monospace', color: '#64748b' }}>WELCOME50</td>
+                                            <td>50% Off First Month</td>
+                                            <td><span className="badge" style={{ background: '#cbd5e1', color: '#475569' }}>Inactive</span></td>
+                                            <td>2025-12-31</td>
+                                            <td>0/100</td>
+                                            <td>
+                                                <button className="icon-btn-small"><Edit2 size={14} /></button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 )}
 
                 {activeTab === 'plans' && (
                     <div className="plans-view fade-in">
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
-                            {/* Pro Plan Config */}
-                            <div className="glass-panel" style={{ padding: '2rem', borderTop: '4px solid #10b981' }}>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
-                                    <h3>Pro Plan</h3>
-                                    <button className="icon-btn-small"><Edit2 size={16} /></button>
-                                </div>
-                                <div className="form-group">
-                                    <label>Monthly Price (RM)</label>
-                                    <input type="number" value={22} disabled style={{ background: '#f8fafc' }} />
-                                </div>
-                                <div className="form-group">
-                                    <label>Yearly Price (RM)</label>
-                                    <input type="number" value={220} disabled style={{ background: '#f8fafc' }} />
-                                </div>
-                                <div className="form-group">
-                                    <label>Contact Limit</label>
-                                    <input type="text" value="Unlimited" disabled style={{ background: '#f8fafc' }} />
-                                </div>
-                                <div className="form-group">
-                                    <label>Features</label>
-                                    <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-                                        <span className="badge pro">WhatsApp</span>
-                                        <span className="badge pro">Landing Page</span>
-                                        <span className="badge pro">Analytics</span>
+                        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '1rem', gap: '1rem' }}>
+                            <button className="secondary-btn small-btn" onClick={checkDbRole}>Check My Role</button>
+                            <button className="primary-btn small-btn" onClick={handleAddPlan}>+ Add New Plan</button>
+                        </div>
+                        <div className="sa-plans-grid">
+                            {plans.map(plan => (
+                                <div key={plan.id} className="glass-panel" style={{ padding: '2rem', borderTop: `4px solid ${plan.name.toLowerCase().includes('pro') ? '#10b981' : '#3b82f6'}` }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
+                                        <h3>{plan.name}</h3>
+                                        <div className="flex gap-1">
+                                            <button className="icon-btn-small" onClick={() => setEditingPlan(plan)}><Edit2 size={16} /></button>
+                                            <button className="icon-btn-small text-danger" onClick={() => handleDeletePlan(plan.id)}><Trash2 size={16} /></button>
+                                        </div>
+                                    </div>
+                                    <div className="form-group">
+                                        <label>Monthly Price (RM)</label>
+                                        <input type="number" value={plan.price_monthly} disabled style={{ background: '#f8fafc' }} />
+                                    </div>
+                                    <div className="form-group">
+                                        <label>Contact Limit</label>
+                                        <input type="text" value={plan.contact_limit === 0 || plan.contact_limit > 10000 ? 'Unlimited' : plan.contact_limit} disabled style={{ background: '#f8fafc' }} />
+                                    </div>
+                                    <div className="form-group">
+                                        <label>Msg Limit</label>
+                                        <input type="text" value={plan.monthly_message_limit || 0} disabled style={{ background: '#f8fafc' }} />
+                                    </div>
+                                    <div className="form-group">
+                                        <label>Features</label>
+                                        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                                            {(Array.isArray(plan.features) ? plan.features : []).map((f, i) => (
+                                                <span key={i} className={`badge ${plan.name.toLowerCase().includes('pro') ? 'pro' : ''}`}>{f}</span>
+                                            ))}
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-
-                            {/* Free Plan Config */}
-                            <div className="glass-panel" style={{ padding: '2rem', borderTop: '4px solid #3b82f6' }}>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
-                                    <h3>Free Starter</h3>
-                                    <button className="icon-btn-small"><Edit2 size={16} /></button>
-                                </div>
-                                <div className="form-group">
-                                    <label>Monthly Price (RM)</label>
-                                    <input type="number" value={0} disabled style={{ background: '#f8fafc' }} />
-                                </div>
-                                <div className="form-group">
-                                    <label>Contact Limit</label>
-                                    <input type="number" value={10} disabled style={{ background: '#f8fafc' }} />
-                                </div>
-                                <div className="form-group">
-                                    <label>Features</label>
-                                    <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-                                        <span className="badge">Email Only</span>
-                                        <span className="badge">Dashboard</span>
-                                    </div>
-                                </div>
-                            </div>
+                            ))}
                         </div>
                     </div>
                 )}
+
             </div>
 
             {editingNode && <EditNodeModal node={editingNode} onClose={() => setEditingNode(null)} onSave={handleSaveNode} />}
             {editingUser && <EditUserModal user={editingUser} onClose={() => setEditingUser(null)} onSave={handleSaveUser} />}
+            {editingPlan && <EditPlanModal plan={editingPlan} onClose={() => setEditingPlan(null)} onSave={handleSavePlan} />}
         </div>
     );
 };

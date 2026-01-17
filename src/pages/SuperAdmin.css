@@ -285,15 +285,159 @@
     background: #f0fdf4;
 }
 
-.modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.5);
+/* Toolbar Styles */
+.sa-toolbar {
+    margin-bottom: 3.5rem;
     display: flex;
+    justify-content: space-between;
     align-items: center;
-    justify-content: center;
-    z-index: 9999;
+    gap: 1rem;
+}
+
+.sa-toolbar .search-bar {
+    background: #f1f5f9;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    display: flex;
+    gap: 0.5rem;
+    width: 300px;
+    align-items: center;
+}
+
+.sa-toolbar .search-bar input {
+    border: none;
+    background: transparent;
+    outline: none;
+    width: 100%;
+}
+
+.toolbar-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+/* Plans Grid */
+.sa-plans-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+}
+
+/* Responsive Improvements */
+@media (max-width: 768px) {
+    .super-admin-container {
+        padding: 1rem;
+    }
+
+    .sa-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .sa-header h1 {
+        font-size: 1.5rem;
+    }
+
+    /* Scrollable Tabs - Hidden Scrollbar */
+    .sa-tabs-modern {
+        width: 100%;
+        overflow-x: auto;
+        white-space: nowrap;
+        padding-bottom: 0px;
+        scrollbar-width: none;
+        /* Firefox */
+        margin-bottom: 1.5rem;
+        background: transparent;
+        padding-left: 0;
+    }
+
+    .sa-tabs-modern::-webkit-scrollbar {
+        display: none;
+        /* Chrome/Safari */
+    }
+
+    .sa-tab-item {
+        padding: 0.6rem 1rem;
+        flex-shrink: 0;
+        background: white;
+        border: 1px solid #e2e8f0;
+        font-size: 0.9rem;
+    }
+
+    .sa-tab-item.active {
+        background: #1e293b;
+        color: white;
+        border-color: #1e293b;
+    }
+
+    /* Responsive Table Wrapper */
+    .table-responsive-wrapper {
+        width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        margin-bottom: 1rem;
+        border-radius: 8px;
+        border: 1px solid #f1f5f9;
+    }
+
+    .sa-table {
+        min-width: 600px;
+    }
+
+    /* Improved Toolbar for Mobile */
+    .sa-toolbar {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .sa-toolbar .search-bar {
+        width: 100%;
+        /* Full width search */
+    }
+
+    .toolbar-actions {
+        display: grid;
+        grid-template-columns: auto 1fr;
+        /* Refresh button small, Add button fills rest */
+    }
+
+    .toolbar-actions .primary-btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .role-selector {
+        flex-wrap: wrap;
+    }
+
+    .role-pill {
+        flex: 1;
+        text-align: center;
+        padding: 0.5rem;
+        font-size: 0.85rem;
+    }
+
+    /* Follow Up Cards */
+    .flow-card-admin {
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .flow-actions {
+        width: 100%;
+        justify-content: flex-end;
+        padding-top: 1rem;
+        border-top: 1px dashed #e2e8f0;
+    }
+
+    /* Plans Grid Mobile */
+    .sa-plans-grid {
+        grid-template-columns: 1fr;
+        /* Stack vertically */
+        gap: 1.5rem;
+    }
 }

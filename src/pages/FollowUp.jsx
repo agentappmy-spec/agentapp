@@ -297,25 +297,31 @@ const FollowUpCard = ({ step, prevStep, index, isLast, onEdit, onDelete }) => {
     );
 };
 
-const WorkflowList = ({ steps, onEditNode, onDeleteNode }) => {
-    if (!steps || steps.length === 0) return <div className="text-center p-8 text-muted">No steps configured.</div>;
-
-    // Sort steps by day just in case
-    const sortedSteps = [...steps].sort((a, b) => a.day - b.day);
+const WorkflowList = ({ steps, onEditNode, onDeleteNode, onAddStep }) => {
+    // Determine the empty state but still show the add button even if empty
+    const sortedSteps = (steps || []).sort((a, b) => a.day - b.day);
 
     return (
         <div className="flow-list-container">
-            {sortedSteps.map((step, index) => (
-                <FollowUpCard
-                    key={step.id}
-                    step={step}
-                    prevStep={index > 0 ? sortedSteps[index - 1] : null}
-                    index={index}
-                    isLast={index === sortedSteps.length - 1} // Only last item is true
-                    onEdit={onEditNode}
-                    onDelete={onDeleteNode}
-                />
-            ))}
+            {sortedSteps.length === 0 ? (
+                <div className="text-center p-8 text-muted">No steps configured. Start by adding one below.</div>
+            ) : (
+                sortedSteps.map((step, index) => (
+                    <FollowUpCard
+                        key={step.id}
+                        step={step}
+                        prevStep={index > 0 ? sortedSteps[index - 1] : null}
+                        index={index}
+                        isLast={index === sortedSteps.length - 1}
+                        onEdit={onEditNode}
+                        onDelete={onDeleteNode}
+                    />
+                ))
+            )}
+
+            <button className="add-step-card" onClick={onAddStep}>
+                <Plus size={20} /> Add Next Step
+            </button>
         </div>
     );
 };
@@ -394,15 +400,15 @@ const FollowUp = () => {
             </header>
 
             <div className="content-wrapper glass-panel no-padding">
-                <div className="tabs-header">
-                    <button className={`tab-btn ${activeTab === 'prospect' ? 'active' : ''}`} onClick={() => setActiveTab('prospect')}>
-                        Prospect Flow
+                <div className="std-tabs-container" style={{ margin: '1.5rem 1.5rem 0' }}>
+                    <button className={`std-tab-item ${activeTab === 'prospect' ? 'active' : ''}`} onClick={() => setActiveTab('prospect')}>
+                        <User size={16} /> Prospect Flow
                     </button>
-                    <button className={`tab-btn ${activeTab === 'client' ? 'active' : ''}`} onClick={() => setActiveTab('client')}>
-                        Client Flow
+                    <button className={`std-tab-item ${activeTab === 'client' ? 'active' : ''}`} onClick={() => setActiveTab('client')}>
+                        <Check size={16} /> Client Flow
                     </button>
-                    <button className={`tab-btn ${activeTab === 'global' ? 'active' : ''}`} onClick={() => setActiveTab('global')}>
-                        Global Reminders
+                    <button className={`std-tab-item ${activeTab === 'global' ? 'active' : ''}`} onClick={() => setActiveTab('global')}>
+                        <Clock size={16} /> Global Reminders
                     </button>
                 </div>
 
@@ -464,10 +470,8 @@ const FollowUp = () => {
                                 steps={followUpSchedules[activeTab]}
                                 onEditNode={setEditingNode}
                                 onDeleteNode={handleDeleteClick}
+                                onAddStep={handleAddNode}
                             />
-                            <button className="fab-add" onClick={handleAddNode} title="Add New Step">
-                                <Plus size={24} />
-                            </button>
                         </>
                     )}
                 </div>

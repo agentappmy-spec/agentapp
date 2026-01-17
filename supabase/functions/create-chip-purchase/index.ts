@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const CHIP_API_URL = "https://gate.chip-in.asia/api/v1/purchases/";
 
@@ -14,20 +15,38 @@ serve(async (req) => {
     }
 
     try {
-        const { email, plan, successUrl, failureUrl } = await req.json()
+        const { email, planId, interval, successUrl, failureUrl } = await req.json()
 
         // Validate Environment Variables
         const BRAND_ID = Deno.env.get('CHIP_BRAND_ID');
         const SECRET_KEY = Deno.env.get('CHIP_SECRET_KEY');
+        const SUPABASE_URL = Deno.env.get('SUPABASE_URL');
+        const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
 
-        if (!BRAND_ID || !SECRET_KEY) {
-            throw new Error("Missing Chip In credentials");
+        if (!BRAND_ID || !SECRET_KEY || !SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
+            throw new Error("Missing credentials");
         }
 
+        // Initialize Admin Client
+        const supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+
+        // Fetch Plan Details
+        const { data: planData, error: planError } = await supabaseAdmin
+            .from('plans')
+            .select('*')
+            .eq('id', planId || 'pro')
+            .single();
+
+        // Fallback defaults if DB fail or missing
+        const defaultPro = { price_monthly: 22, price_yearly: 220, name: 'Pro' };
+        const proPlan = planData || defaultPro;
+
+        if (planError) console.error("Error fetching plan:", planError);
+
         // Determine Price & Product
-        const isYearly = plan === 'yearly';
-        const priceCents = isYearly ? 22000 : 2200; // RM 220.00 or RM 22.00
-        const productName = isYearly ? "AgentApp Pro (Yearly)" : "AgentApp Pro (Monthly)";
+        const isYearly = interval === 'yearly';
+        const priceCents = isYearly ? (proPlan.price_yearly * 100) : (proPlan.price_monthly * 100);
+        const productName = isYearly ? `AgentApp ${proPlan.name} (Yearly)` : `AgentApp ${proPlan.name} (Monthly)`;
 
         // Construct Payload
         const payload = {
@@ -44,7 +63,7 @@ serve(async (req) => {
                         quantity: 1
                     }
                 ],
-                notes: `Upgrade ${email} to ${plan}`
+                notes: `Upgrade ${email} to ${proPlan.name} (${interval})`
             },
             success_callback: `${Deno.env.get('SUPABASE_URL')}/functions/v1/chip-webhook`,
             success_redirect: successUrl,

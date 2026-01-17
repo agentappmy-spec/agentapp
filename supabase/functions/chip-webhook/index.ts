@@ -31,12 +31,32 @@ serve(async (req) => {
             Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
         );
 
-        // Calculate Expiry (Monthly or Yearly based on amount)
-        // We can infer from price: 2200 = 1 month, 22000 = 1 year
-        const amount = purchase.purchase?.total_amount || purchase.total_amount; // handle structure variations
+        // Determine Plan & Expiry from Product Name
+        const productName = purchase.products?.[0]?.name || ""; // e.g., "AgentApp Pro (Yearly)"
+        const nameMatch = productName.match(/AgentApp (.+) \((Monthly|Yearly)\)/);
 
+        let targetPlanId = 'pro';
         let daysToAdd = 30;
-        if (amount >= 20000) daysToAdd = 365; // Simple inference
+
+        if (nameMatch) {
+            const extractedName = nameMatch[1];
+            const interval = nameMatch[2];
+
+            daysToAdd = interval === 'Yearly' ? 365 : 30;
+
+            // Fetch Plan ID by Name
+            const { data: planRow } = await supabaseAdmin
+                .from('plans')
+                .select('id')
+                .ilike('name', extractedName) // Case insensitive match
+                .single();
+
+            if (planRow) targetPlanId = planRow.id;
+        } else {
+            // Fallback to legacy amount check
+            const amount = purchase.purchase?.total_amount || purchase.total_amount;
+            if (amount >= 20000) daysToAdd = 365;
+        }
 
         const expiryDate = new Date();
         expiryDate.setDate(expiryDate.getDate() + daysToAdd);
@@ -45,7 +65,7 @@ serve(async (req) => {
         const { data, error } = await supabaseAdmin
             .from('profiles')
             .update({
-                plan_id: 'pro',
+                plan_id: targetPlanId,
                 subscription_status: 'active',
                 subscription_end_date: expiryDate.toISOString()
             })

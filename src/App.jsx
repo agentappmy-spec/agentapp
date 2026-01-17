@@ -169,22 +169,27 @@ function App() {
   }, [availableTags]);
 
   // --- SaaS Configuration ---
-  const [packages, setPackages] = useState([
-    {
-      id: 'free',
-      name: 'Free Starter',
-      price: 0,
-      contactLimit: 10,
-      features: ['dashboard', 'email'] // email only
-    },
-    {
-      id: 'pro',
-      name: 'Pro Agent',
-      price: 22,
-      contactLimit: 999999, // Unlimited
-      features: ['dashboard', 'email', 'sms', 'whatsapp', 'landing_page', 'landing_pub', 'analytics']
-    }
-  ]);
+  const [packages, setPackages] = useState([]);
+
+  useEffect(() => {
+    const fetchPlans = async () => {
+      try {
+        const { data, error } = await supabase.from('plans').select('*').eq('is_active', true);
+        if (data) {
+          const mapped = data.map(p => ({
+            id: p.id,
+            name: p.name,
+            price: p.price_monthly,
+            contactLimit: p.contact_limit,
+            monthlyMessageLimit: p.monthly_message_limit || 0,
+            features: Array.isArray(p.features) ? p.features : []
+          }));
+          setPackages(mapped);
+        }
+      } catch (e) { console.error('Error loading plans:', e); }
+    };
+    fetchPlans();
+  }, []);
 
   const [userProfile, setUserProfile] = useState(() => {
     const saved = localStorage.getItem('agent_user_profile');
@@ -491,9 +496,14 @@ function App() {
 
   // --- Check Permission Helper ---
   const checkPermission = (featureKey) => {
-    if (userProfile.role === 'super_admin') return true;
-    const myPlan = packages.find(p => p.id === (userProfile.planId || 'free')) || packages[0];
-    return myPlan.features.includes(featureKey);
+    if (userProfile?.role === 'super_admin') return true;
+    if (packages.length === 0) return false;
+
+    // Normalize keys
+    if (featureKey === 'landing_page') featureKey = 'landing_page_view';
+
+    const myPlan = packages.find(p => p.id === (userProfile.planId || 'free')) || packages.find(p => p.id === 'free') || packages[0];
+    return myPlan?.features?.includes(featureKey);
   };
 
   const contextValue = {

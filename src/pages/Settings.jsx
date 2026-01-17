@@ -63,14 +63,52 @@ const Settings = () => {
     // Payment Logic
     const [upgradePlan, setUpgradePlan] = useState('monthly');
     const [isProcessingPayment, setIsProcessingPayment] = useState(false);
+    const [plans, setPlans] = useState([]);
 
-    const handleUpgradePayment = async () => {
+    React.useEffect(() => {
+        const fetchPlans = async () => {
+            try {
+                const { data, error } = await supabase.from('plans').select('*').order('price_monthly', { ascending: true });
+                if (error) throw error;
+                if (data && data.length > 0) {
+                    setPlans(data);
+                } else {
+                    // Fallback if empty
+                    throw new Error('No plans found');
+                }
+            } catch (err) {
+                console.warn('Using default plans (DB fetch failed):', err);
+                setPlans([
+                    {
+                        id: 'free',
+                        name: 'Free Starter',
+                        price_monthly: 0,
+                        price_yearly: 0,
+                        contact_limit: 50,
+                        features: ["Email Only", "Dashboard", "Keep your client contact safe"]
+                    },
+                    {
+                        id: 'pro',
+                        name: 'Pro',
+                        price_monthly: 22,
+                        price_yearly: 220,
+                        contact_limit: 1000,
+                        features: ["WhatsApp", "SMS", "Email", "Auto Follow Up", "Auto Reminder", "Landing Page", "Analytics"]
+                    }
+                ]);
+            }
+        };
+        fetchPlans();
+    }, []);
+
+    const handleUpgradePayment = async (targetPlanId, targetInterval) => {
         setIsProcessingPayment(true);
         try {
             const { data, error } = await supabase.functions.invoke('create-chip-purchase', {
                 body: {
                     email: userProfile.email,
-                    plan: upgradePlan,
+                    planId: targetPlanId,
+                    interval: targetInterval,
                     successUrl: window.location.origin + '/settings?billing=success',
                     failureUrl: window.location.origin + '/settings?billing=failed'
                 }
@@ -494,87 +532,53 @@ const Settings = () => {
                             </div>
 
                             <div className="pricing-grid">
-                                {/* Free Plan */}
-                                <div className="pricing-card">
-                                    <div className="plan-name">Basic</div>
-                                    <div className="plan-desc">Essential tools to manage your leads, perfect for individuals.</div>
-                                    <div className="plan-price">
-                                        RM 0<small>/ mo</small>
-                                    </div>
+                                {plans.map(plan => {
+                                    const isCurrent = (userProfile.planId || 'free') === plan.id;
+                                    const isPro = plan.name.toLowerCase().includes('pro');
+                                    const price = upgradePlan === 'yearly' ? plan.price_yearly : plan.price_monthly;
 
-                                    <ul className="plan-features">
-                                        <li className="feature-item">
-                                            <Check size={18} className="check-icon" />
-                                            <span>50 Contacts Limit</span>
-                                        </li>
-                                        <li className="feature-item">
-                                            <Check size={18} className="check-icon" />
-                                            <span>Basic Analytics</span>
-                                        </li>
-                                        <li className="feature-item">
-                                            <Check size={18} className="check-icon" />
-                                            <span>Goal Tracking</span>
-                                        </li>
-                                        <li className="feature-item text-muted" style={{ opacity: 0.5 }}>
-                                            <X size={18} />
-                                            <span>No WhatsApp Automation</span>
-                                        </li>
-                                    </ul>
+                                    return (
+                                        <div key={plan.id} className={`pricing-card ${isPro ? 'popular' : ''}`}>
+                                            {isPro && <div className="popular-badge"><Star size={12} fill="white" /> Most Popular</div>}
+                                            <div className="plan-name">{plan.name}</div>
+                                            <div className="plan-desc">{isPro ? "Advanced features to track and grow your sales." : "Essential tools to manage your leads."}</div>
+                                            <div className="plan-price">
+                                                {upgradePlan === 'yearly' && plan.price_yearly > 0 && <span className="old-price">RM {plan.price_yearly * 1.2}</span>}
+                                                RM {price}
+                                                <small>{upgradePlan === 'yearly' ? '/ year' : '/ mo'}</small>
+                                            </div>
 
-                                    <button className="plan-btn outline" disabled>
-                                        {userProfile.planId === 'pro' ? 'Downgrade' : 'Current Plan'}
-                                    </button>
-                                </div>
+                                            <ul className="plan-features">
+                                                <li className="feature-item">
+                                                    <Check size={18} className="check-icon" />
+                                                    <span>{plan.contact_limit === 0 || plan.contact_limit > 10000 ? <strong>Unlimited</strong> : plan.contact_limit} Contacts</span>
+                                                </li>
+                                                {Array.isArray(plan.features) && plan.features.map((feature, idx) => (
+                                                    <li key={idx} className="feature-item">
+                                                        <Check size={18} className="check-icon" />
+                                                        <span>{feature}</span>
+                                                    </li>
+                                                ))}
+                                            </ul>
 
-                                {/* Pro Plan */}
-                                <div className="pricing-card popular">
-                                    <div className="popular-badge"><Star size={12} fill="white" /> Most Popular</div>
-                                    <div className="plan-name">Pro</div>
-                                    <div className="plan-desc">Advanced features to track and grow your sales with ease.</div>
-                                    <div className="plan-price">
-                                        {upgradePlan === 'yearly' && <span className="old-price">RM 220</span>}
-                                        RM {upgradePlan === 'yearly' ? '220' : '22'}
-                                        <small>{upgradePlan === 'yearly' ? '/ year' : '/ mo'}</small>
-                                    </div>
+                                            {isCurrent ? (
+                                                <button className="plan-btn outline" disabled>Current Plan</button>
+                                            ) : (
+                                                <button
+                                                    className={`plan-btn ${isPro ? 'primary' : 'outline'}`}
+                                                    onClick={() => isPro ? handleUpgradePayment(plan.id, upgradePlan) : alert('Please contact support to downgrade.')}
+                                                    disabled={isProcessingPayment}
+                                                >
+                                                    {isPro ? (isProcessingPayment ? 'Processing...' : 'Upgrade to Pro') : 'Downgrade'}
+                                                </button>
+                                            )}
 
-                                    <ul className="plan-features">
-                                        <li className="feature-item">
-                                            <Check size={18} className="check-icon" />
-                                            <span><strong>Unlimited</strong> Contacts</span>
-                                        </li>
-                                        <li className="feature-item">
-                                            <Check size={18} className="check-icon" />
-                                            <span>WhatsApp Auto-Follow up</span>
-                                        </li>
-                                        <li className="feature-item">
-                                            <Check size={18} className="check-icon" />
-                                            <span>Publish Landing Pages</span>
-                                        </li>
-                                        <li className="feature-item">
-                                            <Check size={18} className="check-icon" />
-                                            <span>Advanced Analytics</span>
-                                        </li>
-                                        <li className="feature-item">
-                                            <Check size={18} className="check-icon" />
-                                            <span>Priority Support</span>
-                                        </li>
-                                    </ul>
-
-                                    {userProfile.planId === 'pro' ? (
-                                        <button className="plan-btn outline" disabled>Current Plan</button>
-                                    ) : (
-                                        <button
-                                            className="plan-btn primary"
-                                            onClick={handleUpgradePayment}
-                                            disabled={isProcessingPayment}
-                                        >
-                                            {isProcessingPayment ? 'Processing...' : 'Upgrade to Pro'}
-                                        </button>
-                                    )}
-
-                                    <div className="guarantee-text">30-day money-back guarantee</div>
-                                </div>
+                                            {isPro && <div className="guarantee-text">30-day money-back guarantee</div>}
+                                        </div>
+                                    );
+                                })}
                             </div>
+
 
                             {/* Promo Code Section */}
                             <div className="promo-section">
@@ -602,15 +606,15 @@ const Settings = () => {
                         <div className="config-section fade-in">
                             <h2 className="section-title">Reference Data Configuration</h2>
 
-                            <div className="config-tabs">
+                            <div className="std-tabs-container">
                                 <button
-                                    className={`tab-pill ${managerTab === 'products' ? 'active' : ''}`}
+                                    className={`std-tab-item ${managerTab === 'products' ? 'active' : ''}`}
                                     onClick={() => setManagerTab('products')}
                                 >
                                     Products
                                 </button>
                                 <button
-                                    className={`tab-pill ${managerTab === 'tags' ? 'active' : ''}`}
+                                    className={`std-tab-item ${managerTab === 'tags' ? 'active' : ''}`}
                                     onClick={() => setManagerTab('tags')}
                                 >
                                     Behavior Tags
