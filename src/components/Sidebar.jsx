@@ -11,14 +11,32 @@ import {
 } from 'lucide-react';
 import './Sidebar.css';
 
-const Sidebar = () => {
+import { supabase } from '../services/supabaseClient';
+
+const Sidebar = ({ userProfile, checkPermission, setUserProfile }) => {
     const navigate = useNavigate();
-    const profile = JSON.parse(localStorage.getItem('agent_user_profile') || '{}');
+    const profile = userProfile || JSON.parse(localStorage.getItem('agent_user_profile') || '{}');
     const isSuperAdmin = profile.role === 'super_admin';
 
-    const handleLogout = () => {
-        localStorage.removeItem('agent_user_profile');
-        navigate('/login');
+    const handleLogout = async () => {
+        try {
+            // 1. Sign out from Supabase
+            await supabase.auth.signOut();
+
+            // 2. Clear state in App.jsx
+            if (setUserProfile) setUserProfile(null);
+
+            // 3. Clear local storage
+            localStorage.removeItem('agent_user_profile');
+
+            // 4. Redirect
+            navigate('/login');
+        } catch (error) {
+            console.error('Logout error:', error);
+            // Fallback: still redirect and clear storage
+            localStorage.removeItem('agent_user_profile');
+            navigate('/login');
+        }
     };
 
     return (
