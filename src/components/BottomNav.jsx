@@ -8,7 +8,9 @@ const BottomNav = ({ onAddContact, checkPermission }) => {
     const handleLockedClick = (e) => {
         if (!checkPermission('landing_page')) {
             e.preventDefault();
-            alert("This feature is available on the Pro plan.");
+            if (window.confirm("🚀 Landing Page Builder is a Pro feature.\n\nUpgrade now to create your professional landing page and grow your business!\n\nClick OK to view upgrade options.")) {
+                window.location.href = '/settings?tab=billing';
+            }
         }
     };
 
@@ -38,12 +40,9 @@ const BottomNav = ({ onAddContact, checkPermission }) => {
             <NavLink
                 to={checkPermission('landing_page') ? "/landing-page" : "#"}
                 onClick={handleLockedClick}
-                className={({ isActive }) => `nav-item-mobile ${isActive && checkPermission('landing_page') ? 'active' : ''} ${!checkPermission('landing_page') ? 'locked-nav-item' : ''}`}
+                className={({ isActive }) => `nav-item-mobile ${isActive && checkPermission('landing_page') ? 'active' : ''}`}
             >
-                <div>
-                    <Calendar size={24} />
-                    {!checkPermission('landing_page') && <span style={{ position: 'absolute', top: -5, right: 10, fontSize: '0.8rem' }}>🔒</span>}
-                </div>
+                <Calendar size={24} />
                 <span>Your Page</span>
             </NavLink>
         </nav>

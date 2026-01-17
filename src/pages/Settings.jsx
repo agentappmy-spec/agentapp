@@ -29,9 +29,15 @@ const Settings = () => {
 
     // Helper to switch tabs
     const handleTabChange = (tab) => {
-        // Feature Gating Visual Check
+        // Feature Gating: Show upgrade prompt for restricted features
         if (tab === 'whatsapp' && !checkPermission('whatsapp')) {
-            // We allow navigation but will show lock screen
+            if (window.confirm("📱 WhatsApp Integration is a Pro feature.\n\nUpgrade now to automate your follow-ups and connect with clients seamlessly!\n\nClick OK to view upgrade options.")) {
+                setActiveTab('billing');
+                if (window.innerWidth <= 900) {
+                    setMobileView('content');
+                }
+            }
+            return;
         }
 
         setActiveTab(tab);
@@ -235,12 +241,7 @@ const Settings = () => {
     };
 
     const SettingsCard = ({ icon: Icon, title, description, enabled, onToggle, children, locked }) => (
-        <div className={`integration-card ${enabled ? 'enabled' : ''} ${locked ? 'locked-card' : ''}`} style={locked ? { opacity: 0.7, pointerEvents: 'none', position: 'relative' } : {}}>
-            {locked && (
-                <div style={{ position: 'absolute', top: 10, right: 10, background: '#e2e8f0', padding: '2px 8px', borderRadius: '4px', fontSize: '0.7rem', fontWeight: 'bold' }}>
-                    PRO ONLY
-                </div>
-            )}
+        <div className={`integration-card ${enabled ? 'enabled' : ''}`}>
             <div className="card-header-row">
                 <div className="card-icon-wrapper">
                     <Icon size={24} />
@@ -249,12 +250,23 @@ const Settings = () => {
                     <h3>{title}</h3>
                     <p>{description}</p>
                 </div>
-                {!locked && (
-                    <div className="toggle-switch">
-                        <input type="checkbox" checked={enabled} onChange={onToggle} />
-                        <span className="slider"></span>
-                    </div>
-                )}
+                <div className="toggle-switch">
+                    <input
+                        type="checkbox"
+                        checked={enabled}
+                        onChange={(e) => {
+                            if (locked) {
+                                e.preventDefault();
+                                if (window.confirm("🚀 This is a Pro feature.\n\nUpgrade now to unlock advanced integrations!\n\nClick OK to view upgrade options.")) {
+                                    window.location.href = '/settings?tab=billing';
+                                }
+                            } else {
+                                onToggle(e);
+                            }
+                        }}
+                    />
+                    <span className="slider"></span>
+                </div>
             </div>
             {enabled && !locked && (
                 <div className="card-config animated-fade-in">
@@ -314,7 +326,7 @@ const Settings = () => {
                         className={`settings-nav-item ${activeTab === 'whatsapp' ? 'active' : ''}`}
                         onClick={() => handleTabChange('whatsapp')}
                     >
-                        <MessageSquare size={18} /> Link WhatsApp {!checkPermission('whatsapp') && <span style={{ fontSize: '0.8em', marginLeft: 'auto' }}>🔒</span>}
+                        <MessageSquare size={18} /> Link WhatsApp
                     </button>
 
                     {userProfile.role === 'super_admin' && (
@@ -833,32 +845,21 @@ const Settings = () => {
                     {activeTab === 'whatsapp' && (
                         <div className="whatsapp-section fade-in">
                             <h2 className="section-title">Link WhatsApp Device</h2>
-                            {checkPermission('whatsapp') ? (
-                                <div className="glass-panel" style={{ padding: '2rem', textAlign: 'center' }}>
-                                    <div style={{ marginBottom: '1.5rem' }}>
-                                        <div style={{ width: '200px', height: '200px', background: '#f0f0f0', margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                            <span className="text-muted">QR Code Placeholder</span>
-                                        </div>
-                                    </div>
-                                    <h3>Scan to Link Device</h3>
-                                    <p className="text-muted" style={{ maxWidth: '400px', margin: '1rem auto' }}>
-                                        Open WhatsApp on your mobile phone, go to Settings &gt; Linked Devices &gt; Link a Device, and scan the QR code above.
-                                    </p>
-                                    <div className="status-indicator">
-                                        <span className={`status-dot dot-lapsed`}></span>
-                                        <span>Disconnected</span>
+                            <div className="glass-panel" style={{ padding: '2rem', textAlign: 'center' }}>
+                                <div style={{ marginBottom: '1.5rem' }}>
+                                    <div style={{ width: '200px', height: '200px', background: '#f0f0f0', margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                        <span className="text-muted">QR Code Placeholder</span>
                                     </div>
                                 </div>
-                            ) : (
-                                <div className="detail-lock-screen" style={{ textAlign: 'center', padding: '4rem 1rem' }}>
-                                    <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🔒</div>
-                                    <h2>Pro Feature Locked</h2>
-                                    <p style={{ maxWidth: '400px', margin: '1rem auto', color: '#666' }}>
-                                        WhatsApp integration is only available on the Pro plan. Upgrade now to automate your messages and link your device.
-                                    </p>
-                                    <button className="primary-btn">Upgrade to Pro</button>
+                                <h3>Scan to Link Device</h3>
+                                <p className="text-muted" style={{ maxWidth: '400px', margin: '1rem auto' }}>
+                                    Open WhatsApp on your mobile phone, go to Settings &gt; Linked Devices &gt; Link a Device, and scan the QR code above.
+                                </p>
+                                <div className="status-indicator">
+                                    <span className={`status-dot dot-lapsed`}></span>
+                                    <span>Disconnected</span>
                                 </div>
-                            )}
+                            </div>
 
                             <div style={{ marginTop: '3rem', borderTop: '1px solid #e2e8f0', paddingTop: '2rem' }}>
                                 <h3 className="section-title" style={{ fontSize: '1.1rem', marginBottom: '1rem' }}>Message Template Shortcodes</h3>
