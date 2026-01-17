@@ -12,8 +12,12 @@ import {
     Plus,
     X,
     Clock,
+    RotateCw,
     Send,
-    Tag
+    Tag,
+    CheckCircle2,
+    Crown,
+    Zap
 } from 'lucide-react';
 import './SuperAdmin.css';
 
@@ -600,24 +604,7 @@ const SuperAdmin = () => {
         setEditingPlan(null);
     };
 
-    const checkDbRole = async () => {
-        try {
-            const { supabase } = await import('../services/supabaseClient');
-            const { data: { user } } = await supabase.auth.getUser();
-            if (user) {
-                const { data, error } = await supabase.from('profiles').select('role').eq('id', user.id).single();
-                if (error) {
-                    alert(`Fetch profile error: ${error.message}`);
-                } else {
-                    alert(`Auth ID: ${user.id}\nDB Role: ${data?.role || 'None (null)'}\n\nIf Role is not 'super_admin', you cannot edit plans.`);
-                }
-            } else {
-                alert('Not authenticated');
-            }
-        } catch (e) {
-            alert(`Error checking role: ${e.message}`);
-        }
-    };
+
 
 
     const handleAddPlan = () => {
@@ -747,7 +734,7 @@ const SuperAdmin = () => {
                                     <Filter size={20} />
                                 </button>
                                 <button onClick={fetchUsers} className="secondary-btn" title="Refresh Data" style={{ padding: '0.75rem' }}>
-                                    <Clock size={16} />
+                                    <RotateCw size={16} className={isLoading ? 'animate-spin' : ''} />
                                 </button>
                                 <button onClick={() => setEditingUser({ name: '', email: '', plan: 'Free', status: 'Active', isNew: true })} className="primary-btn">
                                     <Plus size={18} style={{ marginRight: '8px' }} />
@@ -919,42 +906,75 @@ const SuperAdmin = () => {
 
                 {activeTab === 'plans' && (
                     <div className="plans-view fade-in">
-                        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '1rem', gap: '1rem' }}>
-                            <button className="secondary-btn small-btn" onClick={checkDbRole}>Check My Role</button>
-                            <button className="primary-btn small-btn" onClick={handleAddPlan}>+ Add New Plan</button>
+                        <div className="sa-plans-header">
+                            <div className="sa-section-info">
+                                <h3>Subscription Plans</h3>
+                                <p>Manage available tiers and pricing</p>
+                            </div>
+                            <button className="primary-btn" onClick={handleAddPlan}>
+                                <Plus size={18} style={{ marginRight: '8px' }} /> Add New Plan
+                            </button>
                         </div>
-                        <div className="sa-plans-grid">
-                            {plans.map(plan => (
-                                <div key={plan.id} className="glass-panel" style={{ padding: '2rem', borderTop: `4px solid ${plan.name.toLowerCase().includes('pro') ? '#10b981' : '#3b82f6'}` }}>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
-                                        <h3>{plan.name}</h3>
-                                        <div className="flex gap-1">
-                                            <button className="icon-btn-small" onClick={() => setEditingPlan(plan)}><Edit2 size={16} /></button>
-                                            <button className="icon-btn-small text-danger" onClick={() => handleDeletePlan(plan.id)}><Trash2 size={16} /></button>
+                        <div className="sa-plans-grid-modern">
+                            {plans.map(plan => {
+                                const isPro = plan.name.toLowerCase().includes('pro');
+                                return (
+                                    <div key={plan.id} className={`sa-plan-card ${isPro ? 'pro' : ''}`}>
+                                        <div className="sa-plan-header">
+                                            <div className="sa-plan-title-group">
+                                                <div className="sa-plan-icon">
+                                                    {isPro ? <Crown size={24} /> : <Zap size={24} />}
+                                                </div>
+                                                <div>
+                                                    <h4>{plan.name}</h4>
+                                                    <span className={`sa-plan-status-badge ${isPro ? 'active' : ''}`}>
+                                                        {isPro ? 'PREMIUM' : 'BASE'}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <div className="sa-plan-actions">
+                                                <button className="sa-action-btn" onClick={() => setEditingPlan(plan)}><Edit2 size={16} /></button>
+                                                <button className="sa-action-btn text-danger" onClick={() => handleDeletePlan(plan.id)}><Trash2 size={16} /></button>
+                                            </div>
+                                        </div>
+
+                                        <div className="sa-plan-pricing">
+                                            <span className="currency">RM</span>
+                                            <span className="amount">{plan.price_monthly}</span>
+                                            <span className="period">/month</span>
+                                        </div>
+
+                                        <div className="sa-plan-features-stats">
+                                            <div className="sa-feature-stat">
+                                                <Users size={16} />
+                                                <div className="stat-info">
+                                                    <span className="stat-value">{plan.contact_limit === 0 || plan.contact_limit > 10000 ? 'Unlimited' : plan.contact_limit}</span>
+                                                    <span className="stat-label">Contacts</span>
+                                                </div>
+                                            </div>
+                                            <div className="sa-feature-stat">
+                                                <MessageSquare size={16} />
+                                                <div className="stat-info">
+                                                    <span className="stat-value">{plan.monthly_message_limit || 0}</span>
+                                                    <span className="stat-label">MSGs / month</span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div className="sa-plan-features-list">
+                                            <div className="feature-list-title">Included Features</div>
+                                            <div className="feature-tags">
+                                                {(Array.isArray(plan.features) ? plan.features : []).map((f, i) => (
+                                                    <div key={i} className="feature-tag">
+                                                        <CheckCircle2 size={12} />
+                                                        <span>{f}</span>
+                                                    </div>
+                                                ))}
+                                            </div>
                                         </div>
                                     </div>
-                                    <div className="form-group">
-                                        <label>Monthly Price (RM)</label>
-                                        <input type="number" value={plan.price_monthly} disabled style={{ background: '#f8fafc' }} />
-                                    </div>
-                                    <div className="form-group">
-                                        <label>Contact Limit</label>
-                                        <input type="text" value={plan.contact_limit === 0 || plan.contact_limit > 10000 ? 'Unlimited' : plan.contact_limit} disabled style={{ background: '#f8fafc' }} />
-                                    </div>
-                                    <div className="form-group">
-                                        <label>Msg Limit</label>
-                                        <input type="text" value={plan.monthly_message_limit || 0} disabled style={{ background: '#f8fafc' }} />
-                                    </div>
-                                    <div className="form-group">
-                                        <label>Features</label>
-                                        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-                                            {(Array.isArray(plan.features) ? plan.features : []).map((f, i) => (
-                                                <span key={i} className={`badge ${plan.name.toLowerCase().includes('pro') ? 'pro' : ''}`}>{f}</span>
-                                            ))}
-                                        </div>
-                                    </div>
-                                </div>
-                            ))}
+                                );
+                            })}
                         </div>
                     </div>
                 )}

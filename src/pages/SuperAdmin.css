@@ -764,17 +764,20 @@
         display: block;
         background: white;
         border: 1px solid #e2e8f0;
-        border-radius: 12px;
-        margin-bottom: 1rem;
-        padding: 1rem;
+        border-radius: 16px;
+        margin-bottom: 1.25rem;
+        padding: 1.25rem;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
     }
 
     .sa-table-modern td {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding: 0.5rem 0;
+        padding: 0.6rem 0;
         border: none;
+        width: 100%;
+        box-sizing: border-box;
     }
 
     .sa-table-modern td:first-child {
@@ -782,6 +785,8 @@
         border-bottom: 1px solid #f1f5f9;
         margin-bottom: 0.5rem;
         padding-bottom: 1rem;
+        display: block;
+        /* Stack profile info */
     }
 
     .sa-user-cell {
@@ -790,26 +795,28 @@
     }
 
     .sa-avatar {
-        width: 36px;
-        height: 36px;
-        font-size: 1rem;
+        width: 40px;
+        height: 40px;
+        font-size: 1.1rem;
     }
 
     .sa-user-name {
-        font-size: 0.9rem;
+        font-size: 1rem;
     }
 
     .sa-user-email {
-        font-size: 0.75rem;
+        font-size: 0.8rem;
+        word-break: break-all;
     }
 
     /* Labels for mobile table values */
     .sa-table-modern td:not(:first-child)::before {
         content: attr(data-label);
         font-weight: 700;
-        font-size: 0.8rem;
+        font-size: 0.75rem;
         color: #94a3b8;
         text-transform: uppercase;
+        margin-right: 1rem;
     }
 
     .sa-row-actions {
@@ -818,5 +825,29 @@
         padding-top: 0.75rem;
         border-top: 1px dashed #e2e8f0;
         margin-top: 0.5rem;
+        gap: 0.75rem;
+    }
+
+    .sa-icon-btn {
+        width: 40px;
+        /* Larger icons for mobile touch */
+        height: 40px;
+    }
+
+    /* Plans Grid Mobile */
+    .sa-plans-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .sa-plans-header .primary-btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .sa-plans-grid-modern {
+        grid-template-columns: 1fr;
+        /* Stack vertically on mobile */
     }
 }
