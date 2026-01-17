@@ -856,88 +856,90 @@ const Settings = () => {
                     {activeTab === 'integrations' && (
                         <div className="integrations-section fade-in">
                             <h2 className="section-title">External Integrations</h2>
-                            <div className="settings-grid">
-                                <SettingsCard
-                                    icon={MessageCircle}
-                                    title="WhatsApp Integration"
-                                    description="Send automated messages via WhatsApp API (e.g. Waha, Twilio)."
-                                    enabled={integrations.whatsapp.enabled}
-                                    onToggle={() => toggleIntegration('whatsapp')}
-                                    locked={!checkPermission('whatsapp')}
-                                >
-                                    <div className="form-group">
-                                        <label>API Endpoint</label>
-                                        <input
-                                            type="text"
-                                            placeholder="https://api.waha.dev/..."
-                                            value={integrations.whatsapp.endpoint || ''}
-                                            onChange={(e) => setIntegrations(prev => ({ ...prev, whatsapp: { ...prev.whatsapp, endpoint: e.target.value } }))}
-                                        />
-                                    </div>
-                                    <div className="form-group">
-                                        <label>API Key / Token</label>
-                                        <input
-                                            type="password"
-                                            placeholder="••••••••••••••"
-                                            value={integrations.whatsapp.apiKey || ''}
-                                            onChange={(e) => setIntegrations(prev => ({ ...prev, whatsapp: { ...prev.whatsapp, apiKey: e.target.value } }))}
-                                        />
-                                    </div>
-                                </SettingsCard>
+                            {userProfile.planId === 'pro' ? (
+                                <div className="settings-grid">
+                                    <SettingsCard
+                                        icon={MessageCircle}
+                                        title="WhatsApp Integration"
+                                        description="Automated WhatsApp messaging is active for your account."
+                                        enabled={true}
+                                        onToggle={() => { }}
+                                        locked={false}
+                                    >
+                                        <div className="status-badge" style={{ background: '#dcfce7', color: '#166534', border: 'none', padding: '0.5rem 1rem' }}>
+                                            ✓ Provisioned by Package
+                                        </div>
+                                        <p style={{ fontSize: '0.8rem', color: '#64748b', marginTop: '1rem' }}>
+                                            Your WhatsApp automation is handled by our high-delivery servers. No manual setup required.
+                                        </p>
+                                    </SettingsCard>
 
-                                <SettingsCard
-                                    icon={Mail}
-                                    title="Email Service"
-                                    description="Connect via SMTP or API (Resend, SendGrid) for newsletters."
-                                    enabled={integrations.email.enabled}
-                                    onToggle={() => toggleIntegration('email')}
-                                >
-                                    <div className="form-group">
-                                        <label>SMTP Host</label>
-                                        <input
-                                            type="text"
-                                            placeholder="smtp.gmail.com"
-                                            value={integrations.email.host || ''}
-                                            onChange={(e) => setIntegrations(prev => ({ ...prev, email: { ...prev.email, host: e.target.value } }))}
-                                        />
-                                    </div>
-                                    <div className="form-group">
-                                        <label>Sender Email</label>
-                                        <input
-                                            type="email"
-                                            value={integrations.email.sender || ''}
-                                            onChange={(e) => setIntegrations(prev => ({ ...prev, email: { ...prev.email, sender: e.target.value } }))}
-                                        />
-                                    </div>
-                                </SettingsCard>
+                                    <SettingsCard
+                                        icon={Mail}
+                                        title="Email Service"
+                                        description="Official communications sent via our premium delivery network."
+                                        enabled={true}
+                                        onToggle={() => { }}
+                                    >
+                                        <div className="form-group">
+                                            <label>Sender Name</label>
+                                            <input
+                                                type="text"
+                                                value={userProfile.name}
+                                                disabled
+                                                style={{ background: '#f8fafc', cursor: 'default' }}
+                                            />
+                                        </div>
+                                        <div className="form-group">
+                                            <label>Reply to Email</label>
+                                            <input
+                                                type="text"
+                                                value={userProfile.email}
+                                                disabled
+                                                style={{ background: '#f8fafc', cursor: 'default' }}
+                                            />
+                                        </div>
+                                        <small className="text-muted">These settings are synced from your Profile.</small>
+                                    </SettingsCard>
 
-                                <SettingsCard
-                                    icon={MessageSquare}
-                                    title="SMS Gateway"
-                                    description="Traditional SMS for high-priority notifications."
-                                    enabled={integrations.sms.enabled}
-                                    onToggle={() => toggleIntegration('sms')}
-                                >
-                                    <div className="form-group">
-                                        <label>Provider URL</label>
-                                        <input
-                                            type="text"
-                                            placeholder="https://sms-provider.com/api"
-                                            value={integrations.sms.url || ''}
-                                            onChange={(e) => setIntegrations(prev => ({ ...prev, sms: { ...prev.sms, url: e.target.value } }))}
-                                        />
+                                    <SettingsCard
+                                        icon={MessageSquare}
+                                        title="SMS Gateway"
+                                        description="High-priority SMS notifications for urgent follow-ups."
+                                        enabled={true}
+                                        onToggle={() => { }}
+                                    >
+                                        <div className="status-badge" style={{ background: '#dcfce7', color: '#166534', border: 'none', padding: '0.5rem 1rem' }}>
+                                            ✓ Provisioned & Ready
+                                        </div>
+                                        <p style={{ fontSize: '0.8rem', color: '#64748b', marginTop: '1rem' }}>
+                                            SMS credits are included in your Pro subscription.
+                                        </p>
+                                    </SettingsCard>
+                                </div>
+                            ) : (
+                                <div className="glass-panel text-center" style={{ padding: '3rem 2rem' }}>
+                                    <div className="card-icon-wrapper" style={{ margin: '0 auto 1.5rem auto', width: '64px', height: '64px' }}>
+                                        <Star size={32} />
                                     </div>
-                                    <div className="form-group">
-                                        <label>API Key</label>
-                                        <input
-                                            type="password"
-                                            placeholder="••••••••"
-                                            value={integrations.sms.apiKey || ''}
-                                            onChange={(e) => setIntegrations(prev => ({ ...prev, sms: { ...prev.sms, apiKey: e.target.value } }))}
-                                        />
+                                    <h3>Premium Integrations</h3>
+                                    <p className="text-secondary" style={{ maxWidth: '400px', margin: '1rem auto' }}>
+                                        WhatsApp, SMS, and Premium Email delivery are exclusive features for Pro users.
+                                    </p>
+                                    <div style={{ marginTop: '2rem', display: 'flex', flexDirection: 'column', gap: '0.75rem', alignItems: 'center' }}>
+                                        <div className="status-badge" style={{ background: '#f1f5f9', color: '#475569' }}>
+                                            Basic Email (Global Reminders) is Enabled by default.
+                                        </div>
+                                        <button
+                                            className="primary-btn"
+                                            onClick={() => setActiveTab('billing')}
+                                            style={{ marginTop: '1rem' }}
+                                        >
+                                            Upgrade to Pro to Unlock
+                                        </button>
                                     </div>
-                                </SettingsCard>
-                            </div>
+                                </div>
+                            )}
                         </div>
                     )}
                 </div>
