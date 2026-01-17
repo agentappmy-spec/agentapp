@@ -223,9 +223,27 @@ function App() {
                 name: dbProfile.full_name || prev?.name || 'User',
                 expiryDate: dbProfile.subscription_end_date,
                 username: dbProfile.username,
-                is_published: dbProfile.is_published || false
+                is_published: dbProfile.is_published || false,
+                title: dbProfile.title || prev?.title || '',
+                phone: dbProfile.phone || prev?.phone || '',
+                agencyName: dbProfile.agency_name || prev?.agencyName || '',
+                licenseNo: dbProfile.license_no || prev?.licenseNo || '',
+                bio: dbProfile.bio || prev?.bio || '',
+                photoUrl: dbProfile.photo_url || prev?.photoUrl || ''
               };
-              if (prev?.planId !== fresh.planId || prev?.role !== fresh.role || prev?.expiryDate !== fresh.expiryDate || prev?.username !== fresh.username || prev?.is_published !== fresh.is_published) {
+              if (
+                prev?.planId !== fresh.planId ||
+                prev?.role !== fresh.role ||
+                prev?.expiryDate !== fresh.expiryDate ||
+                prev?.username !== fresh.username ||
+                prev?.is_published !== fresh.is_published ||
+                prev?.title !== fresh.title ||
+                prev?.phone !== fresh.phone ||
+                prev?.agencyName !== fresh.agencyName ||
+                prev?.licenseNo !== fresh.licenseNo ||
+                prev?.bio !== fresh.bio ||
+                prev?.photoUrl !== fresh.photoUrl
+              ) {
                 return fresh;
               }
               return prev;
@@ -286,6 +304,38 @@ function App() {
       });
     }
   }, [landingConfig, userProfile?.id]);
+
+  // Persist Profile Details to DB (Name, Title, Agency, Phone, etc.)
+  useEffect(() => {
+    if (userProfile?.id) {
+      const timeoutId = setTimeout(() => {
+        const payload = {
+          full_name: userProfile.name,
+          title: userProfile.title,
+          phone: userProfile.phone,
+          agency_name: userProfile.agencyName,
+          license_no: userProfile.licenseNo,
+          bio: userProfile.bio,
+          photo_url: userProfile.photoUrl
+        };
+
+        supabase.from('profiles').update(payload).eq('id', userProfile.id).then(({ error }) => {
+          if (error) console.warn('Failed to save profile details to DB:', error.message);
+        });
+      }, 2000); // 2 second debounce to prevent excessive writes
+
+      return () => clearTimeout(timeoutId);
+    }
+  }, [
+    userProfile?.name,
+    userProfile?.title,
+    userProfile?.phone,
+    userProfile?.agencyName,
+    userProfile?.licenseNo,
+    userProfile?.bio,
+    userProfile?.photoUrl,
+    userProfile?.id
+  ]);
 
   const [integrations, setIntegrations] = useState({
     whatsapp: { enabled: true, apiKey: '', instanceId: '' },

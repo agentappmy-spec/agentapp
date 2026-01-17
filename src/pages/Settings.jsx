@@ -394,16 +394,26 @@ const Settings = () => {
                                                 />
                                             </div>
                                             <div className="form-group half">
-                                                <label>Role / Title</label>
+                                                <label>Professional Title</label>
                                                 <input
                                                     type="text"
-                                                    value={userProfile.role}
-                                                    onChange={e => updateProfile('role', e.target.value)}
+                                                    placeholder="e.g. Takaful Advisor"
+                                                    value={userProfile.title || ''}
+                                                    onChange={e => updateProfile('title', e.target.value)}
                                                 />
                                             </div>
                                         </div>
 
                                         <div className="form-row">
+                                            <div className="form-group half">
+                                                <label>System Role <span style={{ fontWeight: 'normal', color: '#64748b' }}>(Read-only)</span></label>
+                                                <input
+                                                    type="text"
+                                                    value={userProfile.role}
+                                                    disabled
+                                                    style={{ background: '#f1f5f9', cursor: 'not-allowed' }}
+                                                />
+                                            </div>
                                             <div className="form-group half">
                                                 <label>Agency Name</label>
                                                 <input
@@ -413,6 +423,9 @@ const Settings = () => {
                                                     onChange={e => updateProfile('agencyName', e.target.value)}
                                                 />
                                             </div>
+                                        </div>
+
+                                        <div className="form-row">
                                             <div className="form-group half">
                                                 <label>License Number</label>
                                                 <input
@@ -422,9 +435,6 @@ const Settings = () => {
                                                     onChange={e => updateProfile('licenseNo', e.target.value)}
                                                 />
                                             </div>
-                                        </div>
-
-                                        <div className="form-row">
                                             <div className="form-group half">
                                                 <label>Email</label>
                                                 <input
@@ -433,6 +443,9 @@ const Settings = () => {
                                                     onChange={e => updateProfile('email', e.target.value)}
                                                 />
                                             </div>
+                                        </div>
+
+                                        <div className="form-row">
                                             <div className="form-group half">
                                                 <label>Phone</label>
                                                 <input
