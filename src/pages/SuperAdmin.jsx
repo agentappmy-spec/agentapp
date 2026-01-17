@@ -44,48 +44,56 @@ const EditNodeModal = ({ node, onClose, onSave }) => {
 
     return (
         <div className="modal-overlay">
-            <div className="modal-content glass-panel" style={{ width: '600px', background: 'white', padding: '2rem', borderRadius: '12px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                    <h2 className="modal-title" style={{ fontSize: '1.25rem', fontWeight: 'bold' }}>Edit Message Step</h2>
-                    <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer' }}><X size={20} /></button>
-                </div>
-
-                <div className="form-group" style={{ marginBottom: '1.5rem' }}>
-                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600' }}>Days after Join (Day 0 = Instant)</label>
-                    <input
-                        type="number"
-                        value={cDay}
-                        onChange={(e) => setCDay(Number(e.target.value))}
-                        min="0"
-                        style={{ width: '100%', padding: '0.75rem', border: '1px solid #e2e8f0', borderRadius: '8px' }}
-                    />
-                </div>
-
-                <div className="channel-tabs" style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem' }}>
-                    <button className={`tab-btn-sm ${activeChannel === 'sms' ? 'active' : ''}`} onClick={() => setActiveChannel('sms')} style={{ flex: 1, padding: '0.5rem', borderRadius: '6px', border: '1px solid #e2e8f0', background: activeChannel === 'sms' ? '#2563eb' : 'white', color: activeChannel === 'sms' ? 'white' : '#64748b' }}>SMS</button>
-                    <button className={`tab-btn-sm ${activeChannel === 'whatsapp' ? 'active' : ''}`} onClick={() => setActiveChannel('whatsapp')} style={{ flex: 1, padding: '0.5rem', borderRadius: '6px', border: '1px solid #e2e8f0', background: activeChannel === 'whatsapp' ? '#25D366' : 'white', color: activeChannel === 'whatsapp' ? 'white' : '#64748b' }}>WhatsApp</button>
-                    <button className={`tab-btn-sm ${activeChannel === 'email' ? 'active' : ''}`} onClick={() => setActiveChannel('email')} style={{ flex: 1, padding: '0.5rem', borderRadius: '6px', border: '1px solid #e2e8f0', background: activeChannel === 'email' ? '#EA4335' : 'white', color: activeChannel === 'email' ? 'white' : '#64748b' }}>Email</button>
+            <div className="modal-content glass-panel" style={{ width: '90%', maxWidth: '600px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+                    <h2 className="modal-title" style={{ margin: 0, border: 'none', padding: 0 }}>Edit Automation Step</h2>
+                    <button className="sa-icon-btn" onClick={onClose}><X size={20} /></button>
                 </div>
 
                 <div className="form-group">
-                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600' }}>Message Content</label>
-                    <textarea
-                        rows="6"
-                        value={getCurrentContent()}
-                        onChange={(e) => setCurrentContent(e.target.value)}
-                        style={{ width: '100%', padding: '0.75rem', border: '1px solid #e2e8f0', borderRadius: '8px', fontFamily: 'monospace' }}
+                    <label>Days after Join (Day 0 = Instant)</label>
+                    <input
+                        type="number"
+                        className="sa-input-modern"
+                        value={cDay}
+                        onChange={(e) => setCDay(Number(e.target.value))}
+                        min="0"
                     />
-                    <small style={{ display: 'block', marginTop: '0.5rem', color: '#64748b' }}>Use {'{name}'} for user name.</small>
                 </div>
 
-                <div className="modal-actions" style={{ marginTop: '2rem', display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>
-                    <button className="secondary-btn" onClick={onClose} style={{ padding: '0.75rem 1.5rem', borderRadius: '8px', border: '1px solid #e2e8f0', background: 'white' }}>Cancel</button>
-                    <button className="primary-btn" onClick={() => onSave({ ...node, day: cDay, contentSms, contentWhatsapp, contentEmail, message: contentSms })} style={{ padding: '0.75rem 1.5rem', borderRadius: '8px', background: '#2563eb', color: 'white', border: 'none' }}>Save Changes</button>
+                <div className="channel-tabs" style={{ background: '#f1f5f9', padding: '4px', borderRadius: '12px', display: 'flex', gap: '4px', margin: '1.5rem 0' }}>
+                    <button className={`role-tab-btn ${activeChannel === 'sms' ? 'active' : ''}`} onClick={() => setActiveTabProp('sms', setActiveChannel)} style={{ flex: 1, padding: '0.6rem' }}>SMS</button>
+                    <button className={`role-tab-btn ${activeChannel === 'whatsapp' ? 'active' : ''}`} onClick={() => setActiveTabProp('whatsapp', setActiveChannel)} style={{ flex: 1, padding: '0.6rem' }}>WhatsApp</button>
+                    <button className={`role-tab-btn ${activeChannel === 'email' ? 'active' : ''}`} onClick={() => setActiveTabProp('email', setActiveChannel)} style={{ flex: 1, padding: '0.6rem' }}>Email</button>
+                </div>
+
+                <div className="form-group">
+                    <label>Message Content</label>
+                    <textarea
+                        rows="6"
+                        className="sa-input-modern"
+                        value={getCurrentContent()}
+                        onChange={(e) => setCurrentContent(e.target.value)}
+                        style={{ fontFamily: 'monospace', resize: 'vertical' }}
+                    />
+                    <small style={{ display: 'block', marginTop: '0.75rem', color: '#64748b', fontWeight: '500' }}>
+                        💡 Use <strong>{'{name}'}</strong> to personalize with the user's name.
+                    </small>
+                </div>
+
+                <div className="modal-actions">
+                    <button className="secondary-btn" onClick={onClose}>Cancel</button>
+                    <button className="primary-btn" onClick={() => onSave({ ...node, day: cDay, contentSms, contentWhatsapp, contentEmail, message: contentSms })}>
+                        Save Changes
+                    </button>
                 </div>
             </div>
         </div>
     );
 };
+
+// Helper for modal tabs
+const setActiveTabProp = (val, setter) => setter(val);
 
 // --- User Management Components ---
 
@@ -97,49 +105,54 @@ const EditUserModal = ({ user, onClose, onSave }) => {
 
     return (
         <div className="modal-overlay">
-            <div className="modal-content glass-panel" style={{ width: '500px', background: 'white', padding: '2rem', borderRadius: '12px' }}>
-                <h2 style={{ fontSize: '1.25rem', fontWeight: 'bold', marginBottom: '1.5rem' }}>Edit User</h2>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                    <div>
-                        <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600' }}>Name</label>
-                        <input value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} style={{ width: '100%', padding: '0.75rem', border: '1px solid #e2e8f0', borderRadius: '8px' }} />
+            <div className="modal-content glass-panel" style={{ width: '90%', maxWidth: '500px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+                    <h2 className="modal-title" style={{ margin: 0, border: 'none', padding: 0 }}>{user.isNew ? 'Add New User' : 'Edit User'}</h2>
+                    <button className="sa-icon-btn" onClick={onClose}><X size={20} /></button>
+                </div>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+                    <div className="form-group">
+                        <label>Full Name</label>
+                        <input className="sa-input-modern" value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} placeholder="Enter user name" />
                     </div>
-                    <div>
-                        <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600' }}>Email</label>
-                        <input value={formData.email} onChange={e => setFormData({ ...formData, email: e.target.value })} style={{ width: '100%', padding: '0.75rem', border: '1px solid #e2e8f0', borderRadius: '8px' }} />
+                    <div className="form-group">
+                        <label>Email Address</label>
+                        <input className="sa-input-modern" value={formData.email} onChange={e => setFormData({ ...formData, email: e.target.value })} placeholder="email@example.com" />
                     </div>
-                    <div>
-                        <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600' }}>Plan</label>
-                        <select value={formData.plan} onChange={e => setFormData({ ...formData, plan: e.target.value })} style={{ width: '100%', padding: '0.75rem', border: '1px solid #e2e8f0', borderRadius: '8px' }}>
-                            <option value="Free">Free</option>
-                            <option value="Pro">Pro</option>
+                    <div className="form-group">
+                        <label>Subscription Plan</label>
+                        <select className="sa-input-modern" value={formData.plan} onChange={e => setFormData({ ...formData, plan: e.target.value })}>
+                            <option value="Free">Free Starter</option>
+                            <option value="Pro">Pro Plan</option>
                         </select>
                     </div>
 
                     {formData.plan === 'Pro' && (
-                        <div>
-                            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600' }}>Subscription Expiry</label>
+                        <div className="form-group slide-down">
+                            <label>Pro Subscription Expiry</label>
                             <input
                                 type="date"
+                                className="sa-input-modern"
                                 value={formData.expiryDate}
                                 onChange={e => setFormData({ ...formData, expiryDate: e.target.value })}
-                                style={{ width: '100%', padding: '0.75rem', border: '1px solid #e2e8f0', borderRadius: '8px' }}
                             />
-                            <small style={{ color: '#64748b' }}>Set when this user's Pro plan ends.</small>
+                            <small style={{ color: '#64748b', fontWeight: '500', marginTop: '0.5rem', display: 'block' }}>Set when this user's Pro access should end.</small>
                         </div>
                     )}
 
-                    <div>
-                        <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600' }}>Status</label>
-                        <select value={formData.status} onChange={e => setFormData({ ...formData, status: e.target.value })} style={{ width: '100%', padding: '0.75rem', border: '1px solid #e2e8f0', borderRadius: '8px' }}>
+                    <div className="form-group">
+                        <label>Account Status</label>
+                        <select className="sa-input-modern" value={formData.status} onChange={e => setFormData({ ...formData, status: e.target.value })}>
                             <option value="Active">Active</option>
                             <option value="Inactive">Inactive</option>
                         </select>
                     </div>
                 </div>
-                <div style={{ marginTop: '2rem', display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>
-                    <button onClick={onClose} style={{ padding: '0.75rem 1.5rem', borderRadius: '8px', border: '1px solid #e2e8f0', background: 'white' }}>Cancel</button>
-                    <button onClick={() => onSave(formData)} style={{ padding: '0.75rem 1.5rem', borderRadius: '8px', background: '#2563eb', color: 'white', border: 'none' }}>Save User</button>
+
+                <div className="modal-actions">
+                    <button className="secondary-btn" onClick={onClose}>Cancel</button>
+                    <button className="primary-btn" onClick={() => onSave(formData)}>Save User Profile</button>
                 </div>
             </div>
         </div>
@@ -158,78 +171,81 @@ const EditPlanModal = ({ plan, onClose, onSave }) => {
 
     return (
         <div className="modal-overlay">
-            <div className="modal-content glass-panel" style={{ width: '500px', background: 'white', padding: '2rem', borderRadius: '12px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                    <h2 className="modal-title" style={{ fontSize: '1.25rem', fontWeight: 'bold' }}>{plan.isNew ? 'New Plan' : 'Edit Plan'}</h2>
-                    <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer' }}><X size={20} /></button>
+            <div className="modal-content glass-panel" style={{ width: '90%', maxWidth: '550px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+                    <h2 className="modal-title" style={{ margin: 0, border: 'none', padding: 0 }}>{plan.isNew ? 'Create New Plan' : 'Edit Plan Details'}</h2>
+                    <button className="sa-icon-btn" onClick={onClose}><X size={20} /></button>
                 </div>
 
-                <div className="form-group" style={{ marginBottom: '1rem' }}>
-                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600' }}>Plan Name</label>
-                    <input
-                        value={formData.name}
-                        onChange={e => handleChange('name', e.target.value)}
-                        style={{ width: '100%', padding: '0.75rem', border: '1px solid #e2e8f0', borderRadius: '8px' }}
-                    />
-                </div>
-
-                <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
-                    <div className="form-group" style={{ flex: 1 }}>
-                        <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600' }}>Monthly Price (RM)</label>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+                    <div className="form-group">
+                        <label>Plan Name</label>
                         <input
-                            type="number"
-                            value={formData.price_monthly}
-                            onChange={e => handleChange('price_monthly', e.target.value)}
-                            style={{ width: '100%', padding: '0.75rem', border: '1px solid #e2e8f0', borderRadius: '8px' }}
+                            className="sa-input-modern"
+                            value={formData.name}
+                            onChange={e => handleChange('name', e.target.value)}
+                            placeholder="e.g. Pro Platinum"
                         />
                     </div>
-                    <div className="form-group" style={{ flex: 1 }}>
-                        <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600' }}>Yearly Price (RM)</label>
-                        <input
-                            type="number"
-                            value={formData.price_yearly}
-                            onChange={e => handleChange('price_yearly', e.target.value)}
-                            style={{ width: '100%', padding: '0.75rem', border: '1px solid #e2e8f0', borderRadius: '8px' }}
+
+                    <div style={{ display: 'flex', gap: '1rem' }}>
+                        <div className="form-group" style={{ flex: 1 }}>
+                            <label>Monthly Price (RM)</label>
+                            <input
+                                type="number"
+                                className="sa-input-modern"
+                                value={formData.price_monthly}
+                                onChange={e => handleChange('price_monthly', e.target.value)}
+                            />
+                        </div>
+                        <div className="form-group" style={{ flex: 1 }}>
+                            <label>Yearly Price (RM)</label>
+                            <input
+                                type="number"
+                                className="sa-input-modern"
+                                value={formData.price_yearly}
+                                onChange={e => handleChange('price_yearly', e.target.value)}
+                            />
+                        </div>
+                    </div>
+
+                    <div style={{ display: 'flex', gap: '1rem' }}>
+                        <div className="form-group" style={{ flex: 1 }}>
+                            <label>Contact Limit</label>
+                            <input
+                                type="number"
+                                className="sa-input-modern"
+                                value={formData.contact_limit}
+                                onChange={e => handleChange('contact_limit', e.target.value)}
+                                placeholder="0 for unlimited"
+                            />
+                        </div>
+                        <div className="form-group" style={{ flex: 1 }}>
+                            <label>Message Limit</label>
+                            <input
+                                type="number"
+                                className="sa-input-modern"
+                                value={formData.monthly_message_limit || 0}
+                                onChange={e => handleChange('monthly_message_limit', e.target.value)}
+                            />
+                        </div>
+                    </div>
+
+                    <div className="form-group">
+                        <label>Features (comma separated)</label>
+                        <textarea
+                            rows="4"
+                            className="sa-input-modern"
+                            value={formData.features}
+                            onChange={e => handleChange('features', e.target.value)}
+                            placeholder="WhatsApp, SMS, Email, etc."
+                            style={{ resize: 'vertical' }}
                         />
                     </div>
                 </div>
 
-                <div className="form-group" style={{ marginBottom: '1rem' }}>
-                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600' }}>Contact Limit</label>
-                    <input
-                        type="number"
-                        value={formData.contact_limit}
-                        onChange={e => handleChange('contact_limit', e.target.value)}
-                        placeholder="0 for unlimited"
-                        style={{ width: '100%', padding: '0.75rem', border: '1px solid #e2e8f0', borderRadius: '8px' }}
-                    />
-                    <small style={{ color: '#64748b' }}>Use a large number like 1000000 for "Unlimited", or 0.</small>
-                </div>
-
-                <div className="form-group" style={{ marginBottom: '1rem' }}>
-                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600' }}>Monthly Message Limit</label>
-                    <input
-                        type="number"
-                        value={formData.monthly_message_limit || 0}
-                        onChange={e => handleChange('monthly_message_limit', e.target.value)}
-                        placeholder="0 for no limit or check logic"
-                        style={{ width: '100%', padding: '0.75rem', border: '1px solid #e2e8f0', borderRadius: '8px' }}
-                    />
-                    <small style={{ color: '#64748b' }}>Limit for Auto Follow Up messages (0 uses default).</small>
-                </div>
-
-                <div className="form-group" style={{ marginBottom: '1rem' }}>
-                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600' }}>Features (comma separated)</label>
-                    <textarea
-                        rows="3"
-                        value={formData.features}
-                        onChange={e => handleChange('features', e.target.value)}
-                        style={{ width: '100%', padding: '0.75rem', border: '1px solid #e2e8f0', borderRadius: '8px' }}
-                    />
-                </div>
-
-                <div className="modal-actions" style={{ marginTop: '2rem', display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>
-                    <button className="secondary-btn" onClick={onClose} style={{ padding: '0.75rem 1.5rem', borderRadius: '8px', border: '1px solid #e2e8f0', background: 'white' }}>Cancel</button>
+                <div className="modal-actions">
+                    <button className="secondary-btn" onClick={onClose}>Cancel</button>
                     <button
                         className="primary-btn"
                         onClick={() => onSave({
@@ -240,7 +256,6 @@ const EditPlanModal = ({ plan, onClose, onSave }) => {
                             price_yearly: Number(formData.price_yearly),
                             features: formData.features.split(',').map(f => f.trim()).filter(f => f)
                         })}
-                        style={{ padding: '0.75rem 1.5rem', borderRadius: '8px', background: '#2563eb', color: 'white', border: 'none' }}
                     >
                         Save Plan
                     </button>
@@ -258,69 +273,72 @@ const EditPromoCodeModal = ({ promo, onClose, onSave }) => {
 
     return (
         <div className="modal-overlay">
-            <div className="modal-content glass-panel" style={{ width: '500px', background: 'white', padding: '2rem', borderRadius: '12px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                    <h2 className="modal-title" style={{ fontSize: '1.25rem', fontWeight: 'bold' }}>{promo.isNew ? 'New Promo Code' : 'Edit Promo Code'}</h2>
-                    <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer' }}><X size={20} /></button>
+            <div className="modal-content glass-panel" style={{ width: '90%', maxWidth: '500px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+                    <h2 className="modal-title" style={{ margin: 0, border: 'none', padding: 0 }}>{promo.isNew ? 'New Promo Code' : 'Edit Promo Code'}</h2>
+                    <button className="sa-icon-btn" onClick={onClose}><X size={20} /></button>
                 </div>
 
-                <div className="form-group" style={{ marginBottom: '1rem' }}>
-                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600' }}>Code</label>
-                    <input
-                        value={formData.code}
-                        onChange={e => setFormData({ ...formData, code: e.target.value.toUpperCase() })}
-                        style={{ width: '100%', padding: '0.75rem', border: '1px solid #e2e8f0', borderRadius: '8px', fontFamily: 'monospace' }}
-                        placeholder="e.g. WELCOME10"
-                    />
-                </div>
-
-                <div className="form-group" style={{ marginBottom: '1rem' }}>
-                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600' }}>Reward / Description</label>
-                    <input
-                        value={formData.reward}
-                        onChange={e => setFormData({ ...formData, reward: e.target.value })}
-                        style={{ width: '100%', padding: '0.75rem', border: '1px solid #e2e8f0', borderRadius: '8px' }}
-                        placeholder="e.g. 30 Days Pro Trial"
-                    />
-                </div>
-
-                <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
-                    <div className="form-group" style={{ flex: 1 }}>
-                        <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600' }}>Expiry Date</label>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+                    <div className="form-group">
+                        <label>Promo Code</label>
                         <input
-                            type="date"
-                            value={formData.expiry}
-                            onChange={e => setFormData({ ...formData, expiry: e.target.value })}
-                            style={{ width: '100%', padding: '0.75rem', border: '1px solid #e2e8f0', borderRadius: '8px' }}
-                        />
-                        <small style={{ color: '#64748b' }}>Leave blank for 'Never'</small>
-                    </div>
-                    <div className="form-group" style={{ flex: 1 }}>
-                        <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600' }}>Usage Limit</label>
-                        <input
-                            type="number"
-                            value={formData.usage_limit || ''}
-                            onChange={e => setFormData({ ...formData, usage_limit: Number(e.target.value) })}
-                            placeholder="Unlimited"
-                            style={{ width: '100%', padding: '0.75rem', border: '1px solid #e2e8f0', borderRadius: '8px' }}
+                            className="sa-input-modern"
+                            value={formData.code}
+                            onChange={e => setFormData({ ...formData, code: e.target.value.toUpperCase() })}
+                            placeholder="e.g. SAVE50"
+                            style={{ fontFamily: 'monospace', textTransform: 'uppercase', fontWeight: 'bold', letterSpacing: '1px' }}
                         />
                     </div>
+
+                    <div className="form-group">
+                        <label>Reward Description</label>
+                        <input
+                            className="sa-input-modern"
+                            value={formData.reward}
+                            onChange={e => setFormData({ ...formData, reward: e.target.value })}
+                            placeholder="e.g. 50% Off First Month"
+                        />
+                    </div>
+
+                    <div style={{ display: 'flex', gap: '1rem' }}>
+                        <div className="form-group" style={{ flex: 1 }}>
+                            <label>Expiry Date</label>
+                            <input
+                                type="date"
+                                className="sa-input-modern"
+                                value={formData.expiry}
+                                onChange={e => setFormData({ ...formData, expiry: e.target.value })}
+                            />
+                            <small style={{ color: '#64748b', fontWeight: '500', marginTop: '0.5rem', display: 'block' }}>Leave blank for 'Never'</small>
+                        </div>
+                        <div className="form-group" style={{ flex: 1 }}>
+                            <label>Usage Limit</label>
+                            <input
+                                type="number"
+                                className="sa-input-modern"
+                                value={formData.usage_limit || ''}
+                                onChange={e => setFormData({ ...formData, usage_limit: Number(e.target.value) })}
+                                placeholder="∞"
+                            />
+                        </div>
+                    </div>
+
+                    <div className="form-group">
+                        <label>Initial Status</label>
+                        <select
+                            className="sa-input-modern"
+                            value={formData.status}
+                            onChange={e => setFormData({ ...formData, status: e.target.value })}
+                        >
+                            <option value="ACTIVE">ACTIVE</option>
+                            <option value="INACTIVE">INACTIVE</option>
+                        </select>
+                    </div>
                 </div>
 
-                <div className="form-group" style={{ marginBottom: '1rem' }}>
-                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600' }}>Status</label>
-                    <select
-                        value={formData.status}
-                        onChange={e => setFormData({ ...formData, status: e.target.value })}
-                        style={{ width: '100%', padding: '0.75rem', border: '1px solid #e2e8f0', borderRadius: '8px' }}
-                    >
-                        <option value="ACTIVE">ACTIVE</option>
-                        <option value="INACTIVE">INACTIVE</option>
-                    </select>
-                </div>
-
-                <div className="modal-actions" style={{ marginTop: '2rem', display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>
-                    <button className="secondary-btn" onClick={onClose} style={{ padding: '0.75rem 1.5rem', borderRadius: '8px', border: '1px solid #e2e8f0', background: 'white' }}>Cancel</button>
+                <div className="modal-actions">
+                    <button className="secondary-btn" onClick={onClose}>Cancel</button>
                     <button
                         className="primary-btn"
                         onClick={() => onSave({
@@ -328,7 +346,6 @@ const EditPromoCodeModal = ({ promo, onClose, onSave }) => {
                             expiry: formData.expiry || 'Never',
                             usage_limit: formData.usage_limit || 0
                         })}
-                        style={{ padding: '0.75rem 1.5rem', borderRadius: '8px', background: '#2563eb', color: 'white', border: 'none' }}
                     >
                         Save Promo Code
                     </button>
@@ -691,25 +708,25 @@ const SuperAdmin = () => {
                     className={`std-tab-item ${activeTab === 'users' ? 'active' : ''}`}
                     onClick={() => setActiveTab('users')}
                 >
-                    <Users size={18} /> User Management
+                    <Users size={16} /> Users
                 </button>
                 <button
                     className={`std-tab-item ${activeTab === 'followup' ? 'active' : ''}`}
                     onClick={() => setActiveTab('followup')}
                 >
-                    <MessageSquare size={18} /> Auto Follow-Up
+                    <MessageSquare size={16} /> Automation
                 </button>
                 <button
                     className={`std-tab-item ${activeTab === 'promocodes' ? 'active' : ''}`}
                     onClick={() => setActiveTab('promocodes')}
                 >
-                    <Tag size={18} /> Promo Codes
+                    <Tag size={16} /> Promos
                 </button>
                 <button
                     className={`std-tab-item ${activeTab === 'plans' ? 'active' : ''}`}
                     onClick={() => setActiveTab('plans')}
                 >
-                    <Settings size={18} /> Plans & Billing
+                    <Settings size={16} /> Plans
                 </button>
             </div>
 
@@ -832,10 +849,22 @@ const SuperAdmin = () => {
                 )}
 
                 {activeTab === 'followup' && (
-                    <div className="followup-view">
-                        <div className="role-selector" style={{ display: 'flex', gap: '1rem', marginBottom: '2rem', borderBottom: '1px solid #e2e8f0', paddingBottom: '1rem' }}>
-                            <button className={`role-pill ${selectedRole === 'free' ? 'active' : ''}`} onClick={() => setSelectedRole('free')}>Free User Flow</button>
-                            <button className={`role-pill ${selectedRole === 'pro' ? 'active' : ''}`} onClick={() => setSelectedRole('pro')}>Pro User Flow</button>
+                    <div className="followup-view fade-in">
+                        <div style={{ textAlign: 'center' }}>
+                            <div className="role-tabs">
+                                <button
+                                    className={`role-tab-btn ${selectedRole === 'free' ? 'active' : ''}`}
+                                    onClick={() => setSelectedRole('free')}
+                                >
+                                    Free User Flow
+                                </button>
+                                <button
+                                    className={`role-tab-btn ${selectedRole === 'pro' ? 'active' : ''}`}
+                                    onClick={() => setSelectedRole('pro')}
+                                >
+                                    Pro User Flow
+                                </button>
+                            </div>
                         </div>
 
                         <div className="workflow-container">
@@ -845,18 +874,28 @@ const SuperAdmin = () => {
                                     <div className="flow-content">
                                         <div className="flow-header">
                                             <h4>Day {step.day}</h4>
-                                            {index === 0 ? <span className="tag-instant">Instant</span> : <span className="tag-wait">Wait {step.day - (index > 0 ? followUpSettings[selectedRole][index - 1].day : 0)} days</span>}
+                                            {index === 0 ? (
+                                                <span className="sa-badge pro" style={{ fontSize: '0.65rem' }}>Instant</span>
+                                            ) : (
+                                                <span className="sa-badge free" style={{ fontSize: '0.65rem' }}>
+                                                    Wait {step.day - (index > 0 ? followUpSettings[selectedRole][index - 1].day : 0)} days
+                                                </span>
+                                            )}
                                         </div>
-                                        <p className="preview-text">"{step.contentSms || step.message}"</p>
-                                        <div className="flow-actions">
-                                            <button onClick={() => setEditingNode(step)}><Edit2 size={14} /> Edit</button>
-                                            <button onClick={() => handleDeleteNode(step.id)} className="delete"><Trash2 size={14} /> Delete</button>
+                                        <div className="preview-text">"{step.contentSms || step.message}"</div>
+                                        <div className="sa-row-actions" style={{ justifyContent: 'flex-start' }}>
+                                            <button className="sa-icon-btn" onClick={() => setEditingNode(step)}>
+                                                <Edit2 size={16} />
+                                            </button>
+                                            <button className="sa-icon-btn text-danger" onClick={() => handleDeleteNode(step.id)}>
+                                                <Trash2 size={16} />
+                                            </button>
                                         </div>
                                     </div>
                                 </div>
                             ))}
                             <button className="add-step-btn" onClick={handleAddNode}>
-                                <Plus size={24} /> Add Step
+                                <Plus size={24} /> <span>Add Automation Step</span>
                             </button>
                         </div>
                     </div>
@@ -864,42 +903,56 @@ const SuperAdmin = () => {
 
                 {activeTab === 'promocodes' && (
                     <div className="promocodes-view fade-in">
-                        <div className="glass-panel" style={{ padding: '2rem' }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
+                        <div className="sa-toolbar-enhanced">
+                            <div className="sa-section-info">
                                 <h3>Active Promo Codes</h3>
-                                <button className="primary-btn small-btn" onClick={() => setEditingPromo({ code: '', reward: '', status: 'ACTIVE', expiry: '', usage_limit: 0, isNew: true })}>+ New Code</button>
+                                <p>Manage discounts and trial codes</p>
                             </div>
-                            <div className="table-responsive-wrapper">
-                                <table className="sa-table">
-                                    <thead>
-                                        <tr>
-                                            <th>Code</th>
-                                            <th>Reward</th>
-                                            <th>Status</th>
-                                            <th>Expiry</th>
-                                            <th>Usage</th>
-                                            <th>Action</th>
+                            <button className="primary-btn" onClick={() => setEditingPromo({ code: '', reward: '', status: 'ACTIVE', expiry: '', usage_limit: 0, isNew: true })}>
+                                <Plus size={18} style={{ marginRight: '8px' }} /> New Code
+                            </button>
+                        </div>
+
+                        <div className="table-responsive-wrapper" style={{ background: 'white', borderRadius: '16px', border: '1px solid #f1f5f9' }}>
+                            <table className="sa-table-modern">
+                                <thead>
+                                    <tr>
+                                        <th>Code</th>
+                                        <th>Reward</th>
+                                        <th>Status</th>
+                                        <th>Expiry</th>
+                                        <th>Usage</th>
+                                        <th style={{ textAlign: 'center' }}>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {promoCodes.map(promo => (
+                                        <tr key={promo.id}>
+                                            <td data-label="Code" style={{ fontWeight: 'bold', fontFamily: 'monospace', color: promo.status === 'ACTIVE' ? '#10b981' : '#64748b' }}>
+                                                {promo.code}
+                                            </td>
+                                            <td data-label="Reward">{promo.reward}</td>
+                                            <td data-label="Status">
+                                                <span className={`sa-badge ${promo.status === 'ACTIVE' ? 'pro' : 'free'}`}>
+                                                    {promo.status}
+                                                </span>
+                                            </td>
+                                            <td data-label="Expiry">{promo.expiry || 'Never'}</td>
+                                            <td data-label="Usage">{promo.usage_count || 0}{promo.usage_limit > 0 ? `/${promo.usage_limit}` : ' / ∞'}</td>
+                                            <td>
+                                                <div className="sa-row-actions">
+                                                    <button className="sa-icon-btn" onClick={() => setEditingPromo(promo)}>
+                                                        <Edit2 size={16} />
+                                                    </button>
+                                                    <button className="sa-icon-btn text-danger" onClick={() => handleDeletePromoCode(promo.id)}>
+                                                        <Trash2 size={16} />
+                                                    </button>
+                                                </div>
+                                            </td>
                                         </tr>
-                                    </thead>
-                                    <tbody>
-                                        {promoCodes.map(promo => (
-                                            <tr key={promo.id}>
-                                                <td style={{ fontWeight: 'bold', fontFamily: 'monospace', color: promo.status === 'ACTIVE' ? '#10b981' : '#64748b' }}>{promo.code}</td>
-                                                <td>{promo.reward}</td>
-                                                <td><span className={`badge ${promo.status === 'ACTIVE' ? 'pro' : ''}`} style={promo.status !== 'ACTIVE' ? { background: '#cbd5e1', color: '#475569' } : {}}>{promo.status}</span></td>
-                                                <td>{promo.expiry || 'Never'}</td>
-                                                <td>{promo.usage_count || 0}{promo.usage_limit > 0 ? `/${promo.usage_limit}` : ' / ∞'}</td>
-                                                <td>
-                                                    <div className="flex gap-1">
-                                                        <button className="icon-btn-small" onClick={() => setEditingPromo(promo)}><Edit2 size={14} /></button>
-                                                        <button className="icon-btn-small text-danger" onClick={() => handleDeletePromoCode(promo.id)}><Trash2 size={14} /></button>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
+                                    ))}
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 )}

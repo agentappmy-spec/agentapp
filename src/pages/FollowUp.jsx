@@ -426,15 +426,15 @@ const FollowUp = () => {
             </header>
 
             <div className="content-wrapper glass-panel no-padding">
-                <div className="std-tabs-container" style={{ margin: '1.5rem 1.5rem 0' }}>
+                <div className="std-tabs-container">
                     <button className={`std-tab-item ${activeTab === 'prospect' ? 'active' : ''}`} onClick={() => setActiveTab('prospect')}>
-                        <User size={16} /> Prospect Flow
+                        <User size={16} /> Prospect
                     </button>
                     <button className={`std-tab-item ${activeTab === 'client' ? 'active' : ''}`} onClick={() => setActiveTab('client')}>
-                        <Check size={16} /> Client Flow
+                        <Check size={16} /> Client
                     </button>
                     <button className={`std-tab-item ${activeTab === 'global' ? 'active' : ''}`} onClick={() => setActiveTab('global')}>
-                        <Clock size={16} /> Global Reminders
+                        <Clock size={16} /> Reminders
                     </button>
                 </div>
 

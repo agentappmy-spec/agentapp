@@ -395,10 +395,10 @@ const LandingPage = () => {
     return (
         <div className="landing-builder-container">
             {/* Header */}
-            <header className="builder-header glass-panel">
+            <header className="builder-header">
                 <div className="header-left">
                     <div className="icon-wrapper">
-                        <Layout size={24} className="text-primary" />
+                        <Layout size={24} />
                     </div>
                     <div>
                         <h1 className="header-title">Page Builder</h1>
@@ -412,22 +412,24 @@ const LandingPage = () => {
                         {userProfile?.is_published ? (
                             <span className="badge-published">● Published</span>
                         ) : (
-                            <span className="badge-draft">○ Draft</span>
+                            <span className="badge-draft">○ Draft Mode</span>
                         )}
                     </div>
 
-                    <div className="template-switcher">
-                        <span className="label-text">Template:</span>
+                    <div className="divider-vertical"></div>
+
+                    <div className="control-group">
+                        <span className="control-label">Template</span>
                         <div className="btn-group">
                             <button
-                                className="secondary-btn small-btn"
+                                className={`std-tab-item small-btn ${pageConfig.name === TEMPLATES.basic.name ? 'active' : ''}`}
                                 onClick={() => applyTemplate('basic')}
                                 disabled={userProfile?.is_published}
                             >
                                 Basic
                             </button>
                             <button
-                                className="secondary-btn small-btn"
+                                className={`std-tab-item small-btn ${pageConfig.name === TEMPLATES.pro.name ? 'active' : ''}`}
                                 onClick={() => applyTemplate('pro')}
                                 disabled={userProfile?.is_published}
                             >
@@ -436,18 +438,27 @@ const LandingPage = () => {
                         </div>
                     </div>
 
-                    <div className="divider-vertical"></div>
-
-                    <div className="view-toggles">
-                        <button className={`toggle-btn ${previewMode === 'desktop' ? 'active' : ''}`} onClick={() => setPreviewMode('desktop')} title="Desktop View">
-                            <Monitor size={18} />
-                        </button>
-                        <button className={`toggle-btn ${previewMode === 'mobile' ? 'active' : ''}`} onClick={() => setPreviewMode('mobile')} title="Mobile View">
-                            <Smartphone size={18} />
-                        </button>
+                    <div className="control-group">
+                        <span className="control-label">Preview</span>
+                        <div className="btn-group">
+                            <button
+                                className={`std-tab-item small-btn ${previewMode === 'desktop' ? 'active' : ''}`}
+                                onClick={() => setPreviewMode('desktop')}
+                            >
+                                <Monitor size={16} />
+                            </button>
+                            <button
+                                className={`std-tab-item small-btn ${previewMode === 'mobile' ? 'active' : ''}`}
+                                onClick={() => setPreviewMode('mobile')}
+                            >
+                                <Smartphone size={16} />
+                            </button>
+                        </div>
                     </div>
 
-                    {/* Action Buttons - Different based on publish status */}
+                    <div className="divider-vertical"></div>
+
+                    {/* Action Buttons */}
                     {!userProfile?.is_published ? (
                         <>
                             <button
@@ -456,31 +467,34 @@ const LandingPage = () => {
                                 disabled={!hasUnsavedChanges || isSaving}
                             >
                                 <Save size={18} />
-                                <span>{isSaving ? 'Saving...' : hasUnsavedChanges ? 'Save *' : 'Saved'}</span>
+                                <span className="btn-text-desktop">
+                                    {isSaving ? 'Saving...' : hasUnsavedChanges ? 'Save Changes' : 'Saved'}
+                                </span>
+                                <span className="btn-text-mobile">
+                                    {isSaving ? '...' : hasUnsavedChanges ? 'Save' : 'Saved'}
+                                </span>
                             </button>
                             <button
                                 className="primary-btn save-btn"
                                 onClick={handlePublish}
                                 disabled={hasUnsavedChanges}
                             >
-                                <Save size={18} />
+                                <Layout size={18} />
                                 <span>Publish</span>
                             </button>
                         </>
                     ) : (
                         <>
                             <button className="secondary-btn save-btn" onClick={handleCopyLink}>
-                                <LinkIcon size={18} />
-                                <span className="btn-text-desktop">Copy Link</span>
-                                <span className="btn-text-mobile">Copy</span>
+                                <div className="btn-text-desktop"><LinkIcon size={18} /> Copy Link</div>
+                                <div className="btn-text-mobile"><LinkIcon size={18} /> Link</div>
                             </button>
                             <button className="secondary-btn save-btn" onClick={handleOpenInNewTab}>
-                                <Grid size={18} />
-                                <span className="btn-text-desktop">Open Page</span>
-                                <span className="btn-text-mobile">Open</span>
+                                <div className="btn-text-desktop"><Grid size={18} /> Open Page</div>
+                                <div className="btn-text-mobile"><Grid size={18} /> View</div>
                             </button>
                             <button className="primary-btn save-btn" onClick={handleUnpublish}>
-                                <Save size={18} />
+                                <Minus size={18} />
                                 <span>Unpublish</span>
                             </button>
                         </>
