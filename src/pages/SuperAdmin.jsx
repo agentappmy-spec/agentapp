@@ -142,86 +142,73 @@ const EditUserModal = ({ user, onClose, onSave }) => {
     );
 };
 
-const EditPlanModal = ({ plan, onClose, onSave }) => {
+const EditPromoCodeModal = ({ promo, onClose, onSave }) => {
     const [formData, setFormData] = useState({
-        ...plan,
-        features: Array.isArray(plan.features) ? plan.features.join(', ') : plan.features
+        ...promo,
+        expiry: promo.expiry && promo.expiry !== 'Never' ? new Date(promo.expiry).toISOString().split('T')[0] : ''
     });
-
-    const handleChange = (field, value) => {
-        setFormData(prev => ({ ...prev, [field]: value }));
-    };
 
     return (
         <div className="modal-overlay">
             <div className="modal-content glass-panel" style={{ width: '500px', background: 'white', padding: '2rem', borderRadius: '12px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                    <h2 className="modal-title" style={{ fontSize: '1.25rem', fontWeight: 'bold' }}>{plan.isNew ? 'New Plan' : 'Edit Plan'}</h2>
+                    <h2 className="modal-title" style={{ fontSize: '1.25rem', fontWeight: 'bold' }}>{promo.isNew ? 'New Promo Code' : 'Edit Promo Code'}</h2>
                     <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer' }}><X size={20} /></button>
                 </div>
 
                 <div className="form-group" style={{ marginBottom: '1rem' }}>
-                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600' }}>Plan Name</label>
+                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600' }}>Code</label>
                     <input
-                        value={formData.name}
-                        onChange={e => handleChange('name', e.target.value)}
+                        value={formData.code}
+                        onChange={e => setFormData({ ...formData, code: e.target.value.toUpperCase() })}
+                        style={{ width: '100%', padding: '0.75rem', border: '1px solid #e2e8f0', borderRadius: '8px', fontFamily: 'monospace' }}
+                        placeholder="e.g. WELCOME10"
+                    />
+                </div>
+
+                <div className="form-group" style={{ marginBottom: '1rem' }}>
+                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600' }}>Reward / Description</label>
+                    <input
+                        value={formData.reward}
+                        onChange={e => setFormData({ ...formData, reward: e.target.value })}
                         style={{ width: '100%', padding: '0.75rem', border: '1px solid #e2e8f0', borderRadius: '8px' }}
+                        placeholder="e.g. 30 Days Pro Trial"
                     />
                 </div>
 
                 <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
                     <div className="form-group" style={{ flex: 1 }}>
-                        <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600' }}>Monthly Price (RM)</label>
+                        <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600' }}>Expiry Date</label>
                         <input
-                            type="number"
-                            value={formData.price_monthly}
-                            onChange={e => handleChange('price_monthly', e.target.value)}
+                            type="date"
+                            value={formData.expiry}
+                            onChange={e => setFormData({ ...formData, expiry: e.target.value })}
                             style={{ width: '100%', padding: '0.75rem', border: '1px solid #e2e8f0', borderRadius: '8px' }}
                         />
+                        <small style={{ color: '#64748b' }}>Leave blank for 'Never'</small>
                     </div>
                     <div className="form-group" style={{ flex: 1 }}>
-                        <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600' }}>Yearly Price (RM)</label>
+                        <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600' }}>Usage Limit</label>
                         <input
                             type="number"
-                            value={formData.price_yearly}
-                            onChange={e => handleChange('price_yearly', e.target.value)}
+                            value={formData.usage_limit || ''}
+                            onChange={e => setFormData({ ...formData, usage_limit: Number(e.target.value) })}
+                            placeholder="Unlimited"
                             style={{ width: '100%', padding: '0.75rem', border: '1px solid #e2e8f0', borderRadius: '8px' }}
                         />
                     </div>
                 </div>
 
                 <div className="form-group" style={{ marginBottom: '1rem' }}>
-                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600' }}>Contact Limit</label>
-                    <input
-                        type="number"
-                        value={formData.contact_limit}
-                        onChange={e => handleChange('contact_limit', e.target.value)}
-                        placeholder="0 for unlimited"
+                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600' }}>Status</label>
+                    <select
+                        value={formData.status}
+                        onChange={e => setFormData({ ...formData, status: e.target.value })}
                         style={{ width: '100%', padding: '0.75rem', border: '1px solid #e2e8f0', borderRadius: '8px' }}
-                    />
-                    <small style={{ color: '#64748b' }}>Use a large number like 1000000 for "Unlimited", or 0.</small>
-                </div>
-
-                <div className="form-group" style={{ marginBottom: '1rem' }}>
-                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600' }}>Monthly Message Limit</label>
-                    <input
-                        type="number"
-                        value={formData.monthly_message_limit || 0}
-                        onChange={e => handleChange('monthly_message_limit', e.target.value)}
-                        placeholder="0 for no limit or check logic"
-                        style={{ width: '100%', padding: '0.75rem', border: '1px solid #e2e8f0', borderRadius: '8px' }}
-                    />
-                    <small style={{ color: '#64748b' }}>Limit for Auto Follow Up messages (0 uses default).</small>
-                </div>
-
-                <div className="form-group" style={{ marginBottom: '1rem' }}>
-                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600' }}>Features (comma separated)</label>
-                    <textarea
-                        rows="3"
-                        value={formData.features}
-                        onChange={e => handleChange('features', e.target.value)}
-                        style={{ width: '100%', padding: '0.75rem', border: '1px solid #e2e8f0', borderRadius: '8px' }}
-                    />
+                    >
+                        <option value="ACTIVE">ACTIVE</option>
+                        <option value="INACTIVE">INACTIVE</option>
+                    </select>
                 </div>
 
                 <div className="modal-actions" style={{ marginTop: '2rem', display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>
@@ -230,15 +217,12 @@ const EditPlanModal = ({ plan, onClose, onSave }) => {
                         className="primary-btn"
                         onClick={() => onSave({
                             ...formData,
-                            monthly_message_limit: Number(formData.monthly_message_limit) || 0,
-                            contact_limit: Number(formData.contact_limit),
-                            price_monthly: Number(formData.price_monthly),
-                            price_yearly: Number(formData.price_yearly),
-                            features: formData.features.split(',').map(f => f.trim()).filter(f => f)
+                            expiry: formData.expiry || 'Never',
+                            usage_limit: formData.usage_limit || 0
                         })}
                         style={{ padding: '0.75rem 1.5rem', borderRadius: '8px', background: '#2563eb', color: 'white', border: 'none' }}
                     >
-                        Save Plan
+                        Save Promo Code
                     </button>
                 </div>
             </div>
@@ -259,11 +243,13 @@ const SuperAdmin = () => {
     // Real Data from Supabase
     const [users, setUsers] = useState([]);
     const [plans, setPlans] = useState([]);
+    const [promoCodes, setPromoCodes] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         fetchUsers();
         fetchPlans();
+        fetchPromoCodes();
     }, []);
 
     const fetchUsers = async () => {
@@ -327,6 +313,25 @@ const SuperAdmin = () => {
         }
     };
 
+    const fetchPromoCodes = async () => {
+        try {
+            const { supabase } = await import('../services/supabaseClient');
+            const { data, error } = await supabase.from('promo_codes').select('*').order('created_at', { ascending: false });
+
+            if (error) throw error;
+            if (data) {
+                setPromoCodes(data);
+            }
+        } catch (err) {
+            console.warn('Fetching promo codes failed, using fallback:', err);
+            // Fallback mock data
+            setPromoCodes([
+                { id: '1', code: 'KDIGITAL', reward: '30 Days Pro Trial', status: 'ACTIVE', expiry: 'Never', usage_count: 50, usage_limit: 0 },
+                { id: '2', code: 'WELCOME50', reward: '50% Off First Month', status: 'INACTIVE', expiry: '2025-12-31', usage_count: 0, usage_limit: 100 }
+            ]);
+        }
+    };
+
     const [followUpSettings, setFollowUpSettings] = useState({
         free: [
             { id: 1, day: 0, label: 'Welcome', message: 'Hi {name}, thanks for joining! Add your first contact now.', contentSms: 'Hi {name}, thanks for joining! Add your first contact now.' },
@@ -341,6 +346,7 @@ const SuperAdmin = () => {
     const [editingNode, setEditingNode] = useState(null);
     const [editingUser, setEditingUser] = useState(null);
     const [editingPlan, setEditingPlan] = useState(null);
+    const [editingPromo, setEditingPromo] = useState(null);
 
     // --- Actions ---
 
@@ -523,6 +529,50 @@ const SuperAdmin = () => {
         }
     };
 
+    const handleSavePromoCode = async (promoData) => {
+        try {
+            const { supabase } = await import('../services/supabaseClient');
+            const payload = {
+                code: promoData.code,
+                reward: promoData.reward,
+                status: promoData.status,
+                expiry: promoData.expiry,
+                usage_limit: promoData.usage_limit
+            };
+
+            if (promoData.isNew) {
+                const { error } = await supabase.from('promo_codes').insert([payload]);
+                if (error) throw error;
+            } else {
+                const { error } = await supabase.from('promo_codes').update(payload).eq('id', promoData.id);
+                if (error) throw error;
+            }
+            fetchPromoCodes();
+        } catch (err) {
+            console.error('Error saving promo code:', err);
+            alert('Failed to save promo code to Database. Updating locally...');
+            if (promoData.isNew) {
+                setPromoCodes([{ ...promoData, id: Date.now().toString(), usage_count: 0 }, ...promoCodes]);
+            } else {
+                setPromoCodes(promoCodes.map(p => p.id === promoData.id ? promoData : p));
+            }
+        }
+        setEditingPromo(null);
+    };
+
+    const handleDeletePromoCode = async (id) => {
+        if (!confirm('Delete this promo code?')) return;
+        try {
+            const { supabase } = await import('../services/supabaseClient');
+            const { error } = await supabase.from('promo_codes').delete().eq('id', id);
+            if (error) throw error;
+            fetchPromoCodes();
+        } catch (err) {
+            console.error('Error deleting promo code:', err);
+            setPromoCodes(promoCodes.filter(p => p.id !== id));
+        }
+    };
+
     return (
         <div className="super-admin-container">
             <header className="sa-header">
@@ -655,7 +705,7 @@ const SuperAdmin = () => {
                         <div className="glass-panel" style={{ padding: '2rem' }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
                                 <h3>Active Promo Codes</h3>
-                                <button className="primary-btn small-btn" onClick={() => alert('Feature coming soon: Add dynamic codes to DB')}>+ New Code</button>
+                                <button className="primary-btn small-btn" onClick={() => setEditingPromo({ code: '', reward: '', status: 'ACTIVE', expiry: '', usage_limit: 0, isNew: true })}>+ New Code</button>
                             </div>
                             <div className="table-responsive-wrapper">
                                 <table className="sa-table">
@@ -670,26 +720,21 @@ const SuperAdmin = () => {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <tr>
-                                            <td style={{ fontWeight: 'bold', fontFamily: 'monospace', color: '#10b981' }}>KDIGITAL</td>
-                                            <td>30 Days Pro Trial</td>
-                                            <td><span className="badge pro">Active</span></td>
-                                            <td>Never</td>
-                                            <td>Unlimited</td>
-                                            <td>
-                                                <button className="icon-btn-small"><Edit2 size={14} /></button>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td style={{ fontWeight: 'bold', fontFamily: 'monospace', color: '#64748b' }}>WELCOME50</td>
-                                            <td>50% Off First Month</td>
-                                            <td><span className="badge" style={{ background: '#cbd5e1', color: '#475569' }}>Inactive</span></td>
-                                            <td>2025-12-31</td>
-                                            <td>0/100</td>
-                                            <td>
-                                                <button className="icon-btn-small"><Edit2 size={14} /></button>
-                                            </td>
-                                        </tr>
+                                        {promoCodes.map(promo => (
+                                            <tr key={promo.id}>
+                                                <td style={{ fontWeight: 'bold', fontFamily: 'monospace', color: promo.status === 'ACTIVE' ? '#10b981' : '#64748b' }}>{promo.code}</td>
+                                                <td>{promo.reward}</td>
+                                                <td><span className={`badge ${promo.status === 'ACTIVE' ? 'pro' : ''}`} style={promo.status !== 'ACTIVE' ? { background: '#cbd5e1', color: '#475569' } : {}}>{promo.status}</span></td>
+                                                <td>{promo.expiry || 'Never'}</td>
+                                                <td>{promo.usage_count || 0}{promo.usage_limit > 0 ? `/${promo.usage_limit}` : ' / ∞'}</td>
+                                                <td>
+                                                    <div className="flex gap-1">
+                                                        <button className="icon-btn-small" onClick={() => setEditingPromo(promo)}><Edit2 size={14} /></button>
+                                                        <button className="icon-btn-small text-danger" onClick={() => handleDeletePromoCode(promo.id)}><Trash2 size={14} /></button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        ))}
                                     </tbody>
                                 </table>
                             </div>
@@ -744,6 +789,7 @@ const SuperAdmin = () => {
             {editingNode && <EditNodeModal node={editingNode} onClose={() => setEditingNode(null)} onSave={handleSaveNode} />}
             {editingUser && <EditUserModal user={editingUser} onClose={() => setEditingUser(null)} onSave={handleSaveUser} />}
             {editingPlan && <EditPlanModal plan={editingPlan} onClose={() => setEditingPlan(null)} onSave={handleSavePlan} />}
+            {editingPromo && <EditPromoCodeModal promo={editingPromo} onClose={() => setEditingPromo(null)} onSave={handleSavePromoCode} />}
         </div>
     );
 };

@@ -1,20 +1,22 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { Home, Users, MessageSquare, Calendar, Plus } from 'lucide-react';
+import { Home, Users, MessageSquare, Globe, Plus, Crown } from 'lucide-react';
 import '../MobileStyles.css';
 
 const BottomNav = ({ onAddContact, checkPermission }) => {
+    const profile = JSON.parse(localStorage.getItem('agent_user_profile') || '{}');
+    const isSuperAdmin = profile.role === 'super_admin';
 
     return (
         <nav className="bottom-nav mobile-only">
             <NavLink to="/" className={({ isActive }) => `nav-item-mobile ${isActive ? 'active' : ''}`}>
                 <Home size={24} />
-                <span>Dashboard</span>
+                <span>Home</span>
             </NavLink>
 
             <NavLink to="/databases" className={({ isActive }) => `nav-item-mobile ${isActive ? 'active' : ''}`}>
                 <Users size={24} />
-                <span>Databases</span>
+                <span>DB</span>
             </NavLink>
 
             <div className="nav-fab-container">
@@ -25,13 +27,20 @@ const BottomNav = ({ onAddContact, checkPermission }) => {
 
             <NavLink to="/follow-up" className={({ isActive }) => `nav-item-mobile ${isActive ? 'active' : ''}`}>
                 <MessageSquare size={24} />
-                <span>Follow Up</span>
+                <span>Msgs</span>
             </NavLink>
 
-            <NavLink to="/landing-page" className={({ isActive }) => `nav-item-mobile ${isActive ? 'active' : ''}`}>
-                <Calendar size={24} />
-                <span>Your Page</span>
-            </NavLink>
+            {isSuperAdmin ? (
+                <NavLink to="/super-admin" className={({ isActive }) => `nav-item-mobile ${isActive ? 'active' : ''}`}>
+                    <Crown size={24} color="#eab308" />
+                    <span>Admin</span>
+                </NavLink>
+            ) : (
+                <NavLink to="/landing-page" className={({ isActive }) => `nav-item-mobile ${isActive ? 'active' : ''}`}>
+                    <Globe size={24} />
+                    <span>Page</span>
+                </NavLink>
+            )}
         </nav>
     );
 };
