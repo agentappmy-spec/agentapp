@@ -452,6 +452,18 @@ const SuperAdmin = () => {
     const [editingPlan, setEditingPlan] = useState(null);
     const [editingPromo, setEditingPromo] = useState(null);
 
+    // Filter & Search State
+    const [searchTerm, setSearchTerm] = useState('');
+    const [isFilterOpen, setIsFilterOpen] = useState(false);
+    const [selectedFilterPlan, setSelectedFilterPlan] = useState('All');
+
+    const filteredUsers = users.filter(user => {
+        const matchesSearch = user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            user.email.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesPlan = selectedFilterPlan === 'All' || user.plan === selectedFilterPlan;
+        return matchesSearch && matchesPlan;
+    });
+
     // --- Actions ---
 
     const handleSaveNode = (updatedNode) => {
@@ -716,57 +728,116 @@ const SuperAdmin = () => {
 
             <div className="sa-content">
                 {activeTab === 'users' && (
-                    <div className="user-list-view">
-                        <div className="sa-toolbar">
-                            <div className="search-bar">
-                                <Search size={18} className="text-gray-400" />
-                                <input placeholder="Search users..." />
+                    <div className="user-list-view fade-in">
+                        <div className="sa-toolbar-enhanced">
+                            <div className="sa-search-wrapper">
+                                <Search size={18} className="search-icon" />
+                                <input
+                                    placeholder="Search name, email, etc..."
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                />
                             </div>
-                            <div className="toolbar-actions">
-                                <button onClick={fetchUsers} className="icon-btn-small" title="Refresh"><Clock size={16} /></button>
-                                <button onClick={() => setEditingUser({ name: '', email: '', plan: 'Free', status: 'Active', isNew: true })} className="primary-btn small-btn">
-                                    <Plus size={16} style={{ marginRight: '4px' }} /> Add User
+                            <div className="sa-toolbar-actions">
+                                <button
+                                    className={`icon-btn-filter ${isFilterOpen ? 'active' : ''}`}
+                                    onClick={() => setIsFilterOpen(!isFilterOpen)}
+                                    title="Filters"
+                                >
+                                    <Filter size={20} />
+                                </button>
+                                <button onClick={fetchUsers} className="secondary-btn" title="Refresh Data" style={{ padding: '0.75rem' }}>
+                                    <Clock size={16} />
+                                </button>
+                                <button onClick={() => setEditingUser({ name: '', email: '', plan: 'Free', status: 'Active', isNew: true })} className="primary-btn">
+                                    <Plus size={18} style={{ marginRight: '8px' }} />
+                                    <span className="desktop-only">Add New User</span>
+                                    <span className="mobile-only">Add</span>
                                 </button>
                             </div>
                         </div>
 
+                        {isFilterOpen && (
+                            <div className="sa-filter-panel fade-in">
+                                <div className="filter-group">
+                                    <label>Filter by Plan:</label>
+                                    <div className="filter-pills">
+                                        {['All', 'Free', 'Pro'].map(p => (
+                                            <button
+                                                key={p}
+                                                className={`filter-pill ${selectedFilterPlan === p ? 'active' : ''}`}
+                                                onClick={() => setSelectedFilterPlan(p)}
+                                            >
+                                                {p}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
                         <div className="table-responsive-wrapper">
-                            <table className="sa-table">
+                            <table className="sa-table-modern">
                                 <thead>
                                     <tr>
-                                        <th>Name</th>
-                                        <th>Email</th>
-                                        <th>Plan</th>
-                                        <th>Joined</th>
+                                        <th>User Profile</th>
+                                        <th>Plan ID</th>
                                         <th>Status</th>
-                                        <th>Action</th>
+                                        <th>Joined Date</th>
+                                        <th style={{ textAlign: 'center' }}>Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {users.map(user => (
+                                    {filteredUsers.map(user => (
                                         <tr key={user.id}>
                                             <td>
-                                                <div className="user-cell">
-                                                    <div className="avatar-circle">{user.name.charAt(0)}</div>
-                                                    <span>{user.name}</span>
+                                                <div className="sa-user-cell">
+                                                    <div className={`sa-avatar ${user.plan === 'Pro' ? 'pro' : ''}`}>
+                                                        {user.name.charAt(0)}
+                                                    </div>
+                                                    <div className="sa-user-info">
+                                                        <div className="sa-user-name">{user.name}</div>
+                                                        <div className="sa-user-email">{user.email}</div>
+                                                    </div>
                                                 </div>
                                             </td>
-                                            <td>{user.email}</td>
-                                            <td><span className={`badge ${user.plan.toLowerCase()}`}>{user.plan}</span></td>
-                                            <td>{user.joined}</td>
-                                            <td><span className={`status-dot ${user.status.toLowerCase()}`}></span> {user.status}</td>
+                                            <td data-label="Plan ID">
+                                                <span className={`sa-badge ${user.plan.toLowerCase()}`}>
+                                                    {user.plan}
+                                                </span>
+                                            </td>
+                                            <td data-label="Status">
+                                                <div className="sa-status-wrapper">
+                                                    <span className={`sa-status-dot ${user.status.toLowerCase()}`}></span>
+                                                    <span className="sa-status-text">{user.status}</span>
+                                                </div>
+                                            </td>
+                                            <td data-label="Joined Date">
+                                                <div className="sa-date-cell">
+                                                    <Clock size={12} className="text-muted" />
+                                                    <span>{user.joined}</span>
+                                                </div>
+                                            </td>
                                             <td>
-                                                <div className="flex gap-1">
-                                                    <button className="icon-btn-small" onClick={() => setEditingUser(user)} title="Edit User">
+                                                <div className="sa-row-actions">
+                                                    <button className="sa-icon-btn" onClick={() => setEditingUser(user)} title="Edit User">
                                                         <Edit2 size={16} />
                                                     </button>
-                                                    <button className="icon-btn-small text-danger" onClick={() => handleDeleteUser(user.id)} title="Delete User">
+                                                    <button className="sa-icon-btn text-danger" onClick={() => handleDeleteUser(user.id)} title="Delete User">
                                                         <Trash2 size={16} />
                                                     </button>
                                                 </div>
                                             </td>
                                         </tr>
                                     ))}
+                                    {filteredUsers.length === 0 && (
+                                        <tr>
+                                            <td colSpan="5" className="empty-state">
+                                                <Search size={40} className="empty-icon" />
+                                                <p>No users found matching your criteria</p>
+                                            </td>
+                                        </tr>
+                                    )}
                                 </tbody>
                             </table>
                         </div>
