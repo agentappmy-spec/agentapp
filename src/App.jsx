@@ -626,11 +626,11 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/reset-password" element={<ResetPassword />} />
 
-          {/* Public Bio Link - @username */}
-          <Route path="/@:username" element={<PublicLanding />} />
-
           {/* Public Landing (legacy - for backward compatibility) */}
           <Route path="/p/public" element={<PublicLanding />} />
+
+          {/* Public Bio Link - @username or slug */}
+          <Route path="/:username" element={<PublicLanding />} />
 
           {/* Protected Routes */}
           <Route

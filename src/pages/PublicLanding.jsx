@@ -15,10 +15,12 @@ const PublicLanding = () => {
             try {
                 let query = supabase.from('profiles').select('landing_config, is_published, username');
 
-                // Check if URL is @username format
+                // Check if URL is @username format or clean slug
                 if (username) {
-                    console.log('Looking for username:', username);
-                    query = query.eq('username', username.toLowerCase());
+                    // Extract clean username (remove @ if present)
+                    const cleanUsername = username.startsWith('@') ? username.substring(1) : username;
+                    console.log('Looking for username:', cleanUsername);
+                    query = query.eq('username', cleanUsername.toLowerCase());
                 } else {
                     // Fall back to user_id query parameter (legacy)
                     const userId = searchParams.get('user_id');
