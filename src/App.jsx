@@ -196,7 +196,7 @@ function App() {
     return saved ? JSON.parse(saved) : null;
   });
 
-  // Sync Profile with DB on load
+  // Sync Profile & Config with DB on load
   useEffect(() => {
     const syncProfile = async () => {
       try {
@@ -209,8 +209,8 @@ function App() {
             .single();
 
           if (dbProfile && !error) {
+            // 1. Sync User Profile
             setUserProfile(prev => {
-              // Construct fresh object
               const fresh = {
                 ...prev,
                 planId: dbProfile.plan_id || 'free',
@@ -220,14 +220,19 @@ function App() {
                 name: dbProfile.full_name || prev?.name || 'User',
                 expiryDate: dbProfile.subscription_end_date
               };
-
-              // Only update if meaningfully different to avoid loops
               if (prev?.planId !== fresh.planId || prev?.role !== fresh.role || prev?.expiryDate !== fresh.expiryDate) {
-                console.log('Profile synced with DB:', fresh);
                 return fresh;
               }
               return prev;
             });
+
+            // 2. Sync Configs (Products & Tags) if they exist in DB
+            if (dbProfile.products && Array.isArray(dbProfile.products) && dbProfile.products.length > 0) {
+              setAvailableProducts(dbProfile.products);
+            }
+            if (dbProfile.tags && Array.isArray(dbProfile.tags) && dbProfile.tags.length > 0) {
+              setAvailableTags(dbProfile.tags);
+            }
           }
         }
       } catch (err) {
@@ -243,6 +248,26 @@ function App() {
       localStorage.setItem('agent_user_profile', JSON.stringify(userProfile));
     }
   }, [userProfile]);
+
+  // Persist Products to DB
+  useEffect(() => {
+    localStorage.setItem('agent_products', JSON.stringify(availableProducts));
+    if (userProfile?.id) {
+      supabase.from('profiles').update({ products: availableProducts }).eq('id', userProfile.id).then(({ error }) => {
+        if (error) console.warn('Failed to save products to DB (column might be missing):', error.message);
+      });
+    }
+  }, [availableProducts, userProfile?.id]);
+
+  // Persist Tags to DB
+  useEffect(() => {
+    localStorage.setItem('agent_tags', JSON.stringify(availableTags));
+    if (userProfile?.id) {
+      supabase.from('profiles').update({ tags: availableTags }).eq('id', userProfile.id).then(({ error }) => {
+        if (error) console.warn('Failed to save tags to DB (column might be missing):', error.message);
+      });
+    }
+  }, [availableTags, userProfile?.id]);
 
   const [integrations, setIntegrations] = useState({
     whatsapp: { enabled: true, apiKey: '', instanceId: '' },
