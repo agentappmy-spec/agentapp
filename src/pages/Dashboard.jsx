@@ -377,7 +377,12 @@ const Dashboard = () => {
             {/* --- Desktop Header --- */}
             <header className="page-header desktop-only">
                 <div>
-                    <h1 className="page-title">Welcome back, {userProfile.name.split(' ')[0]}</h1>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <h1 className="page-title">Welcome back, {userProfile.name.split(' ')[0]}</h1>
+                        <span className={`badge ${userProfile.planId === 'pro' ? 'pro' : ''}`} style={{ fontSize: '0.8rem', padding: '0.2rem 0.6rem', alignSelf: 'center' }}>
+                            {userProfile.planId === 'pro' ? 'PRO' : 'FREE'}
+                        </span>
+                    </div>
                     <p className="page-subtitle">Track your goals and stay on top of your clients.</p>
                 </div>
                 <div style={{ display: 'flex', gap: '10px' }}>
@@ -393,7 +398,7 @@ const Dashboard = () => {
                     <h1 style={{ color: 'white' }}>Salam, {userProfile.name.split(' ')[0]}!</h1>
                     <div className="tier-badge">
                         <Target size={12} />
-                        {userProfile.role === 'super_admin' ? 'Super Admin' : userProfile.role === 'pro' ? 'PRO User' : 'FREE User'}
+                        {userProfile.role === 'super_admin' ? 'Super Admin' : userProfile.planId === 'pro' ? 'PRO User' : 'FREE User'}
                     </div>
 
                 </div>

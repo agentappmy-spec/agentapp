@@ -408,3 +408,20 @@
     color: var(--text-primary);
     border: 1px solid var(--border-color);
 }
+
+/* Badge Styles */
+.badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    display: inline-block;
+    background: #e2e8f0;
+    color: #475569;
+}
+
+.badge.pro {
+    background: #dbeafe;
+    color: #2563eb;
+}

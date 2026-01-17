@@ -512,6 +512,31 @@ const Settings = () => {
                                 <h2 className="pricing-title">Simple, transparent pricing</h2>
                                 <p className="pricing-subtitle">Everything you need to grow your agency business.</p>
 
+                                {/* Current Plan Summary */}
+                                <div className="glass-panel" style={{ margin: '2rem auto', padding: '1.5rem', maxWidth: '600px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderLeft: `6px solid ${userProfile.planId === 'pro' ? '#10b981' : '#cbd5e1'}` }}>
+                                    <div>
+                                        <div style={{ textTransform: 'uppercase', fontSize: '0.75rem', fontWeight: '700', color: '#64748b', letterSpacing: '1px' }}>Current Plan</div>
+                                        <h3 style={{ fontSize: '1.5rem', margin: '0.2rem 0', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                            {userProfile.planId === 'pro' ? 'Pro Plan' : 'Free Starter'}
+                                            {userProfile.planId === 'pro' && <span className="badge pro">Active</span>}
+                                        </h3>
+                                        <p style={{ color: '#64748b', fontSize: '0.9rem', margin: 0 }}>
+                                            {userProfile.planId === 'pro' && userProfile.subscription_end_date
+                                                ? `Renews on ${new Date(userProfile.subscription_end_date).toLocaleDateString()}`
+                                                : 'Free forever. Upgrade anytime.'}
+                                        </p>
+                                    </div>
+                                    {userProfile.planId === 'pro' ? (
+                                        <div style={{ textAlign: 'right' }}>
+                                            <button className="secondary-btn small-btn" onClick={() => alert('Manage subscription via Portal (Coming Soon)')}>Manage</button>
+                                        </div>
+                                    ) : (
+                                        <div style={{ textAlign: 'right' }}>
+                                            <div style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>RM 0<span style={{ fontSize: '0.9rem', fontWeight: 'normal' }}>/mo</span></div>
+                                        </div>
+                                    )}
+                                </div>
+
                                 <div className="pricing-toggle-container">
                                     <div className="pricing-toggle">
                                         <div

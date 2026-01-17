@@ -67,18 +67,26 @@ const Sidebar = () => {
             <div className="sidebar-footer">
                 <button
                     onClick={handleLogout}
-                    className="nav-item"
+                    className="logout-btn"
                     style={{
                         width: '100%',
-                        background: 'none',
-                        border: 'none',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '12px',
+                        padding: '12px',
+                        background: 'rgba(239, 68, 68, 0.1)',
+                        border: '1px solid rgba(239, 68, 68, 0.2)',
+                        borderRadius: '12px',
                         color: '#ef4444',
                         cursor: 'pointer',
-                        justifyContent: 'flex-start'
+                        transition: 'all 0.2s ease',
+                        fontWeight: 500
                     }}
+                    onMouseOver={(e) => { e.currentTarget.style.background = 'rgba(239, 68, 68, 0.2)'; }}
+                    onMouseOut={(e) => { e.currentTarget.style.background = 'rgba(239, 68, 68, 0.1)'; }}
                 >
-                    <LogOut size={20} className="nav-icon" />
-                    <span className="nav-text">Logout</span>
+                    <LogOut size={20} />
+                    <span>Sign Out</span>
                 </button>
             </div>
         </aside>
