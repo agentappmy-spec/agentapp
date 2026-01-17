@@ -196,8 +196,52 @@ function App() {
     return saved ? JSON.parse(saved) : null;
   });
 
+  // Sync Profile with DB on load
   useEffect(() => {
-    localStorage.setItem('agent_user_profile', JSON.stringify(userProfile));
+    const syncProfile = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session && session.user) {
+          const { data: dbProfile, error } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', session.user.id)
+            .single();
+
+          if (dbProfile && !error) {
+            setUserProfile(prev => {
+              // Construct fresh object
+              const fresh = {
+                ...prev,
+                planId: dbProfile.plan_id || 'free',
+                role: dbProfile.role || 'free',
+                id: session.user.id,
+                email: session.user.email,
+                name: dbProfile.full_name || prev?.name || 'User',
+                expiryDate: dbProfile.subscription_end_date
+              };
+
+              // Only update if meaningfully different to avoid loops
+              if (prev?.planId !== fresh.planId || prev?.role !== fresh.role || prev?.expiryDate !== fresh.expiryDate) {
+                console.log('Profile synced with DB:', fresh);
+                return fresh;
+              }
+              return prev;
+            });
+          }
+        }
+      } catch (err) {
+        console.error('Profile sync failed:', err);
+      }
+    };
+
+    syncProfile();
+  }, []);
+
+  useEffect(() => {
+    if (userProfile) {
+      localStorage.setItem('agent_user_profile', JSON.stringify(userProfile));
+    }
   }, [userProfile]);
 
   const [integrations, setIntegrations] = useState({
