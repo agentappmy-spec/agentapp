@@ -32,7 +32,14 @@ const LandingRenderer = ({ config, profile }) => {
                         mergedContent.text = `© ${new Date().getFullYear()} ${profile.name || profile.full_name || 'Agent'}. All rights reserved.`;
                     }
                     if (section.type === 'products_grid' && profile.products) {
-                        mergedContent.items = profile.products.map(p => typeof p === 'string' ? { name: p, description: '' } : p);
+                        mergedContent.items = profile.products.map(p => {
+                            const pName = typeof p === 'string' ? p : p.name;
+                            const existing = section.content.items?.find(i => (typeof i === 'string' ? i : i.name) === pName);
+                            return {
+                                name: pName,
+                                description: existing?.description || (typeof p === 'object' ? p.description : '')
+                            };
+                        });
                     }
                 }
 

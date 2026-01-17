@@ -581,13 +581,42 @@ const LandingPage = () => {
                                         </div>
                                         <div className="form-group">
                                             <label>Products <span className="sync-note">(Synced from Products Settings)</span></label>
-                                            <div style={{ padding: '1rem', background: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+                                            <div className="list-editor">
                                                 {userProfile?.products?.length > 0 ? (
-                                                    <ul style={{ paddingLeft: '1.2rem', margin: 0 }}>
-                                                        {userProfile.products.map((p, idx) => (
-                                                            <li key={idx} style={{ fontSize: '0.85rem', color: '#64748b' }}>{typeof p === 'string' ? p : p.name}</li>
-                                                        ))}
-                                                    </ul>
+                                                    userProfile.products.map((p, idx) => {
+                                                        const pName = typeof p === 'string' ? p : p.name;
+                                                        const pDesc = selectedSection.content.items?.find(i => (typeof i === 'string' ? i : i.name) === pName)?.description || (typeof p === 'object' ? p.description : '');
+
+                                                        return (
+                                                            <div key={idx} className="list-item-box" style={{ padding: '1rem', background: '#f8fafc', border: '1px solid #e2e8f0' }}>
+                                                                <div className="form-group" style={{ marginBottom: '8px' }}>
+                                                                    <label style={{ fontSize: '0.75rem', fontWeight: '800' }}>Product Name</label>
+                                                                    <div style={{ padding: '0.6rem 0.8rem', background: '#f1f5f9', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '0.9rem', color: '#64748b' }}>
+                                                                        {pName}
+                                                                    </div>
+                                                                </div>
+                                                                <div className="form-group" style={{ marginBottom: 0 }}>
+                                                                    <label style={{ fontSize: '0.75rem', fontWeight: '800' }}>Description (Landing Page)</label>
+                                                                    <textarea
+                                                                        rows="2"
+                                                                        value={pDesc}
+                                                                        onChange={(e) => {
+                                                                            const newItems = [...(selectedSection.content.items || [])];
+                                                                            const existingIdx = newItems.findIndex(i => (typeof i === 'string' ? i : i.name) === pName);
+                                                                            if (existingIdx >= 0) {
+                                                                                newItems[existingIdx] = { ...newItems[existingIdx], name: pName, description: e.target.value };
+                                                                            } else {
+                                                                                newItems.push({ name: pName, description: e.target.value });
+                                                                            }
+                                                                            handleUpdateSection(selectedSection.id, { items: newItems });
+                                                                        }}
+                                                                        placeholder="Write a custom description for your landing page..."
+                                                                        style={{ fontSize: '0.9rem' }}
+                                                                    />
+                                                                </div>
+                                                            </div>
+                                                        );
+                                                    })
                                                 ) : (
                                                     <p style={{ fontSize: '0.85rem', color: '#94a3b8', margin: 0 }}>No products configured. Set them in Settings &gt; Products.</p>
                                                 )}
