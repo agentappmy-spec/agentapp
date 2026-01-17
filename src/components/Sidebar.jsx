@@ -24,9 +24,20 @@ const Sidebar = () => {
     return (
         <aside className={`sidebar desktop-only`}>
             <div className="sidebar-header">
-                <div className="logo-container">
-                    <span style={{ fontSize: '24px', marginRight: '8px' }}>🚀</span>
-                    <h1 className="logo-text">AgentApp</h1>
+                <div className="logo-container" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <div style={{
+                        width: '32px',
+                        height: '32px',
+                        background: '#0f172a',
+                        color: 'white',
+                        borderRadius: '8px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontWeight: '800',
+                        fontSize: '18px'
+                    }}>A</div>
+                    <h1 className="logo-text" style={{ fontSize: '1.25rem', fontWeight: '800', color: '#0f172a' }}>AgentApp</h1>
                 </div>
             </div>
 
