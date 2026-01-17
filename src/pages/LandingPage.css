@@ -290,6 +290,21 @@
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
+.section-item.active {
+    background: white;
+    border-color: var(--primary);
+    color: var(--primary);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.sync-note {
+    color: #3b82f6;
+    font-weight: normal;
+    font-size: 0.7rem;
+    font-style: italic;
+    margin-left: 4px;
+}
+
 .delete-icon {
     color: var(--text-secondary);
     opacity: 1;

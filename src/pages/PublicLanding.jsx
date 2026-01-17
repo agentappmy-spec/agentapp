@@ -5,6 +5,7 @@ import LandingRenderer from '../components/landing/LandingRenderer';
 
 const PublicLanding = () => {
     const [config, setConfig] = useState(null);
+    const [profile, setProfile] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [searchParams] = useSearchParams();
@@ -13,7 +14,7 @@ const PublicLanding = () => {
     useEffect(() => {
         const fetchConfig = async () => {
             try {
-                let query = supabase.from('profiles').select('landing_config, is_published, username');
+                let query = supabase.from('profiles').select('landing_config, is_published, username, full_name, photo_url, title, bio, products');
 
                 // Check if URL is @username format or clean slug
                 if (username) {
@@ -57,6 +58,7 @@ const PublicLanding = () => {
 
                 if (data?.landing_config) {
                     setConfig(data.landing_config);
+                    setProfile(data);
                 } else {
                     setError('No landing page configured');
                 }
@@ -84,7 +86,7 @@ const PublicLanding = () => {
 
     return (
         <div className="public-landing-page">
-            <LandingRenderer config={config} />
+            <LandingRenderer config={config} profile={profile} />
             <footer style={{ textAlign: 'center', padding: '2rem', fontSize: '0.8rem', opacity: 0.6 }}>
                 Powered by AgentApp
             </footer>

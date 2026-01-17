@@ -513,28 +513,28 @@ const LandingPage = () => {
                                 {selectedSection.type === 'profile_hero' && (
                                     <>
                                         <div className="form-group">
-                                            <label>Name</label>
-                                            <input value={selectedSection.content.name} onChange={e => handleUpdateSection(selectedSection.id, { name: e.target.value })} />
+                                            <label>Name <span className="sync-note">(Synced from Profile)</span></label>
+                                            <input value={userProfile?.name || ''} disabled style={{ backgroundColor: '#f8fafc', color: '#64748b' }} />
                                         </div>
                                         <div className="form-group">
-                                            <label>Role / Title</label>
-                                            <input value={selectedSection.content.role} onChange={e => handleUpdateSection(selectedSection.id, { role: e.target.value })} />
+                                            <label>Title <span className="sync-note">(Synced from Profile)</span></label>
+                                            <input value={userProfile?.title || ''} disabled style={{ backgroundColor: '#f8fafc', color: '#64748b' }} />
                                         </div>
                                         <div className="form-group">
                                             <label>Theme Color</label>
                                             <input type="color" value={selectedSection.content.primaryColor} onChange={e => handleUpdateSection(selectedSection.id, { primaryColor: e.target.value })} />
                                         </div>
                                         <div className="form-group">
-                                            <label>Image URL</label>
-                                            <input placeholder="https://..." value={selectedSection.content.imageUrl || ''} onChange={e => handleUpdateSection(selectedSection.id, { imageUrl: e.target.value })} />
+                                            <label>Image URL <span className="sync-note">(Synced from Profile)</span></label>
+                                            <input value={userProfile?.photoUrl || ''} disabled style={{ backgroundColor: '#f8fafc', color: '#64748b' }} />
                                         </div>
                                     </>
                                 )}
 
                                 {selectedSection.type === 'bio' && (
                                     <div className="form-group">
-                                        <label>Bio Text</label>
-                                        <textarea rows="6" value={selectedSection.content.text} onChange={e => handleUpdateSection(selectedSection.id, { text: e.target.value })} />
+                                        <label>Bio Text <span className="sync-note">(Synced from Profile)</span></label>
+                                        <textarea rows="6" value={userProfile?.bio || ''} disabled style={{ backgroundColor: '#f8fafc', color: '#64748b' }} />
                                     </div>
                                 )}
 
@@ -566,8 +566,18 @@ const LandingPage = () => {
                                             <input type="color" value={selectedSection.content.accentColor} onChange={e => handleUpdateSection(selectedSection.id, { accentColor: e.target.value })} />
                                         </div>
                                         <div className="form-group">
-                                            <label>Products</label>
-                                            <ProductEditor items={selectedSection.content.items || []} onChange={items => handleUpdateSection(selectedSection.id, { items })} />
+                                            <label>Products <span className="sync-note">(Synced from Products Settings)</span></label>
+                                            <div style={{ padding: '1rem', background: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+                                                {userProfile?.products?.length > 0 ? (
+                                                    <ul style={{ paddingLeft: '1.2rem', margin: 0 }}>
+                                                        {userProfile.products.map((p, idx) => (
+                                                            <li key={idx} style={{ fontSize: '0.85rem', color: '#64748b' }}>{typeof p === 'string' ? p : p.name}</li>
+                                                        ))}
+                                                    </ul>
+                                                ) : (
+                                                    <p style={{ fontSize: '0.85rem', color: '#94a3b8', margin: 0 }}>No products configured. Set them in Settings &gt; Products.</p>
+                                                )}
+                                            </div>
                                         </div>
                                     </>
                                 )}
@@ -587,8 +597,8 @@ const LandingPage = () => {
 
                                 {selectedSection.type === 'footer' && (
                                     <div className="form-group">
-                                        <label>Footer Text</label>
-                                        <input value={selectedSection.content.text} onChange={e => handleUpdateSection(selectedSection.id, { text: e.target.value })} />
+                                        <label>Footer Text <span className="sync-note">(Auto-generated)</span></label>
+                                        <input value={`© ${new Date().getFullYear()} ${userProfile?.name || 'Agent'}. All rights reserved.`} disabled style={{ backgroundColor: '#f8fafc', color: '#64748b' }} />
                                     </div>
                                 )}
                             </div>
@@ -598,7 +608,7 @@ const LandingPage = () => {
                             <h3 style={{ marginBottom: '1rem' }}>Your Sections</h3>
                             <div className="draggable-list">
                                 {pageConfig.sections.map((section, idx) => (
-                                    <div key={section.id} className="section-item" onClick={() => setSelectedSectionId(section.id)}>
+                                    <div key={section.id} className={`section-item ${selectedSectionId === section.id ? 'active' : ''}`} onClick={() => setSelectedSectionId(section.id)}>
                                         <div className="flex items-center gap-2">
                                             <Move size={14} className="text-gray-400" />
                                             <span>{section.name}</span>
@@ -627,7 +637,7 @@ const LandingPage = () => {
 
                 <main className="builder-canvas">
                     <div className={`preview-wrapper ${previewMode}`}>
-                        <LandingRenderer config={pageConfig} />
+                        <LandingRenderer config={pageConfig} profile={userProfile} />
                     </div>
                 </main>
             </div>

@@ -26,6 +26,7 @@ const Settings = () => {
     // Initialize view based on screen width
     // On Desktop (>900px), this state is ignored by CSS
     const [mobileView, setMobileView] = useState(window.innerWidth <= 900 ? 'menu' : 'content');
+    const [usernameError, setUsernameError] = useState('');
 
     // Helper to switch tabs
     const handleTabChange = (tab) => {
@@ -479,39 +480,54 @@ const Settings = () => {
                                                         placeholder="yourname"
                                                         value={userProfile.username || ''}
                                                         onChange={async (e) => {
-                                                            const value = e.target.value.toLowerCase().replace(/[^a-z0-9_-]/g, '');
+                                                            const value = e.target.value.toLowerCase().replace(/[^a-z]/g, '').substring(0, 10);
                                                             updateProfile('username', value);
 
                                                             // Real-time validation
-                                                            if (value.length >= 3) {
-                                                                const { data } = await supabase
-                                                                    .from('profiles')
-                                                                    .select('id')
-                                                                    .eq('username', value)
-                                                                    .single();
+                                                            if (value.length > 0 && value.length < 4) {
+                                                                setUsernameError('Username must be at least 4 characters');
+                                                            } else {
+                                                                setUsernameError('');
 
-                                                                if (data && data.id !== userProfile.id) {
-                                                                    console.log('Username taken');
+                                                                if (value.length >= 4) {
+                                                                    const { data } = await supabase
+                                                                        .from('profiles')
+                                                                        .select('id')
+                                                                        .eq('username', value)
+                                                                        .single();
+
+                                                                    if (data && data.id !== userProfile.id) {
+                                                                        setUsernameError('Username is already taken');
+                                                                    }
                                                                 }
                                                             }
                                                         }}
                                                         onBlur={async () => {
-                                                            if (userProfile.username && userProfile.username.length >= 3) {
+                                                            if (usernameError) return;
+
+                                                            if (userProfile.username && userProfile.username.length >= 4) {
                                                                 const { error } = await supabase
                                                                     .from('profiles')
                                                                     .update({ username: userProfile.username })
                                                                     .eq('id', userProfile.id);
 
                                                                 if (error) {
-                                                                    alert('Username already taken or invalid. Please choose another.');
-                                                                    updateProfile('username', '');
+                                                                    setUsernameError('Failed to save username. It might be taken.');
                                                                 }
                                                             }
                                                         }}
-                                                        style={{ paddingLeft: '32px' }}
+                                                        style={{
+                                                            paddingLeft: '32px',
+                                                            borderColor: usernameError ? '#ef4444' : ''
+                                                        }}
                                                     />
+                                                    {usernameError && (
+                                                        <div style={{ color: '#ef4444', fontSize: '0.75rem', marginTop: '4px', fontWeight: '500' }}>
+                                                            {usernameError}
+                                                        </div>
+                                                    )}
                                                 </div>
-                                                {userProfile.username && userProfile.username.length >= 3 && (
+                                                {userProfile.username && userProfile.username.length >= 4 && (
                                                     <button
                                                         type="button"
                                                         className="secondary-btn"
