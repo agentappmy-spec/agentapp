@@ -30,17 +30,10 @@ const BottomNav = ({ onAddContact, checkPermission }) => {
                 <span>Msgs</span>
             </NavLink>
 
-            {isSuperAdmin ? (
-                <NavLink to="/super-admin" className={({ isActive }) => `nav-item-mobile ${isActive ? 'active' : ''}`}>
-                    <Crown size={24} color="#eab308" />
-                    <span>Admin</span>
-                </NavLink>
-            ) : (
-                <NavLink to="/landing-page" className={({ isActive }) => `nav-item-mobile ${isActive ? 'active' : ''}`}>
-                    <Globe size={24} />
-                    <span>Page</span>
-                </NavLink>
-            )}
+            <NavLink to="/landing-page" className={({ isActive }) => `nav-item-mobile ${isActive ? 'active' : ''}`}>
+                <Globe size={24} />
+                <span>Page</span>
+            </NavLink>
         </nav>
     );
 };

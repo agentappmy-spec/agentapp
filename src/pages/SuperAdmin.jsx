@@ -142,6 +142,110 @@ const EditUserModal = ({ user, onClose, onSave }) => {
     );
 };
 
+const EditPlanModal = ({ plan, onClose, onSave }) => {
+    const [formData, setFormData] = useState({
+        ...plan,
+        features: Array.isArray(plan.features) ? plan.features.join(', ') : plan.features
+    });
+
+    const handleChange = (field, value) => {
+        setFormData(prev => ({ ...prev, [field]: value }));
+    };
+
+    return (
+        <div className="modal-overlay">
+            <div className="modal-content glass-panel" style={{ width: '500px', background: 'white', padding: '2rem', borderRadius: '12px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                    <h2 className="modal-title" style={{ fontSize: '1.25rem', fontWeight: 'bold' }}>{plan.isNew ? 'New Plan' : 'Edit Plan'}</h2>
+                    <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer' }}><X size={20} /></button>
+                </div>
+
+                <div className="form-group" style={{ marginBottom: '1rem' }}>
+                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600' }}>Plan Name</label>
+                    <input
+                        value={formData.name}
+                        onChange={e => handleChange('name', e.target.value)}
+                        style={{ width: '100%', padding: '0.75rem', border: '1px solid #e2e8f0', borderRadius: '8px' }}
+                    />
+                </div>
+
+                <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
+                    <div className="form-group" style={{ flex: 1 }}>
+                        <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600' }}>Monthly Price (RM)</label>
+                        <input
+                            type="number"
+                            value={formData.price_monthly}
+                            onChange={e => handleChange('price_monthly', e.target.value)}
+                            style={{ width: '100%', padding: '0.75rem', border: '1px solid #e2e8f0', borderRadius: '8px' }}
+                        />
+                    </div>
+                    <div className="form-group" style={{ flex: 1 }}>
+                        <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600' }}>Yearly Price (RM)</label>
+                        <input
+                            type="number"
+                            value={formData.price_yearly}
+                            onChange={e => handleChange('price_yearly', e.target.value)}
+                            style={{ width: '100%', padding: '0.75rem', border: '1px solid #e2e8f0', borderRadius: '8px' }}
+                        />
+                    </div>
+                </div>
+
+                <div className="form-group" style={{ marginBottom: '1rem' }}>
+                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600' }}>Contact Limit</label>
+                    <input
+                        type="number"
+                        value={formData.contact_limit}
+                        onChange={e => handleChange('contact_limit', e.target.value)}
+                        placeholder="0 for unlimited"
+                        style={{ width: '100%', padding: '0.75rem', border: '1px solid #e2e8f0', borderRadius: '8px' }}
+                    />
+                    <small style={{ color: '#64748b' }}>Use a large number like 1000000 for "Unlimited", or 0.</small>
+                </div>
+
+                <div className="form-group" style={{ marginBottom: '1rem' }}>
+                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600' }}>Monthly Message Limit</label>
+                    <input
+                        type="number"
+                        value={formData.monthly_message_limit || 0}
+                        onChange={e => handleChange('monthly_message_limit', e.target.value)}
+                        placeholder="0 for no limit or check logic"
+                        style={{ width: '100%', padding: '0.75rem', border: '1px solid #e2e8f0', borderRadius: '8px' }}
+                    />
+                    <small style={{ color: '#64748b' }}>Limit for Auto Follow Up messages (0 uses default).</small>
+                </div>
+
+                <div className="form-group" style={{ marginBottom: '1rem' }}>
+                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600' }}>Features (comma separated)</label>
+                    <textarea
+                        rows="3"
+                        value={formData.features}
+                        onChange={e => handleChange('features', e.target.value)}
+                        style={{ width: '100%', padding: '0.75rem', border: '1px solid #e2e8f0', borderRadius: '8px' }}
+                    />
+                </div>
+
+                <div className="modal-actions" style={{ marginTop: '2rem', display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>
+                    <button className="secondary-btn" onClick={onClose} style={{ padding: '0.75rem 1.5rem', borderRadius: '8px', border: '1px solid #e2e8f0', background: 'white' }}>Cancel</button>
+                    <button
+                        className="primary-btn"
+                        onClick={() => onSave({
+                            ...formData,
+                            monthly_message_limit: Number(formData.monthly_message_limit) || 0,
+                            contact_limit: Number(formData.contact_limit),
+                            price_monthly: Number(formData.price_monthly),
+                            price_yearly: Number(formData.price_yearly),
+                            features: formData.features.split(',').map(f => f.trim()).filter(f => f)
+                        })}
+                        style={{ padding: '0.75rem 1.5rem', borderRadius: '8px', background: '#2563eb', color: 'white', border: 'none' }}
+                    >
+                        Save Plan
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+};
+
 const EditPromoCodeModal = ({ promo, onClose, onSave }) => {
     const [formData, setFormData] = useState({
         ...promo,
