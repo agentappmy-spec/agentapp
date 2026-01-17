@@ -97,7 +97,8 @@ const LandingPage = () => {
     const pageConfig = landingConfig || TEMPLATES.pro;
 
     const handlePublish = async () => {
-        if (!checkPermission('landing_page')) {
+        // Check permission (super admins bypass this)
+        if (userProfile?.role !== 'super_admin' && !checkPermission('landing_page')) {
             if (window.confirm("📢 Publishing your Landing Page is a Pro feature.\n\nFree users can design and edit, but only Pro users can publish their page for the public to see.\n\nUpgrade now to share your professional landing page!\n\nClick OK to view upgrade options.")) {
                 window.location.href = '/settings?tab=billing';
             }
