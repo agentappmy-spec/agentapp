@@ -221,9 +221,11 @@ function App() {
                 id: session.user.id,
                 email: session.user.email,
                 name: dbProfile.full_name || prev?.name || 'User',
-                expiryDate: dbProfile.subscription_end_date
+                expiryDate: dbProfile.subscription_end_date,
+                username: dbProfile.username,
+                is_published: dbProfile.is_published || false
               };
-              if (prev?.planId !== fresh.planId || prev?.role !== fresh.role || prev?.expiryDate !== fresh.expiryDate) {
+              if (prev?.planId !== fresh.planId || prev?.role !== fresh.role || prev?.expiryDate !== fresh.expiryDate || prev?.username !== fresh.username || prev?.is_published !== fresh.is_published) {
                 return fresh;
               }
               return prev;
@@ -623,7 +625,11 @@ function App() {
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/reset-password" element={<ResetPassword />} />
-          {/* Public Landing (if kept separate) */}
+
+          {/* Public Bio Link - @username */}
+          <Route path="/@:username" element={<PublicLanding />} />
+
+          {/* Public Landing (legacy - for backward compatibility) */}
           <Route path="/p/public" element={<PublicLanding />} />
 
           {/* Protected Routes */}

@@ -12,6 +12,7 @@ import {
     Grid,
     Link as LinkIcon
 } from 'lucide-react';
+import { supabase } from '../services/supabaseClient';
 import LandingRenderer from '../components/landing/LandingRenderer';
 import './LandingPage.css';
 
@@ -95,14 +96,49 @@ const LandingPage = () => {
     // Use landingConfig from context (synced with DB)
     const pageConfig = landingConfig || TEMPLATES.pro;
 
-    const handlePublish = () => {
+    const handlePublish = async () => {
         if (!checkPermission('landing_page')) {
             if (window.confirm("📢 Publishing your Landing Page is a Pro feature.\n\nFree users can design and edit, but only Pro users can publish their page for the public to see.\n\nUpgrade now to share your professional landing page!\n\nClick OK to view upgrade options.")) {
                 window.location.href = '/settings?tab=billing';
             }
-        } else {
-            // TODO: Implement actual publish logic
-            alert(`✅ Your landing page is published!\n\nPublic URL: ${window.location.origin}/p/public?user_id=${userProfile?.id}`);
+            return;
+        }
+
+        // Check if user has set a username
+        if (!userProfile?.username) {
+            if (window.confirm("⚠️ You need to set a username first!\n\nYour username will be your public bio link URL (e.g., agentapp.com/@yourname)\n\nGo to Settings to set your username now?")) {
+                window.location.href = '/settings?tab=profile';
+            }
+            return;
+        }
+
+        try {
+            // Toggle publish status
+            const newPublishStatus = !userProfile?.is_published;
+
+            const { error } = await supabase
+                .from('profiles')
+                .update({ is_published: newPublishStatus })
+                .eq('id', userProfile.id);
+
+            if (error) {
+                alert('❌ Failed to publish. Please try again.');
+                console.error('Publish error:', error);
+                return;
+            }
+
+            // Update local state
+            setUserProfile(prev => ({ ...prev, is_published: newPublishStatus }));
+
+            if (newPublishStatus) {
+                const publicUrl = `${window.location.origin}/@${userProfile.username}`;
+                alert(`✅ Your landing page is now published!\n\nPublic URL: ${publicUrl}\n\nCopy this link and add it to your social media bios!`);
+            } else {
+                alert('📝 Your landing page has been unpublished.\n\nIt is no longer publicly accessible.');
+            }
+        } catch (err) {
+            console.error('Publish error:', err);
+            alert('❌ Something went wrong. Please try again.');
         }
     };
 
@@ -287,7 +323,7 @@ const LandingPage = () => {
 
                     <button className="primary-btn save-btn" onClick={handlePublish}>
                         <Save size={18} />
-                        <span>Publish</span>
+                        <span>{userProfile?.is_published ? 'Unpublish' : 'Publish'}</span>
                     </button>
                 </div>
             </header>

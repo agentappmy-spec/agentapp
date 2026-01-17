@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useParams } from 'react-router-dom';
 import { supabase } from '../services/supabaseClient';
 import LandingRenderer from '../components/landing/LandingRenderer';
 
@@ -7,28 +7,42 @@ const PublicLanding = () => {
     const [config, setConfig] = useState(null);
     const [loading, setLoading] = useState(true);
     const [searchParams] = useSearchParams();
+    const { username } = useParams();
 
     useEffect(() => {
         const fetchConfig = async () => {
             try {
-                // Get user_id from URL query parameter
-                const userId = searchParams.get('user_id');
+                let query = supabase.from('profiles').select('landing_config, is_published');
 
-                if (!userId) {
+                // Check if URL is @username format
+                if (username) {
+                    query = query.eq('username', username.toLowerCase());
+                } else {
+                    // Fall back to user_id query parameter (legacy)
+                    const userId = searchParams.get('user_id');
+                    if (!userId) {
+                        setLoading(false);
+                        return;
+                    }
+                    query = query.eq('id', userId);
+                }
+
+                const { data, error } = await query.single();
+
+                if (error) {
+                    console.error('Error fetching landing config:', error);
                     setLoading(false);
                     return;
                 }
 
-                // Fetch landing config from Supabase
-                const { data, error } = await supabase
-                    .from('profiles')
-                    .select('landing_config')
-                    .eq('id', userId)
-                    .single();
+                // Check if page is published
+                if (!data?.is_published) {
+                    console.log('Page not published');
+                    setLoading(false);
+                    return;
+                }
 
-                if (error) {
-                    console.error('Error fetching landing config:', error);
-                } else if (data?.landing_config) {
+                if (data?.landing_config) {
                     setConfig(data.landing_config);
                 }
             } catch (err) {
@@ -38,7 +52,7 @@ const PublicLanding = () => {
         };
 
         fetchConfig();
-    }, [searchParams]);
+    }, [searchParams, username]);
 
     if (loading) return <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>Loading...</div>;
 
@@ -46,7 +60,7 @@ const PublicLanding = () => {
         return (
             <div style={{ textAlign: 'center', padding: '4rem' }}>
                 <h1>Page Not Found</h1>
-                <p>This agent has not published a landing page yet.</p>
+                <p>This page doesn't exist or hasn't been published yet.</p>
             </div>
         );
     }
