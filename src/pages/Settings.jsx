@@ -268,10 +268,23 @@ const Settings = () => {
 
     return (
         <div className={`settings-container ${mobileView === 'content' ? 'mobile-content-active' : ''}`}>
-            <h1 className="page-title desktop-only">Settings</h1>
-            {mobileView === 'menu' && <h1 className="page-title mobile-only">Settings</h1>}
+            {/* Desktop Header */}
+            <header className="page-header desktop-only">
+                <div>
+                    <h1 className="page-title">Settings</h1>
+                    <p className="page-subtitle">Manage your profile, subscription, and app configuration.</p>
+                </div>
+                {activeTab === 'profile' && (
+                    <div className="badge pro" style={{ alignSelf: 'center' }}>
+                        {userProfile.planId === 'pro' ? 'PRO ACCOUNT' : 'FREE ACCOUNT'}
+                    </div>
+                )}
+            </header>
 
-            <div className={`glass-panel settings-layout`}>
+            {/* Mobile Header Title */}
+            {mobileView === 'menu' && <h1 className="page-title mobile-only" style={{ padding: '0 1rem' }}>Settings</h1>}
+
+            <div className={`settings-layout`}>
                 {/* Mobile: Show Back Button if in content mode */}
                 {mobileView === 'content' && (
                     <div className="mobile-only settings-back-header">
