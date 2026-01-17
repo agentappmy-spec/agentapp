@@ -6,47 +6,61 @@ import LandingRenderer from '../components/landing/LandingRenderer';
 const PublicLanding = () => {
     const [config, setConfig] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
     const [searchParams] = useSearchParams();
     const { username } = useParams();
 
     useEffect(() => {
         const fetchConfig = async () => {
             try {
-                let query = supabase.from('profiles').select('landing_config, is_published');
+                let query = supabase.from('profiles').select('landing_config, is_published, username');
 
                 // Check if URL is @username format
                 if (username) {
+                    console.log('Looking for username:', username);
                     query = query.eq('username', username.toLowerCase());
                 } else {
                     // Fall back to user_id query parameter (legacy)
                     const userId = searchParams.get('user_id');
                     if (!userId) {
+                        setError('No username or user ID provided');
                         setLoading(false);
                         return;
                     }
                     query = query.eq('id', userId);
                 }
 
-                const { data, error } = await query.single();
+                const { data, error: fetchError } = await query.single();
 
-                if (error) {
-                    console.error('Error fetching landing config:', error);
+                if (fetchError) {
+                    console.error('Error fetching landing config:', fetchError);
+                    if (fetchError.code === 'PGRST116') {
+                        setError('User not found');
+                    } else {
+                        setError('Failed to load page');
+                    }
                     setLoading(false);
                     return;
                 }
 
+                console.log('Fetched data:', data);
+
                 // Check if page is published
                 if (!data?.is_published) {
                     console.log('Page not published');
+                    setError('Page not published');
                     setLoading(false);
                     return;
                 }
 
                 if (data?.landing_config) {
                     setConfig(data.landing_config);
+                } else {
+                    setError('No landing page configured');
                 }
             } catch (err) {
                 console.error('Failed to load landing page:', err);
+                setError('Something went wrong');
             }
             setLoading(false);
         };
@@ -60,7 +74,8 @@ const PublicLanding = () => {
         return (
             <div style={{ textAlign: 'center', padding: '4rem' }}>
                 <h1>Page Not Found</h1>
-                <p>This page doesn't exist or hasn't been published yet.</p>
+                <p>{error || "This page doesn't exist or hasn't been published yet."}</p>
+                {username && <p style={{ color: '#64748b', fontSize: '0.9rem', marginTop: '1rem' }}>Looking for: @{username}</p>}
             </div>
         );
     }
