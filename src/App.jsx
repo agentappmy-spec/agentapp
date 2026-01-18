@@ -14,7 +14,6 @@ import Login from './pages/Login';
 import ErrorBoundary from './components/ErrorBoundary';
 import ResetPassword from './pages/ResetPassword';
 import SuperAdmin from './pages/SuperAdmin';
-import MessageLogs from './pages/MessageLogs';
 import { supabase } from './services/supabaseClient';
 import { ROLES, APP_PLANS } from './utils/constants';
 import './App.css';
@@ -552,7 +551,6 @@ function App() {
             <Route path="contacts" element={<Databases />} />
             <Route path="follow-up" element={<FollowUp />} />
             <Route path="landing-page" element={<LandingPage />} />
-            <Route path="logs" element={<MessageLogs />} />
 
             {/* Super Admin Route */}
             <Route

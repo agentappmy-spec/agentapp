@@ -75,11 +75,6 @@ const Sidebar = ({ userProfile, checkPermission, setUserProfile }) => {
                     <span className="nav-text">Landing Page</span>
                 </NavLink>
 
-                <NavLink to="/logs" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
-                    <Database size={20} className="nav-icon" /> {/* Using Database icon temporarily or find a History/List icon */}
-                    <span className="nav-text">Message Logs</span>
-                </NavLink>
-
                 {isSuperAdmin && (
                     <NavLink to="/super-admin" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
                         <Crown size={20} className="nav-icon" color="#eab308" />

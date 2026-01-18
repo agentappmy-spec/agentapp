@@ -20,8 +20,8 @@ const LogBadge = ({ type }) => {
     return <span className="status-badge status-default">{type}</span>;
 }
 
-const MessageLogs = () => {
-    const { userProfile } = useOutletContext();
+const MessageLogs = ({ userProfile }) => {
+    // const { userProfile } = useOutletContext(); // Context might not reach here if not direct child of Outlet
     const [logs, setLogs] = useState([]);
     const [loading, setLoading] = useState(true);
     const [filterType, setFilterType] = useState('all'); // all, email, whatsapp
@@ -70,17 +70,11 @@ const MessageLogs = () => {
     });
 
     return (
-        <div className="dashboard-container" style={{ padding: '20px', maxWidth: '1200px', margin: '0 auto' }}>
-            <header className="page-header" style={{ marginBottom: '24px' }}>
-                <div>
-                    <h1 className="page-title">Message History</h1>
-                    <p className="page-subtitle">Track all automated and manual communications.</p>
-                </div>
-                <div className="desktop-only text-muted" style={{ fontSize: '0.9rem' }}>
-                    <Clock size={14} style={{ display: 'inline', marginRight: 5 }} />
-                    Showing last 100 records
-                </div>
-            </header>
+        <div className="message-logs-section fade-in">
+            <h2 className="section-title">Message History</h2>
+            <p className="page-subtitle" style={{ marginBottom: '2rem' }}>
+                Track all automated and manual communications.
+            </p>
 
             <div className="glass-panel" style={{ padding: 0, overflow: 'hidden' }}>
                 {/* Toolbar */}
@@ -133,13 +127,13 @@ const MessageLogs = () => {
                         <tbody>
                             {loading ? (
                                 <tr>
-                                    <td colspan="6" style={{ textAlign: 'center', padding: '40px' }}>
+                                    <td colSpan="6" style={{ textAlign: 'center', padding: '40px' }}>
                                         <div className="loading-spinner"></div>
                                     </td>
                                 </tr>
                             ) : filteredLogs.length === 0 ? (
                                 <tr>
-                                    <td colspan="6" className="empty-state">
+                                    <td colSpan="6" className="empty-state">
                                         No messages found.
                                     </td>
                                 </tr>

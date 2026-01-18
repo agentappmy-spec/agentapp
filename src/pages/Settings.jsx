@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useOutletContext, useSearchParams, useLocation } from 'react-router-dom';
 import { User, Mail, Phone, Save, Tag, Package, Plus, Trash2, Edit2, MessageCircle, MessageSquare, Target, Facebook, Instagram, AtSign, Video, FileText, Globe, LogOut, Check, X, Star } from 'lucide-react';
 import { supabase } from '../services/supabaseClient';
+import MessageLogs from './MessageLogs';
 import './Settings.css';
 
 const Settings = () => {
@@ -394,6 +395,12 @@ const Settings = () => {
                         onClick={() => handleTabChange('integrations')}
                     >
                         <MessageCircle size={18} /> Integrations
+                    </button>
+                    <button
+                        className={`settings-nav-item ${activeTab === 'logs' ? 'active' : ''}`}
+                        onClick={() => handleTabChange('logs')}
+                    >
+                        <FileText size={18} /> Message Logs
                     </button>
 
                     {userProfile.role === 'super_admin' && (
@@ -982,6 +989,12 @@ const Settings = () => {
                                     </button>
                                 </div>
                             )}
+                        </div>
+                    )}
+
+                    {activeTab === 'logs' && (
+                        <div className="logs-section fade-in">
+                            <MessageLogs userProfile={userProfile} />
                         </div>
                     )}
                 </div>
