@@ -16,6 +16,7 @@ import {
     LayoutList,
     LayoutGrid,
     Mail, // For Email
+    Trash2, // For Delete button
     X // For Close Icon
 } from 'lucide-react';
 import { sendAgentEmail } from '../services/emailService';
@@ -166,6 +167,58 @@ const ComposeEmailModal = ({ isOpen, onClose, recipientName, recipientEmail, onS
     );
 };
 
+const DeleteConfirmationModal = ({ isOpen, onClose, onConfirm, contactName }) => {
+    const [confirmText, setConfirmText] = useState('');
+
+    if (!isOpen) return null;
+
+    const isMatch = confirmText === 'DELETE';
+
+    const handleConfirm = () => {
+        if (isMatch) {
+            onConfirm();
+            setConfirmText('');
+            onClose();
+        }
+    };
+
+    return (
+        <div className="modal-overlay">
+            <div className="modal-content glass-panel" style={{ width: '90%', maxWidth: '400px', textAlign: 'center' }}>
+                <div style={{ margin: '0 auto', width: '50px', height: '50px', borderRadius: '50%', background: '#fee2e2', color: '#ef4444', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1rem' }}>
+                    <AlertCircle size={24} />
+                </div>
+                <h3 className="modal-title">Delete Contact?</h3>
+                <p style={{ color: 'var(--text-muted)', marginBottom: '0.5rem' }}>
+                    You are about to delete <strong>{contactName}</strong>.
+                </p>
+                <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem' }}>
+                    This action cannot be undone. To confirm, please type <strong>DELETE</strong> below.
+                </p>
+                <input
+                    type="text"
+                    className="form-input"
+                    placeholder="Type DELETE"
+                    value={confirmText}
+                    onChange={(e) => setConfirmText(e.target.value)}
+                    style={{ marginBottom: '1.5rem' }}
+                />
+                <div className="modal-footer" style={{ justifyContent: 'center' }}>
+                    <button className="secondary-btn" onClick={() => { setConfirmText(''); onClose(); }}>Cancel</button>
+                    <button
+                        className="primary-btn"
+                        style={{ background: isMatch ? '#ef4444' : '#e2e8f0', cursor: isMatch ? 'pointer' : 'not-allowed' }}
+                        disabled={!isMatch}
+                        onClick={handleConfirm}
+                    >
+                        Delete Contact
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+};
+
 const Databases = () => {
     const {
         contacts,
@@ -177,11 +230,14 @@ const Databases = () => {
         openAddModal, // Global context
         setEditingContact: setGlobalEditingContact, // Global context
         setIsContactModalOpen, // Global context
+        handleDeleteContact, // Added for delete functionality
         userProfile, // Needed for limit check
         integrations
     } = useOutletContext();
 
     const { logMessage, canSendMessage, usage, limit } = useMessageLimit(userProfile);
+
+    const [deletingContact, setDeletingContact] = useState(null);
 
     const handleWhatsAppClick = (phone) => {
         if (!integrations.whatsapp?.enabled) {
@@ -498,6 +554,14 @@ const Databases = () => {
                                                 <button className="icon-btn-sm" onClick={() => openEditModal(row)} title="Edit Contact">
                                                     <Edit size={16} />
                                                 </button>
+                                                <button
+                                                    className="icon-btn-sm"
+                                                    onClick={() => setDeletingContact(row)}
+                                                    title="Delete Contact"
+                                                    style={{ color: '#ef4444' }}
+                                                >
+                                                    <Trash2 size={16} />
+                                                </button>
                                             </div>
                                         </td>
                                     </tr>
@@ -583,6 +647,18 @@ const Databases = () => {
                 recipientName={emailRecipient?.name}
                 recipientEmail={emailRecipient?.email}
                 onSend={handleSendEmail}
+            />
+
+            <DeleteConfirmationModal
+                isOpen={!!deletingContact}
+                onClose={() => setDeletingContact(null)}
+                onConfirm={() => {
+                    if (deletingContact) {
+                        handleDeleteContact(deletingContact.id);
+                        setDeletingContact(null);
+                    }
+                }}
+                contactName={deletingContact?.name}
             />
         </div >
     );

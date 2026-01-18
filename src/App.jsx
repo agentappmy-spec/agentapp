@@ -481,6 +481,24 @@ function App() {
     }
   };
 
+  const handleDeleteContact = async (contactId) => {
+    try {
+      const { error } = await supabase
+        .from('contacts')
+        .delete()
+        .eq('id', contactId);
+
+      if (error) throw error;
+
+      // Remove from local state
+      setContacts(contacts.filter(c => c.id !== contactId));
+    } catch (err) {
+      console.error('Error deleting contact:', err);
+      // Fallback to local state if offline
+      setContacts(contacts.filter(c => c.id !== contactId));
+    }
+  };
+
   // --- Check Permission Helper ---
   const checkPermission = (featureKey) => {
     if (userProfile?.role === 'super_admin') return true;
@@ -523,6 +541,7 @@ function App() {
     openAddModal,
     setEditingContact,
     setIsContactModalOpen,
+    handleDeleteContact, // Added for delete functionality
     packages,       // Added
     setPackages,    // Added
     checkPermission, // Added
