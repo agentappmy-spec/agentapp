@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import { useOutletContext, useNavigate } from 'react-router-dom';
 import { Users, FileCheck, AlertCircle, TrendingUp, Gift, ChevronRight, Target, MessageCircle as MessageCheck, LogOut } from 'lucide-react';
 import { supabase } from '../services/supabaseClient';
+import { useMessageLimit } from '../hooks/useMessageLimit';
 import './Dashboard.css';
 
 const StatCard = ({ title, value, label, icon: Icon, color }) => (
@@ -37,6 +38,14 @@ const ProgressBar = ({ label, current, target, unit = '' }) => {
 
 const Dashboard = () => {
     const { contacts, userProfile, userGoals, openAddModal } = useOutletContext();
+    const { usage, limit } = useMessageLimit(userProfile);
+
+    // Calculate reset date (1st of next month)
+    const resetDate = new Date();
+    resetDate.setMonth(resetDate.getMonth() + 1);
+    resetDate.setDate(1);
+    const resetDateStr = resetDate.toLocaleDateString('en-US', { day: 'numeric', month: 'short' });
+
     const [saasStats, setSaasStats] = React.useState({
         totalUsers: 0,
         proUsers: 0,
@@ -482,6 +491,24 @@ const Dashboard = () => {
                 </button>
             </div>
 
+            {/* --- Mobile Usage Status --- */}
+            <div className="mobile-usage-card mobile-only" style={{ margin: '0 1rem 1.5rem', padding: '1rem', background: 'rgba(255,255,255,0.1)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.2)' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', color: 'white' }}>
+                    <span style={{ fontSize: '0.9rem' }}>Message Limit</span>
+                    <span style={{ fontSize: '0.9rem', fontWeight: 'bold' }}>{usage} / {limit > 0 ? limit : '∞'}</span>
+                </div>
+                <div style={{ height: '6px', background: 'rgba(255,255,255,0.2)', borderRadius: '3px', overflow: 'hidden' }}>
+                    <div style={{
+                        height: '100%',
+                        width: `${limit > 0 ? Math.min((usage / limit) * 100, 100) : 0}%`,
+                        background: usage >= limit ? '#ef4444' : '#10b981'
+                    }} />
+                </div>
+                <div style={{ marginTop: '0.5rem', fontSize: '0.75rem', color: 'rgba(255,255,255,0.7)', textAlign: 'right' }}>
+                    Resets on {resetDateStr}
+                </div>
+            </div>
+
             {/* --- Desktop Stats Grid --- */}
             <div className="stats-grid desktop-only">
                 <StatCard
@@ -511,6 +538,13 @@ const Dashboard = () => {
                     label="Lapsed / Grace Period"
                     icon={AlertCircle}
                     color="245, 158, 11" // Orange
+                />
+                <StatCard
+                    title="Message Usage"
+                    value={`${usage} / ${limit > 0 ? limit : '∞'}`}
+                    label={`${limit > 0 ? limit - usage : 'Unlimited'} left • Resets ${resetDateStr}`}
+                    icon={MessageCheck}
+                    color={usage >= limit ? "239, 68, 68" : "16, 185, 129"} // Red if full, Green otherwise
                 />
             </div>
 
