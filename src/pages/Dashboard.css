@@ -378,8 +378,9 @@
 
 /* Mobile Actions */
 .mobile-actions-row {
-    display: flex;
-    gap: 1rem;
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 0.75rem;
     margin-bottom: 2rem;
 }
 

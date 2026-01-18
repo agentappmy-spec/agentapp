@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { useOutletContext, useNavigate } from 'react-router-dom';
-import { Users, FileCheck, AlertCircle, TrendingUp, Gift, ChevronRight, Target, MessageCircle as MessageCheck, LogOut, Mail, Smartphone, MessageSquare } from 'lucide-react';
+import { Users, FileCheck, AlertCircle, TrendingUp, Gift, ChevronRight, Target, MessageCircle as MessageCheck, LogOut, Mail, Smartphone, MessageSquare, Search, Globe, Package } from 'lucide-react';
 import { supabase } from '../services/supabaseClient';
 import { useMessageLimit } from '../hooks/useMessageLimit';
 import { ROLES, CONTACT_ROLES, CONTACT_STATUS } from '../utils/constants';
@@ -289,10 +289,16 @@ const Dashboard = () => {
                             <h2 className="section-title">Quick Actions</h2>
                             <div className="quick-actions-grid">
                                 <button className="action-btn" onClick={() => navigate('/super-admin', { state: { activeTab: 'users' } })}>
-                                    <Users size={16} style={{ marginRight: '8px', display: 'inline' }} /> User Management
+                                    <Users size={16} style={{ marginRight: '8px', display: 'inline' }} /> Platform Users
                                 </button>
                                 <button className="action-btn" onClick={() => navigate('/super-admin', { state: { activeTab: 'followup' } })}>
-                                    <MessageCheck size={16} style={{ marginRight: '8px', display: 'inline' }} /> Configure Automation
+                                    <MessageCheck size={16} style={{ marginRight: '8px', display: 'inline' }} /> Master Automation
+                                </button>
+                                <button className="action-btn" onClick={() => navigate('/super-admin', { state: { activeTab: 'promos' } })}>
+                                    <Gift size={16} style={{ marginRight: '8px', display: 'inline' }} /> Manage Promo Codes
+                                </button>
+                                <button className="action-btn" onClick={() => navigate('/super-admin', { state: { activeTab: 'plans' } })}>
+                                    <Package size={16} style={{ marginRight: '8px', display: 'inline' }} /> Subscription Plans
                                 </button>
                             </div>
                         </div>
@@ -559,11 +565,20 @@ const Dashboard = () => {
 
             {/* Mobile Action Buttons */}
             <div className="mobile-actions-row mobile-only">
-                <button className="mobile-action-btn primary" onClick={openAddModal}>
-                    <Users size={18} /> Tambah Lead
+                <button className="mobile-action-btn primary" onClick={openAddModal} style={{ gridColumn: 'span 2' }}>
+                    <Users size={18} /> Tambah Lead Baru
                 </button>
                 <button className="mobile-action-btn secondary" onClick={() => navigate('/databases')}>
-                    <TrendingUp size={18} /> Cari
+                    <Search size={18} /> Cari Contact
+                </button>
+                <button className="mobile-action-btn secondary" onClick={() => navigate('/settings', { state: { activeTab: 'goals' } })}>
+                    <Target size={18} /> Sasaran KPI
+                </button>
+                <button className="mobile-action-btn secondary" onClick={() => navigate('/follow-up')}>
+                    <MessageCheck size={18} /> Semak Followup
+                </button>
+                <button className="mobile-action-btn secondary" onClick={() => navigate('/landing-page')}>
+                    <Globe size={18} /> Landing Page
                 </button>
             </div>
 
@@ -688,16 +703,16 @@ const Dashboard = () => {
                         <h2 className="section-title">Quick Actions</h2>
                         <div className="quick-actions-grid">
                             <button className="action-btn" onClick={() => navigate('/settings', { state: { activeTab: 'goals' } })}>
-                                <Target size={16} style={{ marginRight: '8px', display: 'inline' }} /> Update Targets
+                                <Target size={16} style={{ marginRight: '8px', display: 'inline' }} /> Update Targets & Goals
                             </button>
                             <button className="action-btn" onClick={() => navigate('/follow-up')}>
-                                <MessageCheck size={16} style={{ marginRight: '8px', display: 'inline' }} /> Review Automation
+                                <MessageCheck size={16} style={{ marginRight: '8px', display: 'inline' }} /> Review Auto Follow Up
                             </button>
                             <button className="action-btn" onClick={() => navigate('/databases')}>
-                                <Users size={16} style={{ marginRight: '8px', display: 'inline' }} /> View All Contacts
+                                <Users size={16} style={{ marginRight: '8px', display: 'inline' }} /> Contact Management
                             </button>
                             <button className="action-btn" onClick={() => navigate('/landing-page')}>
-                                <FileCheck size={16} style={{ marginRight: '8px', display: 'inline' }} /> Edit Landing Page
+                                <Globe size={16} style={{ marginRight: '8px', display: 'inline' }} /> Agent Landing Page
                             </button>
                         </div>
                     </div>
