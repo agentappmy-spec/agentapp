@@ -7,15 +7,17 @@ import { supabase } from './supabaseClient';
  * @param {string} to - Recipient email
  * @param {string} subject - Email subject
  * @param {string} html - HTML content
+ * @param {string} text - Plain text fallback (optional)
  * @returns {Promise<any>}
  */
-export const sendEmail = async (to, subject, html) => {
+export const sendEmail = async (to, subject, html, text = '') => {
     try {
         const { data, error } = await supabase.functions.invoke('send-email', {
             body: {
                 to,
                 subject,
-                html
+                html,
+                text: text || html.replace(/<[^>]*>/g, '') // Strip HTML tags as fallback
             }
         });
 
