@@ -235,6 +235,20 @@ function App() {
   // No localStorage to prevent cache conflicts with role/plan_id
   const [userProfile, setUserProfile] = useState(null);
 
+  // Initialize integrations and userGoals BEFORE syncProfile useEffect
+  const [integrations, setIntegrations] = useState({
+    whatsapp: { enabled: true, apiKey: '', instanceId: '' },
+    email: { enabled: false, apiKey: '', sender: 'noreply@agent.com' },
+    sms: { enabled: false, apiKey: '', senderId: 'AGENCY' }
+  });
+
+  // --- KPI / Goals ---
+  const [userGoals, setUserGoals] = useState({
+    monthlyRevenue: 5000,
+    monthlyCases: 5,
+    mdrtGoal: 600000 // Standard MDRT figure approx
+  });
+
   // Sync Profile & Config with DB on load
   useEffect(() => {
     const syncProfile = async () => {
@@ -399,18 +413,6 @@ function App() {
     // NOTE: role and planId are intentionally excluded from dependencies
   ]);
 
-  const [integrations, setIntegrations] = useState({
-    whatsapp: { enabled: true, apiKey: '', instanceId: '' },
-    email: { enabled: false, apiKey: '', sender: 'noreply@agent.com' },
-    sms: { enabled: false, apiKey: '', senderId: 'AGENCY' }
-  });
-
-  // --- KPI / Goals ---
-  const [userGoals, setUserGoals] = useState({
-    monthlyRevenue: 5000,
-    monthlyCases: 5,
-    mdrtGoal: 600000 // Standard MDRT figure approx
-  });
 
   const [followUpSchedules, setFollowUpSchedules] = useState({
     prospect: [
