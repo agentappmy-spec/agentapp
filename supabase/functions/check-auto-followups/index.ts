@@ -85,7 +85,7 @@ serve(async (req) => {
                 // For now, we assume if you are active, you have some quota.
 
                 // Prepare Email
-                const subject = step.trigger_name || `Follow Up - Day ${step.day}`
+                const subject = step.subject || step.trigger_name || `Follow Up - Day ${step.day}`
                 let content = step.content_email || step.content_sms || ''
                 content = content.replace(/{name}/g, contact.name)
 

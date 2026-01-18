@@ -68,6 +68,7 @@ const EditNodeModal = ({ node, onClose, onSave }) => {
     const [contentEmail, setContentEmail] = useState(node.contentEmail || node.content || '');
 
     const [activeChannel, setActiveChannel] = useState('sms'); // 'sms', 'whatsapp', 'email'
+    const [subject, setSubject] = useState(node.subject || '');
 
     // Helper to get current content based on tab
     const getCurrentContent = () => {
@@ -142,6 +143,19 @@ const EditNodeModal = ({ node, onClose, onSave }) => {
                     </button>
                 </div>
 
+                {activeChannel === 'email' && (
+                    <div className="form-group" style={{ marginTop: '1rem' }}>
+                        <label>Email Subject</label>
+                        <input
+                            type="text"
+                            value={subject}
+                            onChange={(e) => setSubject(e.target.value)}
+                            placeholder="Enter email subject..."
+                            style={{ width: '100%', padding: '0.6rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', background: 'white', color: 'var(--text-primary)' }}
+                        />
+                    </div>
+                )}
+
                 <div className="form-group">
                     <div className="shortcode-bar">
                         <span className="shortcode-label">Shortcodes:</span>
@@ -195,6 +209,7 @@ const EditNodeModal = ({ node, onClose, onSave }) => {
                         contentSms,
                         contentWhatsapp,
                         contentEmail,
+                        subject,
                         content: contentSms // Fallback
                     })}>
                         Save Changes
@@ -211,6 +226,7 @@ const FollowUpCard = ({ step, prevStep, index, isLast, onEdit, onDelete }) => {
     let delayText = index === 0 ? 'Instant' : `Wait ${delay} day${delay !== 1 ? 's' : ''}`;
     const dayLabel = `Day ${step.day}`;
     const previewContent = step.contentSms || step.content || step.contentWhatsapp || step.contentEmail || 'No content';
+    const emailSubject = step.subject || 'No Subject';
 
     // Swipe Logic
     const [touchStart, setTouchStart] = useState(null);
@@ -266,6 +282,11 @@ const FollowUpCard = ({ step, prevStep, index, isLast, onEdit, onDelete }) => {
                     </div>
 
                     <div className="card-message-preview">
+                        {step.contentEmail && step.subject && (
+                            <div style={{ fontSize: '0.8rem', fontWeight: 'bold', marginBottom: '4px', color: 'var(--text-primary)' }}>
+                                Subj: {step.subject}
+                            </div>
+                        )}
                         "{previewContent}"
                     </div>
 
@@ -409,6 +430,7 @@ const FollowUp = () => {
                     content_sms: updatedNode.contentSms || updatedNode.content,
                     content_whatsapp: updatedNode.contentWhatsapp,
                     content_email: updatedNode.contentEmail,
+                    subject: updatedNode.subject,
                     trigger_name: updatedNode.trigger_name || updatedNode.label, // Ensure trigger_name is saved
                     updated_at: new Date()
                 })
@@ -456,7 +478,8 @@ const FollowUp = () => {
                     ...created,
                     contentSms: created.content_sms,
                     contentWhatsapp: created.content_whatsapp,
-                    contentEmail: created.content_email
+                    contentEmail: created.content_email,
+                    subject: created.subject
                 });
             }
         } catch (err) {

@@ -43,6 +43,7 @@ const EditNodeModal = ({ node, onClose, onSave }) => {
     const [contentSms, setContentSms] = useState(node.contentSms || node.message || '');
     const [contentWhatsapp, setContentWhatsapp] = useState(node.contentWhatsapp || node.message || '');
     const [contentEmail, setContentEmail] = useState(node.contentEmail || node.message || '');
+    const [subject, setSubject] = useState(node.subject || '');
     const [activeChannel, setActiveChannel] = useState('sms');
 
     const getCurrentContent = () => {
@@ -82,6 +83,19 @@ const EditNodeModal = ({ node, onClose, onSave }) => {
                     <button className={`role-tab-btn ${activeChannel === 'email' ? 'active' : ''}`} onClick={() => setActiveTabProp('email', setActiveChannel)} style={{ flex: 1, padding: '0.6rem' }}>Email</button>
                 </div>
 
+                {activeChannel === 'email' && (
+                    <div className="form-group" style={{ marginBottom: '1.5rem' }}>
+                        <label>Email Subject</label>
+                        <input
+                            type="text"
+                            className="sa-input-modern"
+                            value={subject}
+                            onChange={(e) => setSubject(e.target.value)}
+                            placeholder="Enter email subject..."
+                        />
+                    </div>
+                )}
+
                 <div className="form-group">
                     <label>Message Content</label>
                     <textarea
@@ -98,7 +112,7 @@ const EditNodeModal = ({ node, onClose, onSave }) => {
 
                 <div className="modal-actions">
                     <button className="secondary-btn" onClick={onClose}>Cancel</button>
-                    <button className="primary-btn" onClick={() => onSave({ ...node, day: cDay, contentSms, contentWhatsapp, contentEmail, message: contentSms })}>
+                    <button className="primary-btn" onClick={() => onSave({ ...node, day: cDay, subject, contentSms, contentWhatsapp, contentEmail, message: contentSms })}>
                         Save Changes
                     </button>
                 </div>
@@ -507,8 +521,42 @@ const SuperAdmin = () => {
             fetchUsers();
             fetchPlans();
             fetchPromoCodes();
+            fetchWorkflowTemplates();
         }
     }, [userProfile]); // Rerun when profile loads
+
+    const fetchWorkflowTemplates = async () => {
+        try {
+            const { supabase } = await import('../services/supabaseClient');
+            const { data, error } = await supabase
+                .from('workflow_templates')
+                .select('*')
+                .order('day', { ascending: true });
+
+            if (error) throw error;
+            if (data && data.length > 0) {
+                const grouped = {
+                    free: data.filter(d => d.workflow_type === 'free_user').map(d => ({
+                        ...d,
+                        contentSms: d.content_sms,
+                        contentEmail: d.content_email,
+                        contentWhatsapp: d.content_whatsapp,
+                        message: d.content_sms
+                    })),
+                    pro: data.filter(d => d.workflow_type === 'pro_user').map(d => ({
+                        ...d,
+                        contentSms: d.content_sms,
+                        contentEmail: d.content_email,
+                        contentWhatsapp: d.content_whatsapp,
+                        message: d.content_sms
+                    }))
+                };
+                setFollowUpSettings(grouped);
+            }
+        } catch (err) {
+            console.warn('Failed to fetch workflow templates:', err);
+        }
+    };
 
     const fetchUsers = async () => {
         setIsLoading(true);
@@ -592,11 +640,11 @@ const SuperAdmin = () => {
 
     const [followUpSettings, setFollowUpSettings] = useState({
         free: [
-            { id: 1, day: 0, label: 'Welcome', message: 'Hi {name}, thanks for joining! Add your first contact now.', contentSms: 'Hi {name}, thanks for joining! Add your first contact now.' },
-            { id: 2, day: 3, label: 'Tips', message: 'Did you know? Pro users get unlimited contacts.', contentSms: 'Did you know? Pro users get unlimited contacts.' }
+            { id: 1, day: 0, label: 'Welcome', subject: 'Welcome to AgentApp! 🎉', message: 'Hi {name}, thanks for joining! Add your first contact now.', contentSms: 'Hi {name}, thanks for joining! Add your first contact now.', contentEmail: 'Hi {name}, thanks for joining! Add your first contact now.' },
+            { id: 2, day: 3, label: 'Tips', subject: 'Unlock More with Pro 🚀', message: 'Did you know? Pro users get unlimited contacts.', contentSms: 'Did you know? Pro users get unlimited contacts.', contentEmail: 'Did you know? Pro users get unlimited contacts.' }
         ],
         pro: [
-            { id: 1, day: 0, label: 'Welcome Pro', message: 'Welcome to the elite club, {name}!', contentSms: 'Welcome to the elite club, {name}!' }
+            { id: 1, day: 0, label: 'Welcome Pro', subject: 'Welcome to the elite club! 💎', message: 'Welcome to the elite club, {name}!', contentSms: 'Welcome to the elite club, {name}!', contentEmail: 'Welcome to the elite club, {name}!' }
         ]
     });
 
@@ -620,14 +668,45 @@ const SuperAdmin = () => {
 
     // --- Actions ---
 
-    const handleSaveNode = (updatedNode) => {
-        const list = [...followUpSettings[selectedRole]];
-        const idx = list.findIndex(x => x.id === updatedNode.id);
-        if (idx >= 0) list[idx] = updatedNode;
-        list.sort((a, b) => a.day - b.day);
+    const handleSaveNode = async (updatedNode) => {
+        try {
+            const { supabase } = await import('../services/supabaseClient');
+            const payload = {
+                day: updatedNode.day,
+                subject: updatedNode.subject,
+                content_sms: updatedNode.contentSms,
+                content_email: updatedNode.contentEmail,
+                content_whatsapp: updatedNode.contentWhatsapp,
+                workflow_type: selectedRole === 'free' ? 'free_user' : 'pro_user'
+            };
 
-        setFollowUpSettings(prev => ({ ...prev, [selectedRole]: list }));
-        setEditingNode(null);
+            if (typeof updatedNode.id === 'string' && updatedNode.id.length > 10) {
+                // Existing node in DB
+                const { error } = await supabase
+                    .from('workflow_templates')
+                    .update(payload)
+                    .eq('id', updatedNode.id);
+                if (error) throw error;
+            } else {
+                // New node
+                const { error } = await supabase
+                    .from('workflow_templates')
+                    .insert([payload]);
+                if (error) throw error;
+            }
+
+            fetchWorkflowTemplates();
+            setEditingNode(null);
+        } catch (err) {
+            console.error('Error saving node:', err);
+            // Fallback for UI if DB fails
+            const list = [...followUpSettings[selectedRole]];
+            const idx = list.findIndex(x => x.id === updatedNode.id);
+            if (idx >= 0) list[idx] = updatedNode;
+            list.sort((a, b) => a.day - b.day);
+            setFollowUpSettings(prev => ({ ...prev, [selectedRole]: list }));
+            setEditingNode(null);
+        }
     };
 
     const handleAddNode = () => {
@@ -637,20 +716,34 @@ const SuperAdmin = () => {
             id: Date.now(),
             day: lastDay + 3,
             label: `Day ${lastDay + 3}`,
+            subject: 'New Subject',
             message: 'New automated message...',
-            contentSms: 'New automated message...'
+            contentSms: 'New automated message...',
+            contentEmail: 'New automated message...'
         };
         const newList = [...list, newNode];
         setFollowUpSettings(prev => ({ ...prev, [selectedRole]: newList }));
         setEditingNode(newNode);
     };
 
-    const handleDeleteNode = (id) => {
-        if (window.confirm('Delete this step?')) {
+    const handleDeleteNode = async (id) => {
+        if (!confirm('Delete this step?')) return;
+        try {
+            const { supabase } = await import('../services/supabaseClient');
+            if (typeof id === 'string' && id.length > 10) {
+                const { error } = await supabase
+                    .from('workflow_templates')
+                    .delete()
+                    .eq('id', id);
+                if (error) throw error;
+            }
+
             setFollowUpSettings(prev => ({
                 ...prev,
                 [selectedRole]: prev[selectedRole].filter(n => n.id !== id)
             }));
+        } catch (err) {
+            console.error('Error deleting node:', err);
         }
     };
 
@@ -1051,7 +1144,10 @@ const SuperAdmin = () => {
                                                 </span>
                                             )}
                                         </div>
-                                        <div className="preview-text">"{step.contentSms || step.message}"</div>
+                                        <div className="preview-text">
+                                            {step.subject && <div style={{ fontWeight: 'bold', fontSize: '0.75rem', marginBottom: '2px' }}>Subj: {step.subject}</div>}
+                                            "{step.contentSms || step.message}"
+                                        </div>
                                         <div className="sa-row-actions" style={{ justifyContent: 'flex-start' }}>
                                             <button className="sa-icon-btn" onClick={() => setEditingNode(step)}>
                                                 <Edit2 size={16} />
