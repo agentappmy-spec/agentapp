@@ -1,6 +1,5 @@
-import React, { useMemo } from 'react';
 import { useOutletContext, useNavigate } from 'react-router-dom';
-import { Users, FileCheck, AlertCircle, TrendingUp, Gift, ChevronRight, Target, MessageCircle as MessageCheck, LogOut } from 'lucide-react';
+import { Users, FileCheck, AlertCircle, TrendingUp, Gift, ChevronRight, Target, MessageCircle as MessageCheck, LogOut, Mail, Smartphone, MessageSquare } from 'lucide-react';
 import { supabase } from '../services/supabaseClient';
 import { useMessageLimit } from '../hooks/useMessageLimit';
 import './Dashboard.css';
@@ -45,6 +44,14 @@ const Dashboard = () => {
     resetDate.setMonth(resetDate.getMonth() + 1);
     resetDate.setDate(1);
     const resetDateStr = resetDate.toLocaleDateString('en-US', { day: 'numeric', month: 'short' });
+
+    // Integration Logic (Mocked based on user request)
+    const isPro = userProfile.planId === 'pro';
+    const activeIntegrations = [
+        { id: 'email', label: 'Email', active: true, icon: Mail, color: '#10b981' },
+        { id: 'whatsapp', label: 'WhatsApp', active: isPro, icon: MessageCheck, color: '#25D366' },
+        { id: 'sms', label: 'SMS', active: isPro, icon: Smartphone, color: '#3b82f6' }
+    ];
 
     const [saasStats, setSaasStats] = React.useState({
         totalUsers: 0,
@@ -481,21 +488,63 @@ const Dashboard = () => {
                 </div>
             </div>
 
-            {/* --- Mobile Usage Status (Now above buttons and visible) --- */}
-            <div className="mobile-usage-card mobile-only" style={{ margin: '1rem 1rem 1.5rem', padding: '1rem', background: 'var(--primary)', borderRadius: '12px', boxShadow: '0 4px 12px rgba(37, 99, 235, 0.2)' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', color: 'white' }}>
-                    <span style={{ fontSize: '0.9rem', fontWeight: 500 }}>Message Usage</span>
-                    <span style={{ fontSize: '0.9rem', fontWeight: 'bold' }}>{usage} / {limit > 0 ? limit : '∞'}</span>
+            {/* --- Mobile Usage Status (White Card Style) --- */}
+            <div className="mobile-usage-card mobile-only glass-panel" style={{ margin: '1rem 1rem 1.5rem', padding: '1rem', borderRadius: '16px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+                    <h3 style={{ fontSize: '1rem', fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}>Message Usage</h3>
+                    <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Resets {resetDateStr}</span>
                 </div>
-                <div style={{ height: '6px', background: 'rgba(255,255,255,0.3)', borderRadius: '3px', overflow: 'hidden' }}>
-                    <div style={{
-                        height: '100%',
-                        width: `${limit > 0 ? Math.min((usage / limit) * 100, 100) : 0}%`,
-                        background: usage >= limit ? '#fecaca' : '#ffffff'
-                    }} />
+
+                {/* Usage Bar */}
+                <div style={{ marginBottom: '1rem' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.25rem' }}>
+                        <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Monthly Limit</span>
+                        <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>{usage} / {limit > 0 ? limit : '∞'}</span>
+                    </div>
+                    <div style={{ height: '8px', background: '#f1f5f9', borderRadius: '4px', overflow: 'hidden' }}>
+                        <div style={{
+                            height: '100%',
+                            width: `${limit > 0 ? Math.min((usage / limit) * 100, 100) : 0}%`,
+                            background: usage >= limit ? '#ef4444' : 'var(--primary)'
+                        }} />
+                    </div>
                 </div>
-                <div style={{ marginTop: '0.5rem', fontSize: '0.75rem', color: 'rgba(255,255,255,0.9)', textAlign: 'right' }}>
-                    Resets on {resetDateStr}
+
+                {/* Last Message Status */}
+                <div style={{ padding: '0.75rem', background: '#f8fafc', borderRadius: '8px', marginBottom: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <MessageSquare size={16} className="text-muted" />
+                        <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Last Message</span>
+                    </div>
+                    {lastMessage ? (
+                        <div style={{ textAlign: 'right' }}>
+                            <div style={{ fontSize: '0.85rem', fontWeight: 500, color: '#10b981' }}>{lastMessage.status}</div>
+                            <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
+                                {lastMessage.time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                            </div>
+                        </div>
+                    ) : (
+                        <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>No messages yet</span>
+                    )}
+                </div>
+
+                {/* Active Integrations */}
+                <div>
+                    <h4 style={{ fontSize: '0.85rem', fontWeight: 600, marginBottom: '0.5rem', color: 'var(--text-secondary)' }}>Active Integrations</h4>
+                    <div style={{ display: 'flex', gap: '0.75rem' }}>
+                        {activeIntegrations.map(app => (
+                            <div key={app.id} style={{
+                                display: 'flex', alignItems: 'center', gap: '6px',
+                                padding: '0.4rem 0.6rem', borderRadius: '6px',
+                                background: app.active ? `rgba(16, 185, 129, 0.1)` : '#f1f5f9',
+                                color: app.active ? '#065f46' : '#94a3b8',
+                                opacity: app.active ? 1 : 0.6
+                            }}>
+                                <app.icon size={14} color={app.active ? app.color : 'currentColor'} />
+                                <span style={{ fontSize: '0.75rem', fontWeight: 500 }}>{app.label}</span>
+                            </div>
+                        ))}
+                    </div>
                 </div>
             </div>
 

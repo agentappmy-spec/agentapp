@@ -4,6 +4,7 @@ import { supabase } from '../services/supabaseClient';
 export const useMessageLimit = (userProfile) => {
     const [usage, setUsage] = useState(0);
     const [limit, setLimit] = useState(0);
+    const [lastMessage, setLastMessage] = useState(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -41,14 +42,26 @@ export const useMessageLimit = (userProfile) => {
             startOfMonth.setDate(1);
             startOfMonth.setHours(0, 0, 0, 0);
 
-            const { count, error } = await supabase
+            const { count, data, error } = await supabase
                 .from('message_logs')
-                .select('*', { count: 'exact', head: true })
+                .select('*', { count: 'exact' })
                 .eq('user_id', userProfile.id)
-                .gte('created_at', startOfMonth.toISOString());
+                .gte('created_at', startOfMonth.toISOString())
+                .order('created_at', { ascending: false });
 
             if (error) throw error;
             setUsage(count || 0);
+
+            // Set last message from the latest log
+            if (data && data.length > 0) {
+                setLastMessage({
+                    type: data[0].type,
+                    time: new Date(data[0].created_at),
+                    status: 'Sent' // Mock status as logs imply success
+                });
+            } else {
+                setLastMessage(null);
+            }
         } catch (err) {
             console.error('Error fetching message usage:', err);
         } finally {
@@ -60,6 +73,11 @@ export const useMessageLimit = (userProfile) => {
         try {
             // Optimistic update
             setUsage(prev => prev + 1);
+            setLastMessage({
+                type: type,
+                time: new Date(),
+                status: 'Sent'
+            });
 
             const { error } = await supabase.from('message_logs').insert({
                 user_id: userProfile.id,
@@ -92,6 +110,7 @@ export const useMessageLimit = (userProfile) => {
     return {
         usage,
         limit,
+        lastMessage,
         loading,
         checkLimit,
         logMessage,
