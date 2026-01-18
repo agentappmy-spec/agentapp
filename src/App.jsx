@@ -417,7 +417,7 @@ function App() {
       const payload = {
         name: contactData.name,
         phone: contactData.phone,
-        email: contactData.email || null, // Add email field
+        email: contactData.email || null,
         role: contactData.role,
         status: contactData.status,
         tags: contactData.tags || [],
@@ -425,6 +425,12 @@ function App() {
         deal_value: contactData.dealValue || 0,
         next_action: contactData.nextAction || '',
         occupation: contactData.occupation || '',
+        birthday: contactData.birthday || null,
+        subscription_date: contactData.subscriptionDate || null,
+        additional_info: contactData.additionalInfo || null,
+        smoking: contactData.smoking || null,
+        auto_follow_up: contactData.autoFollowUp !== false, // Default to true
+        joined_at: contactData.joinedAt || (editingContact ? undefined : new Date().toISOString()), // Set on create only
         user_id: user?.id
       };
 
