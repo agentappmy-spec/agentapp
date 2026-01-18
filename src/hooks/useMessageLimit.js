@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
 import { supabase } from '../services/supabaseClient';
+import { APP_PLANS } from '../utils/constants';
 
 export const useMessageLimit = (userProfile) => {
     const [usage, setUsage] = useState(0);
@@ -17,7 +17,7 @@ export const useMessageLimit = (userProfile) => {
     const fetchLimit = async () => {
         try {
             // Fetch plan limits based on user's plan
-            const planId = userProfile.planId || 'free';
+            const planId = userProfile.planId || APP_PLANS.FREE;
             const { data, error } = await supabase
                 .from('plans')
                 .select('monthly_message_limit')
@@ -28,7 +28,7 @@ export const useMessageLimit = (userProfile) => {
                 setLimit(data.monthly_message_limit);
             } else {
                 // Fallback defaults if plan fetch fails
-                setLimit(planId === 'pro' ? 3000 : 300);
+                setLimit(planId === APP_PLANS.PRO ? 3000 : 300);
             }
         } catch (err) {
             console.error('Error fetching message limit:', err);
@@ -96,14 +96,7 @@ export const useMessageLimit = (userProfile) => {
     };
 
     const checkLimit = () => {
-        if (limit === 0) return true; // 0 usually means unlimited in some systems, but here 0 is 0. 
-        // Wait, did user say 0 = unlimited?
-        // User said: Free 300, Pro 3000.
-        // My migration sets default to 0 if not specified.
-        // But seed data sets 300/3000.
-        // If limit is 0, it effectively blocks sending.
-        // Let's assume if limit is > 0 it checks.
-
+        if (limit === 0) return true; // Treat 0 as unlimited in this hook to avoid blocking until data loads
         return usage < limit;
     };
 
@@ -114,6 +107,6 @@ export const useMessageLimit = (userProfile) => {
         loading,
         checkLimit,
         logMessage,
-        canSendMessage: usage < limit
+        canSendMessage: limit === 0 || usage < limit
     };
 };

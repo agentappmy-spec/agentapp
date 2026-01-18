@@ -19,6 +19,7 @@ import {
     Crown,
     Zap
 } from 'lucide-react';
+import { ROLES, APP_PLANS, FEATURE_NAMES } from '../utils/constants';
 import './SuperAdmin.css';
 
 // --- System Configuration for Plans ---
@@ -26,10 +27,10 @@ import './SuperAdmin.css';
 const AVAILABLE_FEATURES = [
     { id: 'global_reminder', label: 'Global Reminder', type: 'boolean', value: 'Auto Reminder' },
     { id: 'auto_follow_up', label: 'Auto Follow Up', type: 'boolean', value: 'Auto Follow Up' },
-    { id: 'email', label: 'Integration with Email', type: 'boolean', value: 'Email' },
-    { id: 'sms', label: 'Integration with SMS', type: 'boolean', value: 'SMS' },
-    { id: 'whatsapp', label: 'Integration with WhatsApp Official API', type: 'boolean', value: 'WhatsApp' },
-    { id: 'landing_page', label: 'Able to publish Landing Page', type: 'boolean', value: 'Landing Page' },
+    { id: 'email', label: FEATURE_NAMES.EMAIL, type: 'boolean', value: FEATURE_NAMES.EMAIL },
+    { id: 'sms', label: FEATURE_NAMES.SMS, type: 'boolean', value: FEATURE_NAMES.SMS },
+    { id: 'whatsapp', label: FEATURE_NAMES.WHATSAPP, type: 'boolean', value: FEATURE_NAMES.WHATSAPP },
+    { id: 'landing_page', label: FEATURE_NAMES.LANDING_PAGE, type: 'boolean', value: FEATURE_NAMES.LANDING_PAGE },
     { id: 'analytics', label: 'Advance Dashboard Analytics', type: 'boolean', value: 'Analytics' },
     { id: 'white_label', label: 'White Labeling', type: 'boolean', value: 'White Label' }
 ];
@@ -498,12 +499,12 @@ const SuperAdmin = () => {
                     features: ["Email Only", "Dashboard", "Keep your client contact safe"]
                 },
                 {
-                    id: 'pro',
+                    id: APP_PLANS.PRO,
                     name: 'Pro',
                     price_monthly: 22,
                     price_yearly: 220,
                     contact_limit: 1000,
-                    features: ["WhatsApp", "SMS", "Email", "Auto Follow Up", "Auto Reminder", "Landing Page", "Analytics"]
+                    features: [FEATURE_NAMES.WHATSAPP, FEATURE_NAMES.SMS, FEATURE_NAMES.EMAIL, "Auto Follow Up", "Auto Reminder", FEATURE_NAMES.LANDING_PAGE, "Analytics"]
                 }
             ]);
         }
@@ -612,18 +613,18 @@ const SuperAdmin = () => {
                 const { data, error } = await supabase.from('profiles').insert([{
                     email: userData.email,
                     full_name: userData.name,
-                    plan_id: userData.plan.toLowerCase(),
-                    role: 'agent'
+                    plan_id: userData.plan.toLowerCase() === 'pro' ? APP_PLANS.PRO : APP_PLANS.FREE,
+                    role: ROLES.AGENT || 'agent'
                 }]).select();
                 if (error) throw error;
                 fetchUsers();
             } else {
-                let planId = 'free';
-                if (userData.plan === 'Pro') planId = 'pro';
-                else if (userData.plan === 'Free') planId = 'free';
+                let planId = APP_PLANS.FREE;
+                if (userData.plan === 'Pro') planId = APP_PLANS.PRO;
+                else if (userData.plan === 'Free') planId = APP_PLANS.FREE;
                 else {
                     const found = plans.find(p => p.name === userData.plan);
-                    planId = found ? found.id : 'free';
+                    planId = found ? found.id : APP_PLANS.FREE;
                 }
 
                 const updates = {
@@ -633,7 +634,7 @@ const SuperAdmin = () => {
                 };
 
                 // If switching to free, ensure expiry is null
-                if (updates.plan_id === 'free') {
+                if (updates.plan_id === APP_PLANS.FREE) {
                     updates.subscription_end_date = null;
                 }
 
@@ -1049,18 +1050,18 @@ const SuperAdmin = () => {
                         </div>
                         <div className="sa-plans-grid-modern">
                             {plans.map(plan => {
-                                const isPro = plan.name.toLowerCase().includes('pro');
+                                const isProPlan = plan.id === APP_PLANS.PRO || plan.name.toLowerCase().includes('pro');
                                 return (
                                     <div key={plan.id} className={`sa-plan-card ${isPro ? 'pro' : ''}`}>
                                         <div className="sa-plan-header">
                                             <div className="sa-plan-title-group">
                                                 <div className="sa-plan-icon">
-                                                    {isPro ? <Crown size={24} /> : <Zap size={24} />}
+                                                    {isProPlan ? <Crown size={24} /> : <Zap size={24} />}
                                                 </div>
                                                 <div>
                                                     <h4>{plan.name}</h4>
-                                                    <span className={`sa-plan-status-badge ${isPro ? 'active' : ''}`}>
-                                                        {isPro ? 'PREMIUM' : 'BASE'}
+                                                    <span className={`sa-plan-status-badge ${isProPlan ? 'active' : ''}`}>
+                                                        {isProPlan ? 'PREMIUM' : 'BASE'}
                                                     </span>
                                                 </div>
                                             </div>

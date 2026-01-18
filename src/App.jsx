@@ -102,6 +102,7 @@ const AppLayout = ({ context, userProfile, openAddModal, checkPermission, setUse
 };
 
 import { supabase } from './services/supabaseClient';
+import { ROLES, APP_PLANS } from './utils/constants';
 
 // ... (existing imports)
 
@@ -255,9 +256,9 @@ function App() {
             // 1. Sync User Profile
             setUserProfile(prev => {
               // AUTO-CORRECT: If plan is PRO but role is FREE, force PRO
-              const dbRole = dbProfile.role || 'free';
-              const dbPlan = dbProfile.plan_id || 'free';
-              const effectiveRole = (dbPlan === 'pro' && dbRole === 'free') ? 'pro' : dbRole;
+              const dbRole = dbProfile.role || APP_PLANS.FREE;
+              const dbPlan = dbProfile.plan_id || APP_PLANS.FREE;
+              const effectiveRole = (dbPlan === APP_PLANS.PRO && dbRole === APP_PLANS.FREE) ? ROLES.PRO : dbRole;
 
               // If we fixed the role, update DB immediately
               if (effectiveRole !== dbRole) {

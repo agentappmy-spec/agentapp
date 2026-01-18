@@ -3,6 +3,7 @@ import { useOutletContext, useNavigate } from 'react-router-dom';
 import { Users, FileCheck, AlertCircle, TrendingUp, Gift, ChevronRight, Target, MessageCircle as MessageCheck, LogOut, Mail, Smartphone, MessageSquare } from 'lucide-react';
 import { supabase } from '../services/supabaseClient';
 import { useMessageLimit } from '../hooks/useMessageLimit';
+import { ROLES, CONTACT_ROLES, CONTACT_STATUS } from '../utils/constants';
 import './Dashboard.css';
 
 const StatCard = ({ title, value, label, icon: Icon, color }) => (
@@ -91,11 +92,16 @@ const Dashboard = () => {
                             date: new Date(u.created_at || Date.now()).toLocaleDateString()
                         }));
 
+                    // Calculate dynamic revenue based on pro users count and plan price
+                    // For now we still use 99 as a base but we can fetch this from the 'plans' table too
+                    // To follow best practices, we'll keep 99 but label it as a constant or fetch it
+                    const PRO_PRICE = 99;
+
                     setSaasStats({
                         totalUsers: total,
                         proUsers: pro,
                         newThisWeek: newUsers,
-                        totalRevenue: pro * 99, // Assuming RM 99/mo
+                        totalRevenue: pro * PRO_PRICE,
                         conversionRate: total > 0 ? Math.round((pro / total) * 100) : 0,
                         recentSignups: recent
                     });
@@ -171,7 +177,7 @@ const Dashboard = () => {
     }, [userProfile]);
 
 
-    if (userProfile.role === 'super_admin') {
+    if (userProfile.role === ROLES.SUPER_ADMIN) {
         return (
             <div className="dashboard-container">
                 <header className="page-header">
@@ -191,9 +197,8 @@ const Dashboard = () => {
                         color="37, 99, 235"
                     />
                     <StatCard
-                        title="Active Pro Subs"
                         value={saasStats.proUsers}
-                        label={`RM ${saasStats.proUsers * 99}.00 / mo`}
+                        label={`RM ${saasStats.totalRevenue / (saasStats.proUsers || 1)}.00 / mo`}
                         icon={Target}
                         color="16, 185, 129"
                     />
@@ -225,7 +230,7 @@ const Dashboard = () => {
                                             <div style={{ fontWeight: 600 }}>{user.name}</div>
                                             <div style={{ fontSize: '0.8rem', color: '#64748b' }}>{user.email} • {user.date}</div>
                                         </div>
-                                        <span className={`badge ${user.plan === 'pro' ? 'pro' : ''}`} style={{ fontSize: '0.7rem', textTransform: 'uppercase' }}>{user.plan}</span>
+                                        <span className={`badge ${user.plan === ROLES.PRO ? 'pro' : ''}`} style={{ fontSize: '0.7rem', textTransform: 'uppercase' }}>{user.plan}</span>
                                     </div>
                                 ))
                             ) : (
@@ -299,9 +304,9 @@ const Dashboard = () => {
 
     // --- AGENT DASHBOARD (Existing Logic) ---
     const stats = useMemo(() => {
-        const activeClients = contacts.filter(c => c.role === 'Client' && c.status === 'Active');
-        const prospects = contacts.filter(c => c.role === 'Prospect');
-        const lapsed = contacts.filter(c => c.status === 'Lapsed' || c.status === 'Grace Period');
+        const activeClients = contacts.filter(c => c.role === CONTACT_ROLES.CLIENT && c.status === CONTACT_STATUS.ACTIVE);
+        const prospects = contacts.filter(c => c.role === CONTACT_ROLES.PROSPECT);
+        const lapsed = contacts.filter(c => c.status === CONTACT_STATUS.LAPSED || c.status === CONTACT_STATUS.GRACE_PERIOD);
 
         // Financials (Simplified)
         const totalPortfolio = activeClients.reduce((sum, c) => sum + (Number(c.dealValue) || 0), 0);
@@ -395,8 +400,8 @@ const Dashboard = () => {
                 <div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                         <h1 className="page-title">Welcome back, {userProfile.name.split(' ')[0]}</h1>
-                        <span className={`badge ${userProfile.planId === 'pro' ? 'pro' : ''}`} style={{ fontSize: '0.8rem', padding: '0.2rem 0.6rem', alignSelf: 'center' }}>
-                            {userProfile.planId === 'pro' ? 'PRO' : 'FREE'}
+                        <span className={`badge ${isPro ? 'pro' : ''}`} style={{ fontSize: '0.8rem', padding: '0.2rem 0.6rem', alignSelf: 'center' }}>
+                            {isPro ? 'PRO' : 'FREE'}
                         </span>
                     </div>
                     <p className="page-subtitle">Track your goals and stay on top of your clients.</p>
@@ -414,7 +419,7 @@ const Dashboard = () => {
                     <h1 style={{ color: 'white' }}>Salam, {userProfile.name.split(' ')[0]}!</h1>
                     <div className="tier-badge">
                         <Target size={12} />
-                        {userProfile.role === 'super_admin' ? 'Super Admin' : userProfile.planId === 'pro' ? 'PRO User' : 'FREE User'}
+                        {isSuperAdmin ? 'Super Admin' : isPro ? 'PRO User' : 'FREE User'}
                     </div>
 
                 </div>
