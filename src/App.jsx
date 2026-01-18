@@ -131,9 +131,12 @@ function App() {
         if (error) {
           console.error('Error fetching contacts:', error);
         } else if (data) {
+          console.log('Fetched contacts from DB:', data);
+
           // KEY FIX: Map snake_case (DB) to camelCase (App)
           const mapToAppFormat = (c) => ({
             ...c,
+            email: c.email, // Explicitly include email
             dealValue: c.deal_value,
             nextAction: c.next_action,
           });
@@ -141,7 +144,9 @@ function App() {
           // AUTO-MIGRATION: REMOVED to prevent dummy data
           // If DB is empty, it should stay empty for new users.
 
-          setContacts(data.map(mapToAppFormat));
+          const mappedContacts = data.map(mapToAppFormat);
+          console.log('Mapped contacts:', mappedContacts);
+          setContacts(mappedContacts);
         }
       } else {
         // Fallback to local storage if not logged in
@@ -422,6 +427,8 @@ function App() {
         occupation: contactData.occupation || '',
         user_id: user?.id
       };
+
+      console.log('Saving contact with payload:', payload);
 
       if (editingContact) {
         // Update
