@@ -129,38 +129,100 @@ const Settings = () => {
     const handleRedeemCode = async () => {
         if (!promoCode.trim()) return;
 
-        // MVP: Hardcoded legacy check + Server-side validation preference
-        // Ideally we should move this to an edge function if we want to hide logics,
-        // but for now we keep the existing logic structure.
-        if (promoCode === 'KDIGITAL') {
-            const expiryDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+        try {
+            // Fetch promo code from database
+            const { data: promoData, error: fetchError } = await supabase
+                .from('promo_codes')
+                .select('*')
+                .eq('code', promoCode.toUpperCase())
+                .single();
 
-            // Update DB
-            const { error } = await supabase.from('profiles').update({
-                plan_id: 'pro',
-                role: 'pro', // Explicitly update role to pro
-                subscription_status: 'trial',
-                subscription_end_date: expiryDate.toISOString(),
-                is_trial_used: true
-            }).eq('id', userProfile.id);
-
-            if (error) {
-                alert('Redemption failed. Please try again.');
+            if (fetchError || !promoData) {
+                alert('❌ Invalid promo code. Please check and try again.');
                 return;
             }
 
-            // Update Local State (no localStorage - DB is source of truth)
+            // Validate promo code
+            if (promoData.status !== 'ACTIVE') {
+                alert('❌ This promo code is no longer active.');
+                return;
+            }
+
+            // Check expiry
+            if (promoData.expiry && promoData.expiry !== 'Never') {
+                const expiryDate = new Date(promoData.expiry);
+                if (expiryDate < new Date()) {
+                    alert('❌ This promo code has expired.');
+                    return;
+                }
+            }
+
+            // Check usage limit
+            if (promoData.usage_limit > 0 && promoData.usage_count >= promoData.usage_limit) {
+                alert('❌ This promo code has reached its usage limit.');
+                return;
+            }
+
+            // Apply reward based on reward text
+            const reward = promoData.reward.toLowerCase();
+            let updateData = {};
+            let successMessage = '';
+
+            if (reward.includes('30 days pro trial') || reward.includes('pro trial')) {
+                // Grant 30-day Pro trial
+                const expiryDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+                updateData = {
+                    plan_id: 'pro',
+                    role: 'pro',
+                    subscription_end_date: expiryDate.toISOString()
+                };
+                successMessage = `🎉 Code Redeemed! You are now a PRO user until ${expiryDate.toLocaleDateString()}.`;
+            } else if (reward.includes('50% off') || reward.includes('discount')) {
+                // For discount codes, just show a message (payment integration needed for actual discount)
+                alert(`✅ Promo code "${promoCode}" validated!\n\n${promoData.reward}\n\nThis discount will be applied at checkout.`);
+                setPromoCode('');
+                return;
+            } else {
+                // Generic reward - grant Pro access
+                const expiryDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+                updateData = {
+                    plan_id: 'pro',
+                    role: 'pro',
+                    subscription_end_date: expiryDate.toISOString()
+                };
+                successMessage = `🎉 Code Redeemed! ${promoData.reward}`;
+            }
+
+            // Update user profile in database
+            const { error: updateError } = await supabase
+                .from('profiles')
+                .update(updateData)
+                .eq('id', userProfile.id);
+
+            if (updateError) {
+                console.error('Profile update error:', updateError);
+                alert('❌ Redemption failed. Please try again.');
+                return;
+            }
+
+            // Increment usage count
+            await supabase
+                .from('promo_codes')
+                .update({ usage_count: promoData.usage_count + 1 })
+                .eq('id', promoData.id);
+
+            // Update local state
             setUserProfile({
                 ...userProfile,
-                planId: 'pro',
-                role: 'pro',
-                subscription_end_date: expiryDate.toISOString()
+                ...updateData
             });
 
-            alert(`Code Redeemed! You are now a PRO user until ${expiryDate.toLocaleDateString()}.`);
+            alert(successMessage);
             setPromoCode('');
-        } else {
-            alert('Invalid or expired code.');
+
+        } catch (error) {
+            console.error('Promo code redemption error:', error);
+            alert('❌ An error occurred. Please try again.');
         }
     };
 
