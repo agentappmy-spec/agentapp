@@ -412,6 +412,7 @@ function App() {
       const payload = {
         name: contactData.name,
         phone: contactData.phone,
+        email: contactData.email || null, // Add email field
         role: contactData.role,
         status: contactData.status,
         tags: contactData.tags || [],
