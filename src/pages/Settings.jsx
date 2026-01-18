@@ -138,6 +138,7 @@ const Settings = () => {
             // Update DB
             const { error } = await supabase.from('profiles').update({
                 plan_id: 'pro',
+                role: 'pro', // Explicitly update role to pro
                 subscription_status: 'trial',
                 subscription_end_date: expiryDate.toISOString(),
                 is_trial_used: true
@@ -149,18 +150,15 @@ const Settings = () => {
             }
 
             // Update Local State
-            const newProfile = { ...userProfile, planId: 'pro', role: 'free' }; // role stays free technically or update to pro? usually we check planId
-            // Let's assume planId is source of truth for features
-            setUserProfile(prev => ({
-                ...prev,
+            const newProfile = {
+                ...userProfile,
                 planId: 'pro',
+                role: 'pro', // Update local role to pro
                 subscription_end_date: expiryDate.toISOString()
-            }));
-            localStorage.setItem('agent_user_profile', JSON.stringify({
-                ...newProfile,
-                planId: 'pro',
-                subscription_end_date: expiryDate.toISOString()
-            }));
+            };
+
+            setUserProfile(newProfile);
+            localStorage.setItem('agent_user_profile', JSON.stringify(newProfile));
 
             alert(`Code Redeemed! You are now a PRO user until ${expiryDate.toLocaleDateString()}.`);
             setPromoCode('');

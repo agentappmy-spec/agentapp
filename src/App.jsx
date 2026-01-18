@@ -144,7 +144,6 @@ function App() {
             ...c,
             dealValue: c.deal_value,
             nextAction: c.next_action,
-            // Keep original snake_case too if needed, but UI uses camel
           });
 
           // AUTO-MIGRATION: If DB is empty but Local Storage has data, migrate it!
@@ -153,7 +152,9 @@ function App() {
             if (local) {
               const parsedLocal = JSON.parse(local);
               if (parsedLocal.length > 0) {
-                console.log('Migrating local contacts to cloud...');
+                console.log(`Starting migration of ${parsedLocal.length} contacts...`);
+                // alert('Migrating your offline data to the cloud... Please wait.'); // Optional: Visual feedback
+
                 const payload = parsedLocal.map(c => ({
                   user_id: session.user.id,
                   name: c.name,
@@ -165,7 +166,6 @@ function App() {
                   deal_value: c.dealValue || 0,
                   next_action: c.nextAction || '',
                   occupation: c.occupation || ''
-                  // Let DB generate timestamps and IDs
                 }));
 
                 const { data: inserted, error: insertError } = await supabase
@@ -176,8 +176,6 @@ function App() {
                 if (!insertError && inserted) {
                   console.log('Migration successful:', inserted.length);
                   setContacts(inserted.map(mapToAppFormat));
-                  // Optionally clear local storage or keep it as backup
-                  // localStorage.removeItem('agent_contacts'); 
                   return;
                 } else {
                   console.error('Migration failed:', insertError);
