@@ -1,8 +1,21 @@
 import { supabase } from '../services/supabaseClient';
 
-// ... (existing imports)
-
-// ...
+import React, { useState, useEffect } from 'react';
+import { useOutletContext } from 'react-router-dom';
+import {
+    MessageSquare,
+    Clock,
+    Plus,
+    Edit2,
+    Trash2,
+    Mail,
+    MessageCircle,
+    User,
+    Check,
+    X,
+    AlertTriangle
+} from 'lucide-react';
+import './FollowUp.css';
 
 const FollowUp = () => {
     // Note: We no longer rely on 'followUpSchedules' from context for the data source
