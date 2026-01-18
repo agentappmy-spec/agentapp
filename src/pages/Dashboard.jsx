@@ -38,7 +38,7 @@ const ProgressBar = ({ label, current, target, unit = '' }) => {
 
 const Dashboard = () => {
     const { contacts, userProfile, userGoals, openAddModal } = useOutletContext();
-    const { usage, limit } = useMessageLimit(userProfile);
+    const { usage, limit, lastMessage } = useMessageLimit(userProfile);
 
     // Calculate reset date (1st of next month)
     const resetDate = new Date();
