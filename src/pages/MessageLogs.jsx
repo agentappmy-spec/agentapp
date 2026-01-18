@@ -36,20 +36,27 @@ const MessageLogs = ({ userProfile }) => {
         setLoading(true);
 
         try {
-            // Note: RLS policies automatically filter rows.
-            // Agents see only their own. Super Admins see all.
+            // Join with profiles using the correct column name 'full_name' 
             let query = supabase
                 .from('message_logs')
                 .select(`
                     *,
-                    profiles:user_id (name, email)
+                    profiles:user_id (full_name, email)
                 `)
                 .order('created_at', { ascending: false })
                 .limit(100);
 
+            // Explicitly filter for non-super admins
+            if (userProfile.role !== 'super_admin') {
+                query = query.eq('user_id', userProfile.id);
+            }
+
             const { data, error } = await query;
 
-            if (error) throw error;
+            if (error) {
+                console.error('Fetch Logs Error:', error);
+                throw error;
+            }
             setLogs(data || []);
         } catch (err) {
             console.error('Error fetching logs:', err);
@@ -59,12 +66,12 @@ const MessageLogs = ({ userProfile }) => {
     };
 
     const filteredLogs = logs.filter(log => {
-        const matchesType = filterType === 'all' || log.type === filterType;
+        const matchesType = filterType === 'all' || (log.type || '').toLowerCase() === filterType;
         const searchLower = searchTerm.toLowerCase();
         const matchesSearch =
             (log.recipient || '').toLowerCase().includes(searchLower) ||
             (log.content_snippet || '').toLowerCase().includes(searchLower) ||
-            (log.profiles?.name || '').toLowerCase().includes(searchLower);
+            (log.profiles?.full_name || '').toLowerCase().includes(searchLower);
 
         return matchesType && matchesSearch;
     });
@@ -160,7 +167,7 @@ const MessageLogs = ({ userProfile }) => {
                                         </td>
                                         {userProfile?.role === 'super_admin' && (
                                             <td>
-                                                {log.profiles?.name || 'Unknown'}
+                                                {log.profiles?.full_name || 'Unknown'}
                                             </td>
                                         )}
                                         <td>
