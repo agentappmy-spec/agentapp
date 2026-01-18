@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { supabase } from '../services/supabaseClient';
 import { APP_PLANS } from '../utils/constants';
 

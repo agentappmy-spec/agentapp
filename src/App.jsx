@@ -12,9 +12,10 @@ import PublicLanding from './pages/PublicLanding';
 import Settings from './pages/Settings';
 import Login from './pages/Login';
 import ErrorBoundary from './components/ErrorBoundary';
-// ... (existing imports)
 import ResetPassword from './pages/ResetPassword';
 import SuperAdmin from './pages/SuperAdmin';
+import { supabase } from './services/supabaseClient';
+import { ROLES, APP_PLANS } from './utils/constants';
 import './App.css';
 import './MobileStyles.css';
 
@@ -100,11 +101,6 @@ const AppLayout = ({ context, userProfile, openAddModal, checkPermission, setUse
     </div>
   );
 };
-
-import { supabase } from './services/supabaseClient';
-import { ROLES, APP_PLANS } from './utils/constants';
-
-// ... (existing imports)
 
 function App() {
   const [contacts, setContacts] = useState([]); // Initialize empty for Supabase
