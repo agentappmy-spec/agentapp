@@ -89,8 +89,12 @@ serve(async (req) => {
 
         const data = await res.json()
         if (!res.ok) {
-            return new Response(JSON.stringify(data), {
-                status: res.status,
+            console.error('Resend API Error:', data)
+            return new Response(JSON.stringify({
+                error: data.message || 'Failed to send email via Resend',
+                details: data
+            }), {
+                status: 400,
                 headers: { ...corsHeaders, 'Content-Type': 'application/json' },
             })
         }

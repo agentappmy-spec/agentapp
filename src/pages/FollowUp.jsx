@@ -377,18 +377,22 @@ const FollowUp = () => {
 
             if (error) throw error;
 
+            console.log('Fetched workflow steps:', data);
+
             // Group by template_id
             const grouped = {
                 prospect: data.filter(d => d.template_id === 'prospect'),
                 client: data.filter(d => d.template_id === 'client'),
                 global: data.filter(d => d.template_id === 'global').sort((a, b) => {
                     // Custom sort for global (by date or trigger name)
-                    if (a.date && b.date && a.date !== 'auto' && b.date !== 'auto') {
+                    if (a.date && b.date && a.date !== 'auto' && a.date !== 'auto') {
                         return new Date(a.date) - new Date(b.date);
                     }
                     return 0;
                 })
             };
+
+            console.log('Grouped steps:', grouped);
             setDbSteps(grouped);
         } catch (err) {
             console.error('Error fetching steps:', err);

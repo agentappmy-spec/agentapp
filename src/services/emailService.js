@@ -23,17 +23,21 @@ export const sendEmail = async (to, subject, html, text = '') => {
 
         if (error) {
             console.error('Supabase Function Error:', error);
+            console.error('Error details:', JSON.stringify(error, null, 2));
             throw new Error(error.message || 'Failed to invoke email function');
         }
 
         // The function might return { error: ... } in the data body if logic failed
         if (data && data.error) {
+            console.error('Edge Function returned error:', data.error);
             throw new Error(data.error);
         }
 
+        console.log('Email sent successfully:', data);
         return data;
     } catch (error) {
         console.error('Email Service Error:', error);
+        console.error('Full error object:', error);
         throw error;
     }
 };
