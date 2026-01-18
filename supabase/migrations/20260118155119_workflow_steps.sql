@@ -20,7 +20,10 @@ CREATE TABLE IF NOT EXISTS public.workflow_steps (
 ALTER TABLE public.workflow_steps ENABLE ROW LEVEL SECURITY;
 
 -- Policies (Viewable by everyone for now to generate templates, editable by admins)
+DROP POLICY IF EXISTS "Enable read access for authenticated users" ON public.workflow_steps;
 CREATE POLICY "Enable read access for authenticated users" ON public.workflow_steps FOR SELECT TO authenticated USING (true);
+
+DROP POLICY IF EXISTS "Enable write access for super admins" ON public.workflow_steps;
 CREATE POLICY "Enable write access for super admins" ON public.workflow_steps FOR ALL TO authenticated USING (
     exists (
         select 1 from public.profiles
