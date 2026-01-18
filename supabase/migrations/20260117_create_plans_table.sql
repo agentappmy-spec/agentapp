@@ -13,6 +13,12 @@ create table if not exists public.plans (
 -- Enable RLS
 alter table public.plans enable row level security;
 
+-- Drop existing policies if they exist
+drop policy if exists "Allow public read access" on public.plans;
+drop policy if exists "Allow super_admin insert" on public.plans;
+drop policy if exists "Allow super_admin update" on public.plans;
+drop policy if exists "Allow super_admin delete" on public.plans;
+
 -- Policies
 create policy "Allow public read access" on public.plans for select using (true);
 create policy "Allow super_admin insert" on public.plans for insert with check (auth.uid() in (select id from profiles where role = 'super_admin'));
