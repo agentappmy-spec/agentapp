@@ -362,18 +362,21 @@ function App() {
   }, [landingConfig, userProfile?.id]);
 
   // Persist Profile Details to DB (Name, Title, Agency, Phone, etc.)
+  // IMPORTANT: We do NOT persist role or plan_id here - those are managed separately
   useEffect(() => {
     if (userProfile?.id) {
       const timeoutId = setTimeout(() => {
         const payload = {
           full_name: userProfile.name,
-          username: userProfile.username, // Added to persist
+          username: userProfile.username,
           title: userProfile.title,
           phone: userProfile.phone,
           agency_name: userProfile.agencyName,
           license_no: userProfile.licenseNo,
           bio: userProfile.bio,
           photo_url: userProfile.photoUrl
+          // NOTE: role and plan_id are intentionally excluded
+          // They should only be updated via redemption code or admin actions
         };
 
         supabase.from('profiles').update(payload).eq('id', userProfile.id).then(({ error }) => {
@@ -385,7 +388,7 @@ function App() {
     }
   }, [
     userProfile?.name,
-    userProfile?.username, // Added dependency
+    userProfile?.username,
     userProfile?.title,
     userProfile?.phone,
     userProfile?.agencyName,
@@ -393,6 +396,7 @@ function App() {
     userProfile?.bio,
     userProfile?.photoUrl,
     userProfile?.id
+    // NOTE: role and planId are intentionally excluded from dependencies
   ]);
 
   const [integrations, setIntegrations] = useState({
