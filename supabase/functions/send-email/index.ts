@@ -77,20 +77,27 @@ serve(async (req) => {
         }
 
         // 4. Send Email via Resend
+        // Clean the text field - strip HTML and limit length
+        const cleanText = text ? text.replace(/<[^>]*>/g, '').substring(0, 10000) : html.replace(/<[^>]*>/g, '').substring(0, 10000);
+
+        const emailPayload = {
+            from: 'AgentApp <system@mail.agentapp.my>',
+            to: to,
+            reply_to: user.email,
+            subject: subject,
+            html: html,
+            text: cleanText
+        };
+
+        console.log('Sending email to:', to, 'from:', user.email);
+
         const res = await fetch('https://api.resend.com/emails', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${RESEND_API_KEY}`,
             },
-            body: JSON.stringify({
-                from: 'AgentApp <system@mail.agentapp.my>',
-                to: to,
-                reply_to: user.email, // Critical: Client replies go to the Agent
-                subject: subject,
-                html: html,
-                text: text
-            }),
+            body: JSON.stringify(emailPayload),
         })
 
         const data = await res.json()
