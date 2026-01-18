@@ -28,8 +28,7 @@ const Login = () => {
             if (session) {
                 navigate('/');
             } else {
-                // Clear any stale local state if Supabase says we aren't logged in
-                localStorage.removeItem('agent_user_profile');
+                // Not logged in - user will see login form
             }
         };
         checkSession();
@@ -75,23 +74,7 @@ const Login = () => {
             console.warn('Profile sync skipped or timed out:', err);
         }
 
-        // 2. Local Storage Setup (Legacy/Fast Access)
-        const newProfile = {
-            name,
-            role,
-            planId,
-            email: user.email,
-            id: user.id,
-            phone: '',
-            photoUrl: '',
-            bio: '',
-            licenseNo: '',
-            agencyName: '',
-            social: { facebook: '', threads: '', tiktok: '', instagram: '' }
-        };
-        localStorage.setItem('agent_user_profile', JSON.stringify(newProfile));
-
-        // 3. Navigate
+        // 2. Navigate (profile will be loaded from DB by App.jsx)
         window.location.href = '/';
     };
 

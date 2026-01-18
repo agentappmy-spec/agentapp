@@ -57,8 +57,7 @@ const AuthGuard = ({ children, requiredRole }) => {
             id: user.id
           };
 
-          // 3. Save and Proceed
-          localStorage.setItem('agent_user_profile', JSON.stringify(recoveredProfile));
+          // 3. Set profile directly (no localStorage)
           setProfile(recoveredProfile);
           setIsChecking(false);
           return;
@@ -239,10 +238,9 @@ function App() {
     fetchPlans();
   }, []);
 
-  const [userProfile, setUserProfile] = useState(() => {
-    const saved = localStorage.getItem('agent_user_profile');
-    return saved ? JSON.parse(saved) : null;
-  });
+  // Database is the ONLY source of truth for user profile
+  // No localStorage to prevent cache conflicts with role/plan_id
+  const [userProfile, setUserProfile] = useState(null);
 
   // Sync Profile & Config with DB on load
   useEffect(() => {
@@ -325,11 +323,8 @@ function App() {
     syncProfile();
   }, []);
 
-  useEffect(() => {
-    if (userProfile) {
-      localStorage.setItem('agent_user_profile', JSON.stringify(userProfile));
-    }
-  }, [userProfile]);
+  // REMOVED: No longer saving userProfile to localStorage
+  // Database is the single source of truth
 
   // Persist Products to DB
   useEffect(() => {

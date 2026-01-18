@@ -149,16 +149,13 @@ const Settings = () => {
                 return;
             }
 
-            // Update Local State
-            const newProfile = {
+            // Update Local State (no localStorage - DB is source of truth)
+            setUserProfile({
                 ...userProfile,
                 planId: 'pro',
-                role: 'pro', // Update local role to pro
+                role: 'pro',
                 subscription_end_date: expiryDate.toISOString()
-            };
-
-            setUserProfile(newProfile);
-            localStorage.setItem('agent_user_profile', JSON.stringify(newProfile));
+            });
 
             alert(`Code Redeemed! You are now a PRO user until ${expiryDate.toLocaleDateString()}.`);
             setPromoCode('');
