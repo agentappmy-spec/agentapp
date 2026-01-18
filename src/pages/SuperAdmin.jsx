@@ -83,18 +83,18 @@ const EditNodeModal = ({ node, onClose, onSave }) => {
                     <button className={`role-tab-btn ${activeChannel === 'email' ? 'active' : ''}`} onClick={() => setActiveTabProp('email', setActiveChannel)} style={{ flex: 1, padding: '0.6rem' }}>Email</button>
                 </div>
 
-                {activeChannel === 'email' && (
-                    <div className="form-group" style={{ marginBottom: '1.5rem' }}>
-                        <label>Email Subject</label>
-                        <input
-                            type="text"
-                            className="sa-input-modern"
-                            value={subject}
-                            onChange={(e) => setSubject(e.target.value)}
-                            placeholder="Enter email subject..."
-                        />
-                    </div>
-                )}
+                <div className="form-group" style={{ marginBottom: '1.5rem' }}>
+                    <label>Email Subject</label>
+                    <input
+                        type="text"
+                        className="sa-input-modern"
+                        value={subject}
+                        onChange={(e) => setSubject(e.target.value)}
+                        placeholder="Subject line for automation emails..."
+                        style={{ fontWeight: '600' }}
+                    />
+                    <small style={{ color: '#64748b', marginTop: '4px', display: 'block' }}>This subject will be used for email notifications to users.</small>
+                </div>
 
                 <div className="form-group">
                     <label>Message Content</label>

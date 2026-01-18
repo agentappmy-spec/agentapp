@@ -143,18 +143,17 @@ const EditNodeModal = ({ node, onClose, onSave }) => {
                     </button>
                 </div>
 
-                {activeChannel === 'email' && (
-                    <div className="form-group" style={{ marginTop: '1rem' }}>
-                        <label>Email Subject</label>
-                        <input
-                            type="text"
-                            value={subject}
-                            onChange={(e) => setSubject(e.target.value)}
-                            placeholder="Enter email subject..."
-                            style={{ width: '100%', padding: '0.6rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', background: 'white', color: 'var(--text-primary)' }}
-                        />
-                    </div>
-                )}
+                <div className="form-group" style={{ marginTop: '1.5rem' }}>
+                    <label>Email Subject</label>
+                    <input
+                        type="text"
+                        value={subject}
+                        onChange={(e) => setSubject(e.target.value)}
+                        placeholder="Subject line for email notifications..."
+                        style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', background: 'white', color: 'var(--text-primary)', fontWeight: '500' }}
+                    />
+                    <small style={{ color: 'var(--text-muted)', marginTop: '4px', display: 'block' }}>This subject will be used when sending email follow-ups.</small>
+                </div>
 
                 <div className="form-group">
                     <div className="shortcode-bar">
@@ -282,12 +281,15 @@ const FollowUpCard = ({ step, prevStep, index, isLast, onEdit, onDelete }) => {
                     </div>
 
                     <div className="card-message-preview">
-                        {step.contentEmail && step.subject && (
-                            <div style={{ fontSize: '0.8rem', fontWeight: 'bold', marginBottom: '4px', color: 'var(--text-primary)' }}>
-                                Subj: {step.subject}
+                        {step.subject && (
+                            <div style={{ fontSize: '0.8rem', fontWeight: 'bold', marginBottom: '6px', color: 'var(--text-primary)', borderBottom: '1px solid #eee', paddingBottom: '4px' }}>
+                                <Mail size={12} style={{ display: 'inline', marginRight: '4px', verticalAlign: 'middle' }} />
+                                Subject: {step.subject}
                             </div>
                         )}
-                        "{previewContent}"
+                        <div style={{ color: 'var(--text-secondary)', lineHeight: '1.5' }}>
+                            "{previewContent}"
+                        </div>
                     </div>
 
                     <div className="card-footer">
