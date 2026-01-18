@@ -1052,7 +1052,7 @@ const SuperAdmin = () => {
                             {plans.map(plan => {
                                 const isProPlan = plan.id === APP_PLANS.PRO || plan.name.toLowerCase().includes('pro');
                                 return (
-                                    <div key={plan.id} className={`sa-plan-card ${isPro ? 'pro' : ''}`}>
+                                    <div key={plan.id} className={`sa-plan-card ${isProPlan ? 'pro' : ''}`}>
                                         <div className="sa-plan-header">
                                             <div className="sa-plan-title-group">
                                                 <div className="sa-plan-icon">
