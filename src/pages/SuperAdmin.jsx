@@ -671,24 +671,26 @@ const SuperAdmin = () => {
         try {
             const { supabase } = await import('../services/supabaseClient');
 
-            // Explicitly check row deletion count
-            const { data, error } = await supabase
-                .from('profiles')
-                .delete()
-                .eq('id', deletingUser.id)
-                .select();
+            // Invoke Server-Side Deletion (handles auth, profiles, contacts, logs)
+            const { data, error } = await supabase.functions.invoke('delete-user-data', {
+                body: { user_id: deletingUser.id }
+            });
 
-            if (error) throw error;
-
-            if (!data || data.length === 0) {
-                alert('Delete failed: No rows removed. You might lack permissions or the user has linked data.');
-                return;
+            if (error) {
+                // Supabase Edge Function connectivity error
+                throw error;
+            }
+            if (data && data.error) {
+                // Logic error returned by function
+                throw new Error(data.error);
             }
 
             setUsers(users.filter(u => u.id !== deletingUser.id));
+            // Optional: Success message
+            // alert(`Successfully deleted ${deletingUser.name}`); 
         } catch (err) {
             console.error('Error deleting user:', err);
-            alert(`Failed to delete user: ${err.message}`);
+            alert(`Failed to delete user: ${err.message || 'Server Error'}`);
         }
     };
 
