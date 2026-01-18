@@ -1205,6 +1205,13 @@ const SuperAdmin = () => {
             {editingUser && <EditUserModal user={editingUser} onClose={() => setEditingUser(null)} onSave={handleSaveUser} plans={plans} />}
             {editingPlan && <EditPlanModal plan={editingPlan} onClose={() => setEditingPlan(null)} onSave={handleSavePlan} />}
             {editingPromo && <EditPromoCodeModal promo={editingPromo} onClose={() => setEditingPromo(null)} onSave={handleSavePromoCode} />}
+
+            <DeleteConfirmationModal
+                isOpen={!!deletingUser}
+                onClose={() => setDeletingUser(null)}
+                onConfirm={confirmDeleteUser}
+                userName={deletingUser?.name}
+            />
         </div>
     );
 };
