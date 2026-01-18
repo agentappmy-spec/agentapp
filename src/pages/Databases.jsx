@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 // import AddContactModal from '../components/AddContactModal'; // Moved to App.jsx
 import TagManagerModal from '../components/TagManagerModal';
+import { useMessageLimit } from '../hooks/useMessageLimit'; // Import the hook
 import './Databases.css';
 
 const StatusBadge = ({ status, role }) => {
@@ -107,8 +108,25 @@ const Databases = () => {
         setAvailableTags,
         openAddModal, // Global context
         setEditingContact: setGlobalEditingContact, // Global context
-        setIsContactModalOpen // Global context
+        setIsContactModalOpen, // Global context
+        userProfile // Needed for limit check
     } = useOutletContext();
+
+    const { logMessage, canSendMessage, usage, limit } = useMessageLimit(userProfile);
+
+    const handleWhatsAppClick = (phone) => {
+        if (!canSendMessage) {
+            alert(`🚫 Message limit reached (${usage}/${limit}).\n\nPlease upgrade your plan to send more messages.`);
+            return;
+        }
+
+        // Log the message
+        logMessage('whatsapp', phone);
+
+        // Open WhatsApp
+        const url = `https://wa.me/${phone.replace(/[^0-9]/g, '')}`;
+        window.open(url, '_blank');
+    };
 
     const navigate = useNavigate();
 
@@ -361,15 +379,13 @@ const Databases = () => {
                                         </td>
                                         <td>
                                             <div className="row-actions">
-                                                <a
-                                                    href={`https://wa.me/${row.phone.replace(/[^0-9]/g, '')}`}
-                                                    target="_blank"
-                                                    rel="noreferrer"
+                                                <button
+                                                    onClick={() => handleWhatsAppClick(row.phone)}
                                                     className="icon-btn-sm action-whatsapp"
-                                                    title="Chat on WhatsApp"
+                                                    title={`Chat on WhatsApp (${usage}/${limit})`}
                                                 >
                                                     <MessageCircle size={16} />
-                                                </a>
+                                                </button>
                                                 <button className="icon-btn-sm" onClick={() => openEditModal(row)} title="Edit Contact">
                                                     <Edit size={16} />
                                                 </button>
