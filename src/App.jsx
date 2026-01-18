@@ -126,7 +126,7 @@ function App() {
   });
 
   // Fetch Contacts from Supabase
-  // Fetch Contacts from Supabase
+
   useEffect(() => {
     const loadContacts = async () => {
       const { data: { session } } = await supabase.auth.getSession();
