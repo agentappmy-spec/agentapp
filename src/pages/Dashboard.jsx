@@ -1,3 +1,4 @@
+import React, { useMemo } from 'react';
 import { useOutletContext, useNavigate } from 'react-router-dom';
 import { Users, FileCheck, AlertCircle, TrendingUp, Gift, ChevronRight, Target, MessageCircle as MessageCheck, LogOut, Mail, Smartphone, MessageSquare } from 'lucide-react';
 import { supabase } from '../services/supabaseClient';
