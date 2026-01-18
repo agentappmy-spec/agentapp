@@ -173,27 +173,34 @@ const Settings = () => {
                 const expiryDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
                 updateData = {
                     plan_id: 'pro',
-                    role: 'pro',
                     subscription_end_date: expiryDate.toISOString()
                 };
-                successMessage = `🎉 Code Redeemed! You are now a PRO user until ${expiryDate.toLocaleDateString()}.`;
+                // IMPORTANT: Do NOT change role - preserve existing role (especially super_admin)
+                successMessage = `🎉 Code Redeemed! You now have PRO access until ${expiryDate.toLocaleDateString()}.`;
             } else if (reward.includes('50% off') || reward.includes('discount')) {
                 // For discount codes, just show a message (payment integration needed for actual discount)
                 alert(`✅ Promo code "${promoCode}" validated!\n\n${promoData.reward}\n\nThis discount will be applied at checkout.`);
                 setPromoCode('');
+
+                // Increment usage count for discount codes too
+                await supabase
+                    .from('promo_codes')
+                    .update({ usage_count: promoData.usage_count + 1 })
+                    .eq('id', promoData.id);
+
                 return;
             } else {
                 // Generic reward - grant Pro access
                 const expiryDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
                 updateData = {
                     plan_id: 'pro',
-                    role: 'pro',
                     subscription_end_date: expiryDate.toISOString()
                 };
+                // IMPORTANT: Do NOT change role
                 successMessage = `🎉 Code Redeemed! ${promoData.reward}`;
             }
 
-            // Update user profile in database
+            // Update user profile in database (ONLY plan_id and subscription_end_date, NOT role)
             const { error: updateError } = await supabase
                 .from('profiles')
                 .update(updateData)
@@ -211,10 +218,12 @@ const Settings = () => {
                 .update({ usage_count: promoData.usage_count + 1 })
                 .eq('id', promoData.id);
 
-            // Update local state
+            // Update local state (preserve role, only update planId and subscription_end_date)
             setUserProfile({
                 ...userProfile,
-                ...updateData
+                planId: updateData.plan_id,
+                subscription_end_date: updateData.subscription_end_date
+                // NOTE: role is intentionally NOT updated here
             });
 
             alert(successMessage);
