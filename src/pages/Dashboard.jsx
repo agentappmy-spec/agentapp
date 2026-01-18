@@ -197,6 +197,7 @@ const Dashboard = () => {
                         color="37, 99, 235"
                     />
                     <StatCard
+                        title="Paid Clients"
                         value={saasStats.proUsers}
                         label={`RM ${saasStats.totalRevenue / (saasStats.proUsers || 1)}.00 / mo`}
                         icon={Target}
@@ -504,14 +505,14 @@ const Dashboard = () => {
             </div>
 
             {/* --- Mobile Usage Status (White Card Style) --- */}
-            <div className="mobile-usage-card mobile-only glass-panel" style={{ margin: '1rem 1rem 1.5rem', padding: '1rem', borderRadius: '16px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+            <div className="mobile-usage-card mobile-only glass-panel">
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <h3 style={{ fontSize: '1rem', fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}>Message Usage</h3>
                     <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Resets {resetDateStr}</span>
                 </div>
 
                 {/* Usage Bar */}
-                <div style={{ marginBottom: '1rem' }}>
+                <div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.25rem' }}>
                         <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Monthly Limit</span>
                         <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>{usage} / {limit > 0 ? limit : '∞'}</span>
@@ -526,7 +527,7 @@ const Dashboard = () => {
                 </div>
 
                 {/* Last Message Status */}
-                <div style={{ padding: '0.75rem', background: '#f8fafc', borderRadius: '8px', marginBottom: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div className="last-message-card">
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                         <MessageSquare size={16} className="text-muted" />
                         <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Last Message</span>
@@ -562,27 +563,6 @@ const Dashboard = () => {
                     </div>
                 </div>
             </div>
-
-            {/* Mobile Action Buttons */}
-            <div className="mobile-actions-row mobile-only">
-                <button className="mobile-action-btn primary" onClick={openAddModal} style={{ gridColumn: 'span 2' }}>
-                    <Users size={18} /> Tambah Lead Baru
-                </button>
-                <button className="mobile-action-btn secondary" onClick={() => navigate('/databases')}>
-                    <Search size={18} /> Cari Contact
-                </button>
-                <button className="mobile-action-btn secondary" onClick={() => navigate('/settings', { state: { activeTab: 'goals' } })}>
-                    <Target size={18} /> Sasaran KPI
-                </button>
-                <button className="mobile-action-btn secondary" onClick={() => navigate('/follow-up')}>
-                    <MessageCheck size={18} /> Semak Followup
-                </button>
-                <button className="mobile-action-btn secondary" onClick={() => navigate('/landing-page')}>
-                    <Globe size={18} /> Landing Page
-                </button>
-            </div>
-
-
 
             {/* --- Desktop Stats Grid --- */}
             <div className="stats-grid desktop-only">

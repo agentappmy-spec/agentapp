@@ -138,43 +138,8 @@ function App() {
             nextAction: c.next_action,
           });
 
-          // AUTO-MIGRATION: If DB is empty but Local Storage has data, migrate it!
-          if (data.length === 0) {
-            const local = localStorage.getItem('agent_contacts');
-            if (local) {
-              const parsedLocal = JSON.parse(local);
-              if (parsedLocal.length > 0) {
-                console.log(`Starting migration of ${parsedLocal.length} contacts...`);
-                // alert('Migrating your offline data to the cloud... Please wait.'); // Optional: Visual feedback
-
-                const payload = parsedLocal.map(c => ({
-                  user_id: session.user.id,
-                  name: c.name,
-                  phone: c.phone,
-                  role: c.role,
-                  status: c.status,
-                  tags: c.tags || [],
-                  products: c.products || [],
-                  deal_value: c.dealValue || 0,
-                  next_action: c.nextAction || '',
-                  occupation: c.occupation || ''
-                }));
-
-                const { data: inserted, error: insertError } = await supabase
-                  .from('contacts')
-                  .insert(payload)
-                  .select();
-
-                if (!insertError && inserted) {
-                  console.log('Migration successful:', inserted.length);
-                  setContacts(inserted.map(mapToAppFormat));
-                  return;
-                } else {
-                  console.error('Migration failed:', insertError);
-                }
-              }
-            }
-          }
+          // AUTO-MIGRATION: REMOVED to prevent dummy data
+          // If DB is empty, it should stay empty for new users.
 
           setContacts(data.map(mapToAppFormat));
         }
