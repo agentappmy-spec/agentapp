@@ -37,7 +37,6 @@ export const sendEmail = async (to, subject, html, text = '') => {
         return data;
     } catch (error) {
         console.error('Email Service Error:', error);
-        console.error('Full error object:', error);
         throw error;
     }
 };

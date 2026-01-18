@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useOutletContext } from 'react-router-dom';
 import {
     Users,
     MessageCircle,
@@ -17,7 +17,8 @@ import {
     Tag,
     CheckCircle2,
     Crown,
-    Zap
+    Zap,
+    AlertCircle
 } from 'lucide-react';
 import { ROLES, APP_PLANS, FEATURE_NAMES } from '../utils/constants';
 import './SuperAdmin.css';
@@ -427,8 +428,65 @@ const EditPromoCodeModal = ({ promo, onClose, onSave }) => {
     );
 };
 
+// --- Delete Confirmation Modal ---
+const DeleteConfirmationModal = ({ isOpen, onClose, onConfirm, userName }) => {
+    const [confirmText, setConfirmText] = useState('');
+    const [isDeleting, setIsDeleting] = useState(false);
+
+    if (!isOpen) return null;
+
+    const isMatch = confirmText === 'DELETE';
+
+    const handleConfirm = async () => {
+        if (isMatch) {
+            setIsDeleting(true);
+            await onConfirm();
+            setIsDeleting(false);
+            setConfirmText('');
+            onClose();
+        }
+    };
+
+    return (
+        <div className="modal-overlay">
+            <div className="modal-content glass-panel" style={{ width: '90%', maxWidth: '400px', textAlign: 'center' }}>
+                <div style={{ margin: '0 auto', width: '50px', height: '50px', borderRadius: '50%', background: '#fee2e2', color: '#ef4444', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1rem' }}>
+                    <AlertCircle size={24} />
+                </div>
+                <h3 className="modal-title">Delete User?</h3>
+                <p style={{ color: 'var(--text-muted)', marginBottom: '0.5rem' }}>
+                    You are about to delete <strong>{userName}</strong>.
+                </p>
+                <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem' }}>
+                    This action completely removes their profile and cannot be undone. To confirm, please type <strong>DELETE</strong> below.
+                </p>
+                <input
+                    type="text"
+                    className="sa-input-modern"
+                    placeholder="Type DELETE"
+                    value={confirmText}
+                    onChange={(e) => setConfirmText(e.target.value)}
+                    style={{ marginBottom: '1.5rem', textAlign: 'center' }}
+                />
+                <div className="modal-actions" style={{ justifyContent: 'center' }}>
+                    <button className="secondary-btn" onClick={() => { setConfirmText(''); onClose(); }}>Cancel</button>
+                    <button
+                        className="primary-btn"
+                        style={{ background: isMatch ? '#ef4444' : '#e2e8f0', cursor: isMatch ? 'pointer' : 'not-allowed', border: 'none' }}
+                        disabled={!isMatch || isDeleting}
+                        onClick={handleConfirm}
+                    >
+                        {isDeleting ? 'Deleting...' : 'Delete User'}
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+};
+
 const SuperAdmin = () => {
     const location = useLocation();
+    const { userProfile } = useOutletContext(); // Get Auth State
     const [activeTab, setActiveTab] = useState(location.state?.activeTab || 'users');
 
     useEffect(() => {
@@ -444,10 +502,13 @@ const SuperAdmin = () => {
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-        fetchUsers();
-        fetchPlans();
-        fetchPromoCodes();
-    }, []);
+        // Only fetch if profile is loaded (Auth is ready)
+        if (userProfile) {
+            fetchUsers();
+            fetchPlans();
+            fetchPromoCodes();
+        }
+    }, [userProfile]); // Rerun when profile loads
 
     const fetchUsers = async () => {
         setIsLoading(true);
@@ -593,18 +654,44 @@ const SuperAdmin = () => {
         }
     };
 
-    const handleDeleteUser = async (id) => {
-        if (!window.confirm('Are you sure you want to delete this user? This action cannot be undone.')) return;
+    const [deletingUser, setDeletingUser] = useState(null);
+
+    const handleDeleteUser = (user) => {
+        // Prevent Super Admin from deleting themselves
+        if (user.id === userProfile.id) {
+            alert("Security Alert: You cannot delete your own Super Admin account.");
+            return;
+        }
+        setDeletingUser(user);
+    };
+
+    const confirmDeleteUser = async () => {
+        if (!deletingUser) return;
+
         try {
             const { supabase } = await import('../services/supabaseClient');
-            const { error } = await supabase.from('profiles').delete().eq('id', id);
+
+            // Explicitly check row deletion count
+            const { data, error } = await supabase
+                .from('profiles')
+                .delete()
+                .eq('id', deletingUser.id)
+                .select();
+
             if (error) throw error;
-            setUsers(users.filter(u => u.id !== id));
+
+            if (!data || data.length === 0) {
+                alert('Delete failed: No rows removed. You might lack permissions or the user has linked data.');
+                return;
+            }
+
+            setUsers(users.filter(u => u.id !== deletingUser.id));
         } catch (err) {
             console.error('Error deleting user:', err);
-            alert('Failed to delete user. Ensure you have permission.');
+            alert(`Failed to delete user: ${err.message}`);
         }
     };
+
 
     const handleSaveUser = async (userData) => {
         try {
@@ -650,7 +737,7 @@ const SuperAdmin = () => {
             }
         } catch (err) {
             setUsers(users.map(u => u.id === userData.id ? { ...userData, status: 'Active' } : u));
-            console.error('Error saving user (likely RLS or table missing), using Optimistic Update:', err);
+            console.error('Error saving user:', err);
         }
         setEditingUser(null);
     };
@@ -907,7 +994,7 @@ const SuperAdmin = () => {
                                                     <button className="sa-icon-btn" onClick={() => setEditingUser(user)} title="Edit User">
                                                         <Edit2 size={16} />
                                                     </button>
-                                                    <button className="sa-icon-btn text-danger" onClick={() => handleDeleteUser(user.id)} title="Delete User">
+                                                    <button className="sa-icon-btn text-danger" onClick={() => handleDeleteUser(user)} title="Delete User">
                                                         <Trash2 size={16} />
                                                     </button>
                                                 </div>

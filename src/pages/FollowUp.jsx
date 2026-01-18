@@ -377,8 +377,6 @@ const FollowUp = () => {
 
             if (error) throw error;
 
-            console.log('Fetched workflow steps:', data);
-
             // Group by template_id
             const grouped = {
                 prospect: data.filter(d => d.template_id === 'prospect'),
@@ -392,7 +390,6 @@ const FollowUp = () => {
                 })
             };
 
-            console.log('Grouped steps:', grouped);
             setDbSteps(grouped);
         } catch (err) {
             console.error('Error fetching steps:', err);

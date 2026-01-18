@@ -131,7 +131,6 @@ function App() {
         if (error) {
           console.error('Error fetching contacts:', error);
         } else if (data) {
-          console.log('Fetched contacts from DB:', data);
 
           // KEY FIX: Map snake_case (DB) to camelCase (App)
           const mapToAppFormat = (c) => ({
@@ -145,7 +144,6 @@ function App() {
           // If DB is empty, it should stay empty for new users.
 
           const mappedContacts = data.map(mapToAppFormat);
-          console.log('Mapped contacts:', mappedContacts);
           setContacts(mappedContacts);
         }
       } else {
@@ -433,8 +431,6 @@ function App() {
         joined_at: contactData.joinedAt || (editingContact ? undefined : new Date().toISOString()), // Set on create only
         user_id: user?.id
       };
-
-      console.log('Saving contact with payload:', payload);
 
       if (editingContact) {
         // Update

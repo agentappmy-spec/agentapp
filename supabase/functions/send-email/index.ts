@@ -17,21 +17,19 @@ const corsHeaders = {
 }
 
 serve(async (req) => {
+    // 0. Handle CORS Preflight
     if (req.method === 'OPTIONS') {
         return new Response('ok', { headers: corsHeaders })
     }
 
     try {
-        const supabase = createClient(
-            SUPABASE_URL ?? '',
-            SUPABASE_SERVICE_ROLE_KEY ?? ''
-        )
-
         // 1. Authenticate User
         const authHeader = req.headers.get('Authorization')
-        if (!authHeader) throw new Error('Missing Authorization header')
 
-        // Create a client with the user's token to get their profile
+        if (!authHeader) {
+            throw new Error('Missing Authorization header')
+        }
+
         const supabaseClient = createClient(
             SUPABASE_URL ?? '',
             Deno.env.get('SUPABASE_ANON_KEY') ?? '',
@@ -39,46 +37,30 @@ serve(async (req) => {
         )
 
         const { data: { user }, error: userError } = await supabaseClient.auth.getUser()
-        if (userError || !user) throw new Error('Unauthorized')
 
-        const { to, subject, html, text } = await req.json()
+        if (userError || !user) {
+            return new Response(JSON.stringify({ error: 'Unauthorized', details: userError }), {
+                status: 401,
+                headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+            })
+        }
 
-        // 2. Fetch User Profile & Plan Limit
+        const body = await req.json()
+        const { to, subject, html, text } = body
+
+        // 2. Fetch User Profile
+        const supabase = createClient(
+            SUPABASE_URL ?? '',
+            SUPABASE_SERVICE_ROLE_KEY ?? ''
+        )
         const { data: profile } = await supabase
             .from('profiles')
-            .select('*, plans(*)')
+            .select('role')
             .eq('id', user.id)
             .single()
 
-        if (!profile) throw new Error('Profile not found')
-
-        const isSuperAdmin = profile.role === 'super_admin'
-        const plan = profile.plans || { monthly_message_limit: 10 } // Fallback to safe default
-
-        // 3. Check Quota (Skip for Super Admin)
-        if (!isSuperAdmin) {
-            const now = new Date()
-            const firstDay = new Date(now.getFullYear(), now.getMonth(), 1).toISOString()
-
-            const { count, error: countError } = await supabase
-                .from('message_logs')
-                .select('*', { count: 'exact', head: true })
-                .eq('user_id', user.id)
-                .gte('created_at', firstDay)
-
-            if (countError) throw countError
-
-            if ((count || 0) >= plan.monthly_message_limit) {
-                return new Response(
-                    JSON.stringify({ error: `Monthly limit reached (${count}/${plan.monthly_message_limit}). Please upgrade.` }),
-                    { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-                )
-            }
-        }
-
-        // 4. Send Email via Resend
-        // Clean the text field - strip HTML and limit length
-        const cleanText = text ? text.replace(/<[^>]*>/g, '').substring(0, 10000) : html.replace(/<[^>]*>/g, '').substring(0, 10000);
+        // 3. Prepare Resend Payload
+        const cleanText = text || html?.replace(/<[^>]*>/g, '').substring(0, 10000) || 'No content'
 
         const emailPayload = {
             from: 'AgentApp <system@mail.agentapp.my>',
@@ -87,48 +69,50 @@ serve(async (req) => {
             subject: subject,
             html: html,
             text: cleanText
-        };
-
-        console.log('Sending email to:', to, 'from:', user.email);
+        }
 
         const res = await fetch('https://api.resend.com/emails', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${RESEND_API_KEY}`,
+                'Authorization': `Bearer ${RESEND_API_KEY}`
             },
-            body: JSON.stringify(emailPayload),
+            body: JSON.stringify(emailPayload)
         })
 
-        const data = await res.json()
         if (!res.ok) {
-            console.error('Resend API Error:', data)
-            return new Response(JSON.stringify({
-                error: data.message || 'Failed to send email via Resend',
-                details: data
-            }), {
-                status: 400,
+            const errorText = await res.text()
+            console.error('Resend API Error:', errorText)
+            return new Response(JSON.stringify({ error: 'Resend Error', details: errorText }), {
+                status: res.status,
                 headers: { ...corsHeaders, 'Content-Type': 'application/json' },
             })
         }
 
+        const data = await res.json()
+
         // 5. Log Transaction
-        await supabase.from('message_logs').insert({
-            user_id: user.id,
-            type: 'email',
-            recipient: to, // Store email address
-            content_snippet: subject // Store subject line as snippet
+        try {
+            await supabase.from('message_logs').insert({
+                user_id: user.id,
+                type: 'email',
+                recipient: to,
+                content_snippet: subject
+            })
+        } catch (logErr) {
+            console.error('Failed to log message:', logErr)
+        }
+
+        return new Response(JSON.stringify(data), {
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+            status: 200,
         })
 
-        return new Response(
-            JSON.stringify(data),
-            { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        )
-
-    } catch (error) {
-        return new Response(
-            JSON.stringify({ error: error.message }),
-            { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        )
+    } catch (err: any) {
+        console.error('Email Function Error:', err)
+        return new Response(JSON.stringify({ error: 'Internal Server Error', details: err.message }), {
+            status: 500,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        })
     }
 })
