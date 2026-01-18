@@ -689,11 +689,22 @@ function App() {
     if (userProfile?.role === 'super_admin') return true;
     if (packages.length === 0) return false;
 
-    // Normalize keys
-    if (featureKey === 'landing_page') featureKey = 'landing_page_view';
-
     const myPlan = packages.find(p => p.id === (userProfile.planId || 'free')) || packages.find(p => p.id === 'free') || packages[0];
-    return myPlan?.features?.includes(featureKey);
+
+    if (!myPlan?.features) return false;
+
+    // Direct exact match
+    if (myPlan.features.includes(featureKey)) return true;
+
+    // Robust match for Landing Page (handles "Landing Page", "landing_page", "landing_page_view")
+    if (featureKey === 'landing_page' || featureKey === 'landing_page_view') {
+      return myPlan.features.some(f => {
+        const feat = f.toLowerCase();
+        return feat.includes('landing page') || feat.includes('landing_page');
+      });
+    }
+
+    return false;
   };
 
   const contextValue = {

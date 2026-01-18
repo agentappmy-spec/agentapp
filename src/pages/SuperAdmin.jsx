@@ -97,7 +97,7 @@ const setActiveTabProp = (val, setter) => setter(val);
 
 // --- User Management Components ---
 
-const EditUserModal = ({ user, onClose, onSave }) => {
+const EditUserModal = ({ user, onClose, onSave, plans = [] }) => {
     const [formData, setFormData] = useState({
         ...user,
         expiryDate: user.expiryDate ? new Date(user.expiryDate).toISOString().split('T')[0] : ''
@@ -125,6 +125,9 @@ const EditUserModal = ({ user, onClose, onSave }) => {
                         <select className="sa-input-modern" value={formData.plan} onChange={e => setFormData({ ...formData, plan: e.target.value })}>
                             <option value="Free">Free Starter</option>
                             <option value="Pro">Pro Plan</option>
+                            {plans.filter(p => p.id !== 'free' && p.id !== 'pro').map(p => (
+                                <option key={p.id} value={p.name}>{p.name}</option>
+                            ))}
                         </select>
                     </div>
 
@@ -388,7 +391,7 @@ const SuperAdmin = () => {
                     id: u.id,
                     name: u.full_name || u.email?.split('@')[0] || 'User',
                     email: u.email,
-                    plan: u.plan_id ? (u.plan_id === 'pro' ? 'Pro' : 'Free') : 'Free',
+                    plan: u.plan_id ? (u.plan_id === 'pro' ? 'Pro' : (u.plan_id === 'free' ? 'Free' : u.plan_id)) : 'Free',
                     status: 'Active',
                     expiryDate: u.subscription_end_date,
                     joined: new Date(u.created_at || Date.now()).toLocaleDateString()
@@ -547,10 +550,18 @@ const SuperAdmin = () => {
                 if (error) throw error;
                 fetchUsers();
             } else {
+                let planId = 'free';
+                if (userData.plan === 'Pro') planId = 'pro';
+                else if (userData.plan === 'Free') planId = 'free';
+                else {
+                    const found = plans.find(p => p.name === userData.plan);
+                    planId = found ? found.id : 'free';
+                }
+
                 const updates = {
                     full_name: userData.name,
-                    plan_id: userData.plan === 'Pro' ? 'pro' : 'free',
-                    subscription_end_date: userData.plan === 'Pro' && userData.expiryDate ? new Date(userData.expiryDate).toISOString() : null
+                    plan_id: planId,
+                    subscription_end_date: planId !== 'free' && userData.expiryDate ? new Date(userData.expiryDate).toISOString() : null
                 };
 
                 // If switching to free, ensure expiry is null
@@ -1035,7 +1046,7 @@ const SuperAdmin = () => {
             </div>
 
             {editingNode && <EditNodeModal node={editingNode} onClose={() => setEditingNode(null)} onSave={handleSaveNode} />}
-            {editingUser && <EditUserModal user={editingUser} onClose={() => setEditingUser(null)} onSave={handleSaveUser} />}
+            {editingUser && <EditUserModal user={editingUser} onClose={() => setEditingUser(null)} onSave={handleSaveUser} plans={plans} />}
             {editingPlan && <EditPlanModal plan={editingPlan} onClose={() => setEditingPlan(null)} onSave={handleSavePlan} />}
             {editingPromo && <EditPromoCodeModal promo={editingPromo} onClose={() => setEditingPromo(null)} onSave={handleSavePromoCode} />}
         </div>
