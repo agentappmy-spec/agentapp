@@ -25,30 +25,23 @@ const AuthGuard = ({ children, requiredRole }) => {
   const location = useLocation();
 
   useEffect(() => {
-    // Check both local storage AND supabase session to be sure
+    // Always fetch from database (no localStorage)
     const check = async () => {
       try {
-        const localProfile = JSON.parse(localStorage.getItem('agent_user_profile') || 'null');
-        if (localProfile) {
-          setProfile(localProfile);
-          setIsChecking(false);
-          return;
-        }
-
-        // Fallback: Check Supabase session directly (slower but more accurate)
+        // Check Supabase session
         const { data: sessionData } = await supabase.auth.getSession();
         if (sessionData?.session) {
-          console.log('Session found, recovering profile...');
+          console.log('Session found, loading profile from database...');
           const user = sessionData.session.user;
 
-          // 1. Try fetching from profiles table
+          // Fetch from profiles table
           const { data: profileData } = await supabase
             .from('profiles')
             .select('*')
             .eq('id', user.id)
             .single();
 
-          // 2. Construct profile object
+          // Construct profile object
           const recoveredProfile = {
             name: profileData?.full_name || user.user_metadata?.full_name || user.email?.split('@')[0] || 'Agent',
             role: profileData?.role || 'free',
@@ -57,7 +50,6 @@ const AuthGuard = ({ children, requiredRole }) => {
             id: user.id
           };
 
-          // 3. Set profile directly (no localStorage)
           setProfile(recoveredProfile);
           setIsChecking(false);
           return;
