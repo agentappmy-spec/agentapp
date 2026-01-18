@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useOutletContext, useSearchParams } from 'react-router-dom';
+import { useOutletContext, useSearchParams, useLocation } from 'react-router-dom';
 import { User, Mail, Phone, Save, Tag, Package, Plus, Trash2, Edit2, MessageCircle, MessageSquare, Target, Facebook, Instagram, AtSign, Video, FileText, Globe, LogOut, Check, X, Star } from 'lucide-react';
 import { supabase } from '../services/supabaseClient';
 import './Settings.css';
@@ -21,7 +21,11 @@ const Settings = () => {
     } = useOutletContext();
 
     const [searchParams] = useSearchParams();
-    const [activeTab, setActiveTab] = useState(searchParams.get('tab') || 'profile');
+    const location = useLocation();
+
+    // Check both URL params and navigation state for activeTab
+    const initialTab = location.state?.activeTab || searchParams.get('tab') || 'profile';
+    const [activeTab, setActiveTab] = useState(initialTab);
 
     // Initialize view based on screen width
     // On Desktop (>900px), this state is ignored by CSS

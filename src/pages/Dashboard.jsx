@@ -687,11 +687,17 @@ const Dashboard = () => {
                     <div className="content-section glass-panel" style={{ minHeight: 'auto' }}>
                         <h2 className="section-title">Quick Actions</h2>
                         <div className="quick-actions-grid">
-                            <button className="action-btn" onClick={() => navigate('/settings')}>
+                            <button className="action-btn" onClick={() => navigate('/settings', { state: { activeTab: 'goals' } })}>
                                 <Target size={16} style={{ marginRight: '8px', display: 'inline' }} /> Update Targets
                             </button>
                             <button className="action-btn" onClick={() => navigate('/follow-up')}>
-                                <TrendingUp size={16} style={{ marginRight: '8px', display: 'inline' }} /> Review Automation
+                                <MessageCheck size={16} style={{ marginRight: '8px', display: 'inline' }} /> Review Automation
+                            </button>
+                            <button className="action-btn" onClick={() => navigate('/databases')}>
+                                <Users size={16} style={{ marginRight: '8px', display: 'inline' }} /> View All Contacts
+                            </button>
+                            <button className="action-btn" onClick={() => navigate('/landing-page')}>
+                                <FileCheck size={16} style={{ marginRight: '8px', display: 'inline' }} /> Edit Landing Page
                             </button>
                         </div>
                     </div>
