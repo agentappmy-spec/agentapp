@@ -380,6 +380,10 @@ const Dashboard = () => {
         });
     }, [contacts]);
 
+    // Role check for badges
+    const isPro = userProfile.planId === ROLES.PRO;
+    const isSuperAdmin = userProfile.role === ROLES.SUPER_ADMIN;
+
     // --- Mobile Specific Metrics ---
     const mobileStats = useMemo(() => {
         const prospects = stats.prospectsCount;
