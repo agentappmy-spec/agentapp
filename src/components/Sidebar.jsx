@@ -15,8 +15,7 @@ import { supabase } from '../services/supabaseClient';
 
 const Sidebar = ({ userProfile, checkPermission, setUserProfile }) => {
     const navigate = useNavigate();
-    const profile = userProfile || JSON.parse(localStorage.getItem('agent_user_profile') || '{}');
-    const isSuperAdmin = profile.role === 'super_admin';
+    const isSuperAdmin = userProfile?.role === 'super_admin';
 
     const handleLogout = async () => {
         try {
@@ -26,15 +25,11 @@ const Sidebar = ({ userProfile, checkPermission, setUserProfile }) => {
             // 2. Clear state in App.jsx
             if (setUserProfile) setUserProfile(null);
 
-            // 3. Clear local storage
-            localStorage.removeItem('agent_user_profile');
-
-            // 4. Redirect
+            // 3. Redirect
             navigate('/login');
         } catch (error) {
             console.error('Logout error:', error);
-            // Fallback: still redirect and clear storage
-            localStorage.removeItem('agent_user_profile');
+            // Fallback: still redirect
             navigate('/login');
         }
     };
