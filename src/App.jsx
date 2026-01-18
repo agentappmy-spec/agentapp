@@ -126,6 +126,7 @@ function App() {
   });
 
   // Fetch Contacts from Supabase
+  // Fetch Contacts from Supabase
   useEffect(() => {
     const loadContacts = async () => {
       const { data: { session } } = await supabase.auth.getSession();
@@ -138,10 +139,57 @@ function App() {
         if (error) {
           console.error('Error fetching contacts:', error);
         } else if (data) {
-          setContacts(data);
+          // KEY FIX: Map snake_case (DB) to camelCase (App)
+          const mapToAppFormat = (c) => ({
+            ...c,
+            dealValue: c.deal_value,
+            nextAction: c.next_action,
+            // Keep original snake_case too if needed, but UI uses camel
+          });
+
+          // AUTO-MIGRATION: If DB is empty but Local Storage has data, migrate it!
+          if (data.length === 0) {
+            const local = localStorage.getItem('agent_contacts');
+            if (local) {
+              const parsedLocal = JSON.parse(local);
+              if (parsedLocal.length > 0) {
+                console.log('Migrating local contacts to cloud...');
+                const payload = parsedLocal.map(c => ({
+                  user_id: session.user.id,
+                  name: c.name,
+                  phone: c.phone,
+                  role: c.role,
+                  status: c.status,
+                  tags: c.tags || [],
+                  products: c.products || [],
+                  deal_value: c.dealValue || 0,
+                  next_action: c.nextAction || '',
+                  occupation: c.occupation || ''
+                  // Let DB generate timestamps and IDs
+                }));
+
+                const { data: inserted, error: insertError } = await supabase
+                  .from('contacts')
+                  .insert(payload)
+                  .select();
+
+                if (!insertError && inserted) {
+                  console.log('Migration successful:', inserted.length);
+                  setContacts(inserted.map(mapToAppFormat));
+                  // Optionally clear local storage or keep it as backup
+                  // localStorage.removeItem('agent_contacts'); 
+                  return;
+                } else {
+                  console.error('Migration failed:', insertError);
+                }
+              }
+            }
+          }
+
+          setContacts(data.map(mapToAppFormat));
         }
       } else {
-        // Fallback to local storage if not logged in (or clear it)
+        // Fallback to local storage if not logged in
         const saved = localStorage.getItem('agent_contacts');
         if (saved) setContacts(JSON.parse(saved));
       }
@@ -153,7 +201,6 @@ function App() {
     const channel = supabase
       .channel('public:contacts')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'contacts' }, (payload) => {
-        // Simple reload or manual merge. Reload is safer for consistency.
         loadContacts();
       })
       .subscribe();
@@ -222,8 +269,8 @@ function App() {
                 email: session.user.email,
                 name: dbProfile.full_name || prev?.name || 'User',
                 expiryDate: dbProfile.subscription_end_date,
-                username: dbProfile.username,
-                is_published: dbProfile.is_published || false,
+                username: dbProfile.username || prev?.username,
+                is_published: dbProfile.is_published || prev?.is_published || false,
                 title: dbProfile.title || prev?.title || '',
                 phone: dbProfile.phone || prev?.phone || '',
                 agencyName: dbProfile.agency_name || prev?.agencyName || '',
@@ -311,6 +358,7 @@ function App() {
       const timeoutId = setTimeout(() => {
         const payload = {
           full_name: userProfile.name,
+          username: userProfile.username, // Added to persist
           title: userProfile.title,
           phone: userProfile.phone,
           agency_name: userProfile.agencyName,
@@ -328,6 +376,7 @@ function App() {
     }
   }, [
     userProfile?.name,
+    userProfile?.username, // Added dependency
     userProfile?.title,
     userProfile?.phone,
     userProfile?.agencyName,
