@@ -80,7 +80,19 @@ const AddContactModal = ({ isOpen, onClose, onSave, availableTags, availableProd
 
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
-        setFormData(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
+
+        let updates = { [name]: type === 'checkbox' ? checked : value };
+
+        // Auto-update Status if Role changes
+        if (name === 'role') {
+            if (value === 'Client') {
+                updates.status = 'Active';
+            } else if (value === 'Prospect') {
+                updates.status = 'New';
+            }
+        }
+
+        setFormData(prev => ({ ...prev, ...updates }));
     };
 
     const toggleSelection = (type, item) => {

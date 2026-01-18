@@ -481,6 +481,24 @@ const Dashboard = () => {
                 </div>
             </div>
 
+            {/* --- Mobile Usage Status (Now above buttons and visible) --- */}
+            <div className="mobile-usage-card mobile-only" style={{ margin: '1rem 1rem 1.5rem', padding: '1rem', background: 'var(--primary)', borderRadius: '12px', boxShadow: '0 4px 12px rgba(37, 99, 235, 0.2)' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', color: 'white' }}>
+                    <span style={{ fontSize: '0.9rem', fontWeight: 500 }}>Message Usage</span>
+                    <span style={{ fontSize: '0.9rem', fontWeight: 'bold' }}>{usage} / {limit > 0 ? limit : '∞'}</span>
+                </div>
+                <div style={{ height: '6px', background: 'rgba(255,255,255,0.3)', borderRadius: '3px', overflow: 'hidden' }}>
+                    <div style={{
+                        height: '100%',
+                        width: `${limit > 0 ? Math.min((usage / limit) * 100, 100) : 0}%`,
+                        background: usage >= limit ? '#fecaca' : '#ffffff'
+                    }} />
+                </div>
+                <div style={{ marginTop: '0.5rem', fontSize: '0.75rem', color: 'rgba(255,255,255,0.9)', textAlign: 'right' }}>
+                    Resets on {resetDateStr}
+                </div>
+            </div>
+
             {/* Mobile Action Buttons */}
             <div className="mobile-actions-row mobile-only">
                 <button className="mobile-action-btn primary" onClick={openAddModal}>
@@ -491,23 +509,7 @@ const Dashboard = () => {
                 </button>
             </div>
 
-            {/* --- Mobile Usage Status --- */}
-            <div className="mobile-usage-card mobile-only" style={{ margin: '0 1rem 1.5rem', padding: '1rem', background: 'rgba(255,255,255,0.1)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.2)' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', color: 'white' }}>
-                    <span style={{ fontSize: '0.9rem' }}>Message Limit</span>
-                    <span style={{ fontSize: '0.9rem', fontWeight: 'bold' }}>{usage} / {limit > 0 ? limit : '∞'}</span>
-                </div>
-                <div style={{ height: '6px', background: 'rgba(255,255,255,0.2)', borderRadius: '3px', overflow: 'hidden' }}>
-                    <div style={{
-                        height: '100%',
-                        width: `${limit > 0 ? Math.min((usage / limit) * 100, 100) : 0}%`,
-                        background: usage >= limit ? '#ef4444' : '#10b981'
-                    }} />
-                </div>
-                <div style={{ marginTop: '0.5rem', fontSize: '0.75rem', color: 'rgba(255,255,255,0.7)', textAlign: 'right' }}>
-                    Resets on {resetDateStr}
-                </div>
-            </div>
+
 
             {/* --- Desktop Stats Grid --- */}
             <div className="stats-grid desktop-only">
