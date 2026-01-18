@@ -258,11 +258,22 @@ function App() {
 
           if (dbProfile && !error) {
             // 1. Sync User Profile
+            // 1. Sync User Profile
             setUserProfile(prev => {
+              // AUTO-CORRECT: If plan is PRO but role is FREE, force PRO
+              const dbRole = dbProfile.role || 'free';
+              const dbPlan = dbProfile.plan_id || 'free';
+              const effectiveRole = (dbPlan === 'pro' && dbRole === 'free') ? 'pro' : dbRole;
+
+              // If we fixed the role, update DB immediately
+              if (effectiveRole !== dbRole) {
+                supabase.from('profiles').update({ role: effectiveRole }).eq('id', session.user.id).then();
+              }
+
               const fresh = {
                 ...prev,
-                planId: dbProfile.plan_id || 'free',
-                role: dbProfile.role || 'free',
+                planId: dbPlan,
+                role: effectiveRole,
                 id: session.user.id,
                 email: session.user.email,
                 name: dbProfile.full_name || prev?.name || 'User',
