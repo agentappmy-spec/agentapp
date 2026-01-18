@@ -3,9 +3,8 @@ import { NavLink } from 'react-router-dom';
 import { Home, Users, MessageSquare, Globe, Plus, Crown } from 'lucide-react';
 import '../MobileStyles.css';
 
-const BottomNav = ({ onAddContact, checkPermission }) => {
-    const profile = JSON.parse(localStorage.getItem('agent_user_profile') || '{}');
-    const isSuperAdmin = profile.role === 'super_admin';
+const BottomNav = ({ onAddContact, checkPermission, userProfile }) => {
+    const isSuperAdmin = userProfile?.role === 'super_admin';
 
     return (
         <nav className="bottom-nav mobile-only">

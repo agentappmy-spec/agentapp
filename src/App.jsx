@@ -83,6 +83,10 @@ const AuthGuard = ({ children, requiredRole }) => {
 const INITIAL_DATA = [];
 
 const AppLayout = ({ context, userProfile, openAddModal, checkPermission, setUserProfile }) => {
+  if (!userProfile) {
+    return <div className="flex-center" style={{ height: '100vh', background: '#f8fafc' }}>Loading Profile...</div>;
+  }
+
   return (
     <div className="app-container">
       <Sidebar userProfile={userProfile} checkPermission={checkPermission} setUserProfile={setUserProfile} />
@@ -92,7 +96,7 @@ const AppLayout = ({ context, userProfile, openAddModal, checkPermission, setUse
           <Outlet context={context} />
         </div>
       </main>
-      <BottomNav onAddContact={openAddModal} checkPermission={checkPermission} />
+      <BottomNav onAddContact={openAddModal} checkPermission={checkPermission} userProfile={userProfile} />
     </div>
   );
 };
