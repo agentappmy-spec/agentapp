@@ -189,3 +189,20 @@ export const sendWelcomeEmail = async (email, name) => {
     `);
     return sendEmail(email, 'Welcome to AgentApp!', html);
 };
+
+/**
+ * Send a generic text email from Agent to Client
+ * Automatically uses the logged-in user as Reply-To (via Edge Function)
+ * @param {string} to 
+ * @param {string} subject 
+ * @param {string} bodyText 
+ */
+export const sendAgentEmail = async (to, subject, bodyText) => {
+    // Simple text to HTML conversion
+    const formattedBody = bodyText.split('\n').map(line =>
+        `<p style="font-family: sans-serif; font-size: 14px; font-weight: normal; margin: 0; margin-bottom: 10px;">${line}</p>`
+    ).join('');
+
+    const html = getEmailTemplate(subject, formattedBody);
+    return sendEmail(to, subject, html);
+};

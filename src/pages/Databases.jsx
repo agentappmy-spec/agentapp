@@ -14,8 +14,11 @@ import {
     Settings,
     Edit, // For Edit button
     LayoutList,
-    LayoutGrid
+    LayoutGrid,
+    Mail, // For Email
+    X // For Close Icon
 } from 'lucide-react';
+import { sendAgentEmail } from '../services/emailService';
 // import AddContactModal from '../components/AddContactModal'; // Moved to App.jsx
 import TagManagerModal from '../components/TagManagerModal';
 import { useMessageLimit } from '../hooks/useMessageLimit'; // Import the hook
@@ -53,9 +56,9 @@ const InfoTag = ({ name }) => {
     return <span className={className}>{name}</span>
 }
 
-const KanbanCard = ({ contact, openEditModal }) => (
-    <div className="kanban-card" onClick={() => openEditModal(contact)}>
-        <div className="card-header">
+const KanbanCard = ({ contact, openEditModal, openEmailModal }) => (
+    <div className="kanban-card">
+        <div className="card-header" onClick={() => openEditModal(contact)}>
             <span className="card-title">{contact.name}</span>
             <MoreVertical size={16} className="text-muted" />
         </div>
@@ -69,6 +72,7 @@ const KanbanCard = ({ contact, openEditModal }) => (
                 {contact.name.charAt(0)}
             </div>
             <div className="card-actions">
+                <Mail size={14} className="text-muted hover-primary" onClick={(e) => { e.stopPropagation(); openEmailModal(contact); }} />
                 <MessageCircle size={14} className="text-muted hover-primary" />
                 <Phone size={14} className="text-muted hover-primary" />
             </div>
@@ -81,7 +85,7 @@ const KanbanCard = ({ contact, openEditModal }) => (
     </div>
 );
 
-const KanbanColumn = ({ title, status, contacts, openEditModal, totalValue }) => (
+const KanbanColumn = ({ title, status, contacts, openEditModal, openEmailModal, totalValue }) => (
     <div className="kanban-column">
         <div className="column-header">
             <div className={`status-dot dot-${status.toLowerCase().replace(' ', '-')}`}></div>
@@ -91,12 +95,76 @@ const KanbanColumn = ({ title, status, contacts, openEditModal, totalValue }) =>
         <div className="column-value">RM {totalValue.toLocaleString()}</div>
         <div className="column-body">
             {contacts.map(contact => (
-                <KanbanCard key={contact.id} contact={contact} openEditModal={openEditModal} />
+                <KanbanCard key={contact.id} contact={contact} openEditModal={openEditModal} openEmailModal={openEmailModal} />
             ))}
         </div>
         <button className="add-deal-btn" onClick={() => openEditModal(null)}>+ Add Deal</button>
     </div>
 );
+
+const ComposeEmailModal = ({ isOpen, onClose, recipientName, recipientEmail, onSend }) => {
+    const [subject, setSubject] = useState('');
+    const [message, setMessage] = useState('');
+    const [isSending, setIsSending] = useState(false);
+
+    if (!isOpen) return null;
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setIsSending(true);
+        try {
+            await onSend(subject, message);
+            setSubject('');
+            setMessage('');
+            onClose();
+        } catch (error) {
+            // Error handled in parent
+        } finally {
+            setIsSending(false);
+        }
+    };
+
+    return (
+        <div className="modal-overlay">
+            <div className="modal-content" style={{ maxWidth: '500px' }}>
+                <div className="modal-header">
+                    <h2>Send Email to {recipientName}</h2>
+                    <button className="close-btn" onClick={onClose}><X size={20} /></button>
+                </div>
+                <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem', padding: '1.5rem' }}>
+                    <div className="form-group">
+                        <label>Subject</label>
+                        <input
+                            type="text"
+                            required
+                            className="form-input"
+                            value={subject}
+                            onChange={(e) => setSubject(e.target.value)}
+                            placeholder="e.g. Follow up on our discussion"
+                        />
+                    </div>
+                    <div className="form-group">
+                        <label>Message</label>
+                        <textarea
+                            required
+                            className="form-input"
+                            style={{ minHeight: '150px', resize: 'vertical' }}
+                            value={message}
+                            onChange={(e) => setMessage(e.target.value)}
+                            placeholder="Write your message here..."
+                        />
+                    </div>
+                    <div className="modal-footer" style={{ padding: 0 }}>
+                        <button type="button" className="secondary-btn" onClick={onClose} disabled={isSending}>Cancel</button>
+                        <button type="submit" className="primary-btn" disabled={isSending}>
+                            {isSending ? 'Sending...' : 'Send Email'}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    );
+};
 
 const Databases = () => {
     const {
@@ -145,7 +213,35 @@ const Databases = () => {
     // Modal States
     // const [isContactModalOpen, setIsContactModalOpen] = useState(false); // Global
     // const [editingContact, setEditingContact] = useState(null); // Global
-    const [isTagManagerOpen, setIsTagManagerOpen] = useState(false); // Kept for backward compat but unused now
+    const [isTagManagerOpen, setIsTagManagerOpen] = useState(false);
+
+    // Email Modal State
+    const [isEmailModalOpen, setIsEmailModalOpen] = useState(false);
+    const [emailRecipient, setEmailRecipient] = useState(null);
+
+    const handleEmailClick = (contact) => {
+        if (!contact.email) {
+            alert('This contact does not have an email address.');
+            return;
+        }
+        setEmailRecipient(contact);
+        setIsEmailModalOpen(true);
+    };
+
+    const handleSendEmail = async (subject, message) => {
+        if (!emailRecipient) return;
+
+        try {
+            await sendAgentEmail(emailRecipient.email, subject, message);
+            alert('Email sent successfully!');
+            // Log for quota (handled by Edge Function, but we could log locally if needed to update UI instantly)
+            logMessage('email', emailRecipient.email); // Optimistic UI update for quota
+        } catch (error) {
+            console.error('Failed to send email:', error);
+            alert('Failed to send email. ' + error.message);
+            throw error; // Re-throw to keep modal open or let it handle loading state
+        }
+    };
 
     // handleSaveContact moved to App.jsx
 
@@ -392,6 +488,13 @@ const Databases = () => {
                                                 >
                                                     <MessageCircle size={16} />
                                                 </button>
+                                                <button
+                                                    onClick={() => handleEmailClick(row)}
+                                                    className="icon-btn-sm"
+                                                    title="Send Email"
+                                                >
+                                                    <Mail size={16} />
+                                                </button>
                                                 <button className="icon-btn-sm" onClick={() => openEditModal(row)} title="Edit Contact">
                                                     <Edit size={16} />
                                                 </button>
@@ -454,6 +557,7 @@ const Databases = () => {
                                     contacts={colData}
                                     totalValue={total}
                                     openEditModal={openEditModal}
+                                    openEmailModal={handleEmailClick}
                                 />
                             );
                         })}
@@ -471,7 +575,16 @@ const Databases = () => {
                     </div>
                 )}
             </div>
-        </div>
+
+
+            <ComposeEmailModal
+                isOpen={isEmailModalOpen}
+                onClose={() => setIsEmailModalOpen(false)}
+                recipientName={emailRecipient?.name}
+                recipientEmail={emailRecipient?.email}
+                onSend={handleSendEmail}
+            />
+        </div >
     );
 };
 
