@@ -21,6 +21,19 @@ import {
 } from 'lucide-react';
 import './SuperAdmin.css';
 
+// --- System Configuration for Plans ---
+// Add new features here to make them appear in the Plan Editor
+const AVAILABLE_FEATURES = [
+    { id: 'global_reminder', label: 'Global Reminder', type: 'boolean', value: 'Auto Reminder' },
+    { id: 'auto_follow_up', label: 'Auto Follow Up', type: 'boolean', value: 'Auto Follow Up' },
+    { id: 'email', label: 'Integration with Email', type: 'boolean', value: 'Email' },
+    { id: 'sms', label: 'Integration with SMS', type: 'boolean', value: 'SMS' },
+    { id: 'whatsapp', label: 'Integration with WhatsApp Official API', type: 'boolean', value: 'WhatsApp' },
+    { id: 'landing_page', label: 'Able to publish Landing Page', type: 'boolean', value: 'Landing Page' },
+    { id: 'analytics', label: 'Advance Dashboard Analytics', type: 'boolean', value: 'Analytics' },
+    { id: 'white_label', label: 'White Labeling', type: 'boolean', value: 'White Label' }
+];
+
 // --- Components for Auto Follow-up (Adapted) ---
 
 const EditNodeModal = ({ node, onClose, onSave }) => {
@@ -165,22 +178,35 @@ const EditUserModal = ({ user, onClose, onSave, plans = [] }) => {
 const EditPlanModal = ({ plan, onClose, onSave }) => {
     const [formData, setFormData] = useState({
         ...plan,
-        features: Array.isArray(plan.features) ? plan.features.join(', ') : plan.features
+        features: Array.isArray(plan.features) ? plan.features : []
     });
 
     const handleChange = (field, value) => {
         setFormData(prev => ({ ...prev, [field]: value }));
     };
 
+    const toggleFeature = (featureValue) => {
+        setFormData(prev => {
+            const currentFeatures = prev.features || [];
+            if (currentFeatures.includes(featureValue)) {
+                return { ...prev, features: currentFeatures.filter(f => f !== featureValue) };
+            } else {
+                return { ...prev, features: [...currentFeatures, featureValue] };
+            }
+        });
+    };
+
     return (
         <div className="modal-overlay">
-            <div className="modal-content glass-panel" style={{ width: '90%', maxWidth: '550px' }}>
+            <div className="modal-content glass-panel" style={{ width: '90%', maxWidth: '600px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-                    <h2 className="modal-title" style={{ margin: 0, border: 'none', padding: 0 }}>{plan.isNew ? 'Create New Plan' : 'Edit Plan Details'}</h2>
+                    <h2 className="modal-title" style={{ margin: 0, border: 'none', padding: 0 }}>
+                        {plan.isNew ? 'Create New Plan' : 'Edit Plan Details'}
+                    </h2>
                     <button className="sa-icon-btn" onClick={onClose}><X size={20} /></button>
                 </div>
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+                <div className="sa-scrollable-form" style={{ maxHeight: '70vh', overflowY: 'auto', paddingRight: '10px' }}>
                     <div className="form-group">
                         <label>Plan Name</label>
                         <input
@@ -191,7 +217,7 @@ const EditPlanModal = ({ plan, onClose, onSave }) => {
                         />
                     </div>
 
-                    <div style={{ display: 'flex', gap: '1rem' }}>
+                    <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
                         <div className="form-group" style={{ flex: 1 }}>
                             <label>Monthly Price (RM)</label>
                             <input
@@ -212,9 +238,14 @@ const EditPlanModal = ({ plan, onClose, onSave }) => {
                         </div>
                     </div>
 
-                    <div style={{ display: 'flex', gap: '1rem' }}>
+                    {/* LIMITS SECTION */}
+                    <h4 style={{ margin: '1.5rem 0 1rem', color: '#334155', borderBottom: '1px solid #e2e8f0', paddingBottom: '0.5rem' }}>
+                        Usage Limits
+                    </h4>
+
+                    <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
                         <div className="form-group" style={{ flex: 1 }}>
-                            <label>Contact Limit</label>
+                            <label>Database Limit (Contacts)</label>
                             <input
                                 type="number"
                                 className="sa-input-modern"
@@ -222,6 +253,7 @@ const EditPlanModal = ({ plan, onClose, onSave }) => {
                                 onChange={e => handleChange('contact_limit', e.target.value)}
                                 placeholder="0 for unlimited"
                             />
+                            <small className="text-muted">Enter 0 for Unlimited</small>
                         </div>
                         <div className="form-group" style={{ flex: 1 }}>
                             <label>Message Limit</label>
@@ -234,20 +266,56 @@ const EditPlanModal = ({ plan, onClose, onSave }) => {
                         </div>
                     </div>
 
-                    <div className="form-group">
-                        <label>Features (comma separated)</label>
-                        <textarea
-                            rows="4"
-                            className="sa-input-modern"
-                            value={formData.features}
-                            onChange={e => handleChange('features', e.target.value)}
-                            placeholder="WhatsApp, SMS, Email, etc."
-                            style={{ resize: 'vertical' }}
-                        />
+                    {/* FEATURES CHECKLIST SECTION */}
+                    <h4 style={{ margin: '1.5rem 0 1rem', color: '#334155', borderBottom: '1px solid #e2e8f0', paddingBottom: '0.5rem' }}>
+                        Features Included
+                    </h4>
+
+                    <div className="features-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                        {AVAILABLE_FEATURES.map(feat => {
+                            const isChecked = formData.features.includes(feat.value);
+                            return (
+                                <div
+                                    key={feat.id}
+                                    className={`feature-toggle-card ${isChecked ? 'active' : ''}`}
+                                    onClick={() => toggleFeature(feat.value)}
+                                    style={{
+                                        padding: '12px',
+                                        borderRadius: '8px',
+                                        border: isChecked ? '1px solid #2563eb' : '1px solid #e2e8f0',
+                                        background: isChecked ? '#eff6ff' : '#fff',
+                                        cursor: 'pointer',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '10px',
+                                        transition: 'all 0.2s'
+                                    }}
+                                >
+                                    <div
+                                        style={{
+                                            width: '20px',
+                                            height: '20px',
+                                            borderRadius: '4px',
+                                            border: isChecked ? 'none' : '2px solid #cbd5e1',
+                                            background: isChecked ? '#2563eb' : 'transparent',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            color: 'white'
+                                        }}
+                                    >
+                                        {isChecked && <CheckCircle2 size={14} />}
+                                    </div>
+                                    <span style={{ fontWeight: '500', color: isChecked ? '#1e293b' : '#64748b', fontSize: '0.9rem' }}>
+                                        {feat.label}
+                                    </span>
+                                </div>
+                            );
+                        })}
                     </div>
                 </div>
 
-                <div className="modal-actions">
+                <div className="modal-actions" style={{ marginTop: '2rem', borderTop: '1px solid #e2e8f0', paddingTop: '1.5rem' }}>
                     <button className="secondary-btn" onClick={onClose}>Cancel</button>
                     <button
                         className="primary-btn"
@@ -257,7 +325,7 @@ const EditPlanModal = ({ plan, onClose, onSave }) => {
                             contact_limit: Number(formData.contact_limit),
                             price_monthly: Number(formData.price_monthly),
                             price_yearly: Number(formData.price_yearly),
-                            features: formData.features.split(',').map(f => f.trim()).filter(f => f)
+                            features: formData.features
                         })}
                     >
                         Save Plan
@@ -590,7 +658,7 @@ const SuperAdmin = () => {
         try {
             const { supabase } = await import('../services/supabaseClient');
 
-            // Format features to array if not already
+            // Features are already an array from the new UI
             const formattedFeatures = Array.isArray(planData.features) ? planData.features : [];
 
             if (planData.isNew) {

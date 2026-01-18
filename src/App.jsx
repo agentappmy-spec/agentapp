@@ -693,18 +693,19 @@ function App() {
 
     if (!myPlan?.features) return false;
 
-    // Direct exact match
-    if (myPlan.features.includes(featureKey)) return true;
+    // Case-insensitive match for all features
+    const normalizedKey = featureKey.toLowerCase();
+    return myPlan.features.some(f => {
+      const feat = f.toLowerCase();
+      // Exact match (case-insensitive) OR fuzzy match for known robust keys
+      if (feat === normalizedKey) return true;
 
-    // Robust match for Landing Page (handles "Landing Page", "landing_page", "landing_page_view")
-    if (featureKey === 'landing_page' || featureKey === 'landing_page_view') {
-      return myPlan.features.some(f => {
-        const feat = f.toLowerCase();
+      // Legacy/Robust handling
+      if (normalizedKey === 'landing_page' || normalizedKey === 'landing_page_view') {
         return feat.includes('landing page') || feat.includes('landing_page');
-      });
-    }
-
-    return false;
+      }
+      return false;
+    });
   };
 
   const contextValue = {
