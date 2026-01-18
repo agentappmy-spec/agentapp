@@ -750,3 +750,71 @@ input:checked+.slider:before {
         grid-template-columns: 1fr;
     }
 }
+
+/* Integration Enhancements */
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.35rem 0.75rem;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.status-badge.success {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.config-text {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    margin: 0.75rem 0;
+}
+
+.card-config-field {
+    margin-bottom: 1rem;
+}
+
+.card-config-field label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+}
+
+.disabled-input {
+    width: 100%;
+    padding: 0.6rem 0.8rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    background: #f8fafc;
+    color: var(--text-secondary);
+    cursor: not-allowed;
+    font-size: 0.9rem;
+}
+
+.upgrade-box {
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    background: linear-gradient(to right, #ffffff, #f8fafc);
+}
+
+.primary-btn-sm {
+    background: var(--primary);
+    color: white;
+    border: none;
+    padding: 0.6rem 1.2rem;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.primary-btn-sm:hover {
+    background: #6d28d9;
+}

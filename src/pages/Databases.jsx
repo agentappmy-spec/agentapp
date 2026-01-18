@@ -109,12 +109,18 @@ const Databases = () => {
         openAddModal, // Global context
         setEditingContact: setGlobalEditingContact, // Global context
         setIsContactModalOpen, // Global context
-        userProfile // Needed for limit check
+        userProfile, // Needed for limit check
+        integrations
     } = useOutletContext();
 
     const { logMessage, canSendMessage, usage, limit } = useMessageLimit(userProfile);
 
     const handleWhatsAppClick = (phone) => {
+        if (!integrations.whatsapp?.enabled) {
+            alert('WhatsApp integration is disabled. Please enable it in Settings > Integrations.');
+            return;
+        }
+
         if (!canSendMessage) {
             alert(`🚫 Message limit reached (${usage}/${limit}).\n\nPlease upgrade your plan to send more messages.`);
             return;

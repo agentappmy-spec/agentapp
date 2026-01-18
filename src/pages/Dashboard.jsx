@@ -37,7 +37,7 @@ const ProgressBar = ({ label, current, target, unit = '' }) => {
 };
 
 const Dashboard = () => {
-    const { contacts, userProfile, userGoals, openAddModal } = useOutletContext();
+    const { contacts, userProfile, userGoals, openAddModal, integrations } = useOutletContext();
     const { usage, limit, lastMessage } = useMessageLimit(userProfile);
 
     // Calculate reset date (1st of next month)
@@ -46,12 +46,11 @@ const Dashboard = () => {
     resetDate.setDate(1);
     const resetDateStr = resetDate.toLocaleDateString('en-US', { day: 'numeric', month: 'short' });
 
-    // Integration Logic (Mocked based on user request)
-    const isPro = userProfile.planId === 'pro';
+    // Integration Logic (Uses actual state from context)
     const activeIntegrations = [
-        { id: 'email', label: 'Email', active: true, icon: Mail, color: '#10b981' },
-        { id: 'whatsapp', label: 'WhatsApp', active: isPro, icon: MessageCheck, color: '#25D366' },
-        { id: 'sms', label: 'SMS', active: isPro, icon: Smartphone, color: '#3b82f6' }
+        { id: 'email', label: 'Email', active: integrations.email?.enabled, icon: Mail, color: '#10b981' },
+        { id: 'whatsapp', label: 'WhatsApp', active: integrations.whatsapp?.enabled, icon: MessageCheck, color: '#25D366' },
+        { id: 'sms', label: 'SMS', active: integrations.sms?.enabled, icon: Smartphone, color: '#3b82f6' }
     ];
 
     const [saasStats, setSaasStats] = React.useState({

@@ -309,6 +309,9 @@ function App() {
             if (dbProfile.landing_config) {
               setLandingConfig(dbProfile.landing_config);
             }
+            if (dbProfile.integrations) {
+              setIntegrations(dbProfile.integrations);
+            }
           }
         }
       } catch (err) {
@@ -351,6 +354,15 @@ function App() {
       });
     }
   }, [landingConfig, userProfile?.id]);
+
+  // Persist Integrations to DB
+  useEffect(() => {
+    if (userProfile?.id) {
+      supabase.from('profiles').update({ integrations }).eq('id', userProfile.id).then(({ error }) => {
+        if (error) console.warn('Failed to save integrations to DB:', error.message);
+      });
+    }
+  }, [integrations, userProfile?.id]);
 
   // Persist Profile Details to DB (Name, Title, Agency, Phone, etc.)
   // IMPORTANT: We do NOT persist role or plan_id here - those are managed separately

@@ -835,88 +835,76 @@ const Settings = () => {
                     {activeTab === 'integrations' && (
                         <div className="integrations-section fade-in">
                             <h2 className="section-title">External Integrations</h2>
-                            {userProfile.planId === 'pro' ? (
-                                <div className="settings-grid">
-                                    <SettingsCard
-                                        icon={MessageCircle}
-                                        title="WhatsApp Integration"
-                                        description="Automated WhatsApp messaging is active for your account."
-                                        enabled={true}
-                                        onToggle={() => { }}
-                                        locked={false}
-                                    >
-                                        <div className="status-badge" style={{ background: '#dcfce7', color: '#166534', border: 'none', padding: '0.5rem 1rem' }}>
-                                            ✓ Provisioned by Package
-                                        </div>
-                                        <p style={{ fontSize: '0.8rem', color: '#64748b', marginTop: '1rem' }}>
-                                            Your WhatsApp automation is handled by our high-delivery servers. No manual setup required.
-                                        </p>
-                                    </SettingsCard>
+                            <p className="page-subtitle" style={{ marginBottom: '2rem' }}>
+                                Connect your favorite tools to automate your workflow.
+                            </p>
 
-                                    <SettingsCard
-                                        icon={Mail}
-                                        title="Email Service"
-                                        description="Official communications sent via our premium delivery network."
-                                        enabled={true}
-                                        onToggle={() => { }}
-                                    >
-                                        <div className="form-group">
-                                            <label>Sender Name</label>
-                                            <input
-                                                type="text"
-                                                value={userProfile.name}
-                                                disabled
-                                                style={{ background: '#f8fafc', cursor: 'default' }}
-                                            />
-                                        </div>
-                                        <div className="form-group">
-                                            <label>Reply to Email</label>
-                                            <input
-                                                type="text"
-                                                value={userProfile.email}
-                                                disabled
-                                                style={{ background: '#f8fafc', cursor: 'default' }}
-                                            />
-                                        </div>
-                                        <small className="text-muted">These settings are synced from your Profile.</small>
-                                    </SettingsCard>
-
-                                    <SettingsCard
-                                        icon={MessageSquare}
-                                        title="SMS Gateway"
-                                        description="High-priority SMS notifications for urgent follow-ups."
-                                        enabled={true}
-                                        onToggle={() => { }}
-                                    >
-                                        <div className="status-badge" style={{ background: '#dcfce7', color: '#166534', border: 'none', padding: '0.5rem 1rem' }}>
-                                            ✓ Provisioned & Ready
-                                        </div>
-                                        <p style={{ fontSize: '0.8rem', color: '#64748b', marginTop: '1rem' }}>
-                                            SMS credits are included in your Pro subscription.
-                                        </p>
-                                    </SettingsCard>
-                                </div>
-                            ) : (
-                                <div className="glass-panel text-center" style={{ padding: '3rem 2rem' }}>
-                                    <div className="card-icon-wrapper" style={{ margin: '0 auto 1.5rem auto', width: '64px', height: '64px' }}>
-                                        <Star size={32} />
+                            <div className="settings-grid">
+                                <SettingsCard
+                                    icon={Mail}
+                                    title="Email Service"
+                                    description="Automated email follow-ups and notifications."
+                                    enabled={integrations.email?.enabled}
+                                    onToggle={() => toggleIntegration('email')}
+                                    locked={false}
+                                >
+                                    <div className="card-config-field">
+                                        <label>Sender Email</label>
+                                        <input
+                                            type="text"
+                                            value={userProfile.email}
+                                            disabled
+                                            className="disabled-input"
+                                        />
+                                        <small className="text-muted">Sends via AgentApp premium delivery network.</small>
                                     </div>
-                                    <h3>Premium Integrations</h3>
-                                    <p className="text-secondary" style={{ maxWidth: '400px', margin: '1rem auto' }}>
-                                        WhatsApp, SMS, and Premium Email delivery are exclusive features for Pro users.
+                                </SettingsCard>
+
+                                <SettingsCard
+                                    icon={MessageCircle}
+                                    title="WhatsApp Integration"
+                                    description="Send automated WhatsApp messages to your leads."
+                                    enabled={integrations.whatsapp?.enabled}
+                                    onToggle={() => toggleIntegration('whatsapp')}
+                                    locked={userProfile.planId !== 'pro'}
+                                >
+                                    <div className="status-badge success">
+                                        ✓ System Provisioned
+                                    </div>
+                                    <p className="config-text">
+                                        WhatsApp automation is handled by our cloud servers. No setup required.
                                     </p>
-                                    <div style={{ marginTop: '2rem', display: 'flex', flexDirection: 'column', gap: '0.75rem', alignItems: 'center' }}>
-                                        <div className="status-badge" style={{ background: '#f1f5f9', color: '#475569' }}>
-                                            Basic Email (Global Reminders) is Enabled by default.
-                                        </div>
-                                        <button
-                                            className="primary-btn"
-                                            onClick={() => setActiveTab('billing')}
-                                            style={{ marginTop: '1rem' }}
-                                        >
-                                            Upgrade to Pro to Unlock
-                                        </button>
+                                </SettingsCard>
+
+                                <SettingsCard
+                                    icon={MessageSquare}
+                                    title="SMS Gateway"
+                                    description="High-delivery SMS for urgent follow-ups."
+                                    enabled={integrations.sms?.enabled}
+                                    onToggle={() => toggleIntegration('sms')}
+                                    locked={userProfile.planId !== 'pro'}
+                                >
+                                    <div className="status-badge success">
+                                        ✓ Ready to use
                                     </div>
+                                    <p className="config-text">
+                                        SMS credits are included in your Pro subscription.
+                                    </p>
+                                </SettingsCard>
+                            </div>
+
+                            {userProfile.planId !== 'pro' && (
+                                <div className="upgrade-box glass-panel" style={{ marginTop: '2rem', padding: '1.5rem', textAlign: 'center' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginBottom: '0.5rem', color: '#123456' }}>
+                                        <Star size={20} fill="#f59e0b" color="#f59e0b" />
+                                        <h3 style={{ margin: 0 }}>Unlock Pro Integrations</h3>
+                                    </div>
+                                    <p className="text-muted" style={{ marginBottom: '1rem' }}>
+                                        WhatsApp and SMS automation are exclusive to Pro members.
+                                    </p>
+                                    <button className="primary-btn-sm" onClick={() => setActiveTab('billing')}>
+                                        View Pricing Options
+                                    </button>
                                 </div>
                             )}
                         </div>
