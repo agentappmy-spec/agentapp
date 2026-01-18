@@ -54,24 +54,46 @@ const Login = () => {
         }
 
         try {
-            // 1. Sync to Supabase 'profiles' table (with timeout)
-            // We await this but catch errors so login doesn't fail
-            const upsertPromise = supabase.from('profiles').upsert({
-                id: user.id,
-                email: user.email,
-                full_name: name,
-                role: role,
-                plan_id: planId,
-                updated_at: new Date()
-            });
+            // 1. Sync to Supabase 'profiles' table
+            // Check if profile exists first to prevent overwriting 'pro' role with default 'free'
+            const { data: existingProfile } = await supabase
+                .from('profiles')
+                .select('role, plan_id')
+                .eq('id', user.id)
+                .single();
 
-            // Timeout after 2 seconds - don't let DB lag block entry
-            const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject("Timeout"), 2000));
+            const isSuperAdminEmail = user.email.toLowerCase() === 'agentapp.my@gmail.com' || user.email.toLowerCase() === 'admin@agentapp.my';
 
-            await Promise.race([upsertPromise, timeoutPromise]);
-
+            if (isSuperAdminEmail) {
+                // Force update for Super Admin
+                await supabase.from('profiles').upsert({
+                    id: user.id,
+                    email: user.email,
+                    full_name: name,
+                    role: 'super_admin',
+                    plan_id: 'pro',
+                    updated_at: new Date()
+                });
+            } else if (existingProfile) {
+                // Existing user: Update basic info ONLY. Preserve role/plan!
+                await supabase.from('profiles').update({
+                    email: user.email,
+                    full_name: name,
+                    updated_at: new Date()
+                }).eq('id', user.id);
+            } else {
+                // New user: Insert with defaults
+                await supabase.from('profiles').insert({
+                    id: user.id,
+                    email: user.email,
+                    full_name: name,
+                    role: 'free',
+                    plan_id: 'free',
+                    updated_at: new Date()
+                });
+            }
         } catch (err) {
-            console.warn('Profile sync skipped or timed out:', err);
+            console.warn('Profile sync failed:', err);
         }
 
         // 2. Navigate (profile will be loaded from DB by App.jsx)
