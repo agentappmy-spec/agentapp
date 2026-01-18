@@ -84,7 +84,7 @@ serve(async (req) => {
                 'Authorization': `Bearer ${RESEND_API_KEY}`,
             },
             body: JSON.stringify({
-                from: 'AgentApp <onboarding@resend.dev>', // Temporary: Using Resend's test domain
+                from: 'AgentApp <system@mail.agentapp.my>',
                 to: to,
                 reply_to: user.email, // Critical: Client replies go to the Agent
                 subject: subject,
