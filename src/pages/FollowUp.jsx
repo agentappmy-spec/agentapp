@@ -632,67 +632,12 @@ const FollowUp = () => {
                 </div>
 
                 <div className="tab-content no-padding" style={{ background: '#f9fafb', height: '100%', overflowY: 'auto' }}>
-                    {activeTab === 'global' ? (
-                        <div className="global-reminders-grid" style={{ padding: '2rem', display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.5rem' }}>
-                            {activeList.map(item => (
-                                <div key={item.id} className="glass-panel" style={{ padding: '1.5rem', background: 'white', border: '1px solid var(--border-color)', borderRadius: '12px', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                        <div style={{ width: '40px', height: '40px', borderRadius: '8px', background: 'rgba(124, 58, 237, 0.1)', color: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                            {(item.trigger_name || '').includes('Birthday') ? <User size={20} /> : <Clock size={20} />}
-                                        </div>
-                                        <div style={{ flex: 1 }}>
-                                            <h3 style={{ fontSize: '1rem', fontWeight: '600', color: 'var(--text-primary)' }}>{item.trigger_name || item.trigger}</h3>
-                                            <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                                                {item.date ? (item.date === 'auto' ? 'Auto-detected' : (() => {
-                                                    const [y, m, d] = item.date.split('-');
-                                                    return `Date: ${d}-${m}-${y}`;
-                                                })()) : 'Based on Contact Data'}
-                                            </p>
-                                        </div>
-                                    </div>
-
-                                    {/* Badges for Client-Only and Mandatory */}
-                                    <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
-                                        {item.client_only && (
-                                            <span style={{ fontSize: '0.7rem', padding: '3px 8px', borderRadius: '4px', background: '#eff6ff', color: '#2563eb', fontWeight: 500, border: '1px solid #bfdbfe' }}>
-                                                Clients Only
-                                            </span>
-                                        )}
-                                        {item.mandatory && (
-                                            <span style={{ fontSize: '0.7rem', padding: '3px 8px', borderRadius: '4px', background: '#fef3c7', color: '#d97706', fontWeight: 500, border: '1px solid #fde68a' }}>
-                                                Mandatory
-                                            </span>
-                                        )}
-                                        {item.days_before && (
-                                            <span style={{ fontSize: '0.7rem', padding: '3px 8px', borderRadius: '4px', background: '#f3e8ff', color: '#7c3aed', fontWeight: 500, border: '1px solid #e9d5ff' }}>
-                                                {item.days_before} days before
-                                            </span>
-                                        )}
-                                    </div>
-
-                                    <div style={{ background: 'var(--bg-secondary)', padding: '1rem', borderRadius: '8px', fontSize: '0.9rem', color: 'var(--text-secondary)', fontStyle: 'italic' }}>
-                                        "{item.contentSms || item.content}"
-                                    </div>
-                                    <button
-                                        className="secondary-btn"
-                                        style={{ width: '100%', justifyContent: 'center' }}
-                                        onClick={() => setEditingNode(item)}
-                                    >
-                                        <Edit2 size={16} /> Edit Message
-                                    </button>
-                                </div>
-                            ))}
-                        </div>
-                    ) : (
-                        <>
-                            <WorkflowList
-                                steps={activeList}
-                                onEditNode={setEditingNode}
-                                onDeleteNode={handleDeleteClick}
-                                onAddStep={handleAddNode}
-                            />
-                        </>
-                    )}
+                    <WorkflowList
+                        steps={activeList}
+                        onEditNode={setEditingNode}
+                        onDeleteNode={handleDeleteClick}
+                        onAddStep={handleAddNode}
+                    />
                 </div>
             </div>
 
