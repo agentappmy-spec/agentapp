@@ -476,11 +476,11 @@ const FollowUp = () => {
 
             if (isGlobal) {
                 // CLONE ON WRITE (Insert Personal Override)
-                const { user } = await supabase.auth.getUser(); // Ensure we have user
+                const { data: { user } } = await supabase.auth.getUser(); // Ensure we have user
                 if (!user) throw new Error("No user found");
 
                 const newStep = {
-                    user_id: userProfile?.id, // Ensure we bind to profile
+                    user_id: user.id, // Use authenticated user ID directly
                     template_id: updatedNode.template_id,
                     day: updatedNode.day,
                     date: updatedNode.date,
