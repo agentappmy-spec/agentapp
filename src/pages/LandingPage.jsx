@@ -322,14 +322,18 @@ const LandingPage = () => {
     };
 
     const handleResetToDefault = async () => {
-        const confirmed = window.confirm(
-            '⚠️ Reset to Default Template?\n\n' +
-            'This will replace your current landing page with the default Pro template. ' +
-            'All your customizations will be lost.\n\n' +
-            'Are you sure you want to continue?'
+        const userInput = prompt(
+            '⚠️ RESET TO DEFAULT TEMPLATE\n\n' +
+            'This will permanently delete all your customizations and restore the default Pro template.\n\n' +
+            'Type "RESET" (in capital letters) to confirm:'
         );
 
-        if (!confirmed) return;
+        if (userInput !== 'RESET') {
+            if (userInput !== null) {
+                alert('❌ Reset cancelled. You must type "RESET" exactly to proceed.');
+            }
+            return;
+        }
 
         // Apply the Pro template as default
         applyTemplate('pro');
@@ -456,14 +460,14 @@ const LandingPage = () => {
                         <span className="control-label">Template</span>
                         <div className="btn-group">
                             <button
-                                className={`std-tab-item small-btn ${pageConfig.name === TEMPLATES.basic.name ? 'active' : ''}`}
+                                className={`std - tab - item small - btn ${pageConfig.name === TEMPLATES.basic.name ? 'active' : ''} `}
                                 onClick={() => applyTemplate('basic')}
                                 disabled={userProfile?.is_published}
                             >
                                 Basic
                             </button>
                             <button
-                                className={`std-tab-item small-btn ${pageConfig.name === TEMPLATES.pro.name ? 'active' : ''}`}
+                                className={`std - tab - item small - btn ${pageConfig.name === TEMPLATES.pro.name ? 'active' : ''} `}
                                 onClick={() => applyTemplate('pro')}
                                 disabled={userProfile?.is_published}
                             >
@@ -476,13 +480,13 @@ const LandingPage = () => {
                         <span className="control-label">Preview</span>
                         <div className="btn-group">
                             <button
-                                className={`std-tab-item small-btn ${previewMode === 'desktop' ? 'active' : ''}`}
+                                className={`std - tab - item small - btn ${previewMode === 'desktop' ? 'active' : ''} `}
                                 onClick={() => setPreviewMode('desktop')}
                             >
                                 <Monitor size={16} />
                             </button>
                             <button
-                                className={`std-tab-item small-btn ${previewMode === 'mobile' ? 'active' : ''}`}
+                                className={`std - tab - item small - btn ${previewMode === 'mobile' ? 'active' : ''} `}
                                 onClick={() => setPreviewMode('mobile')}
                             >
                                 <Smartphone size={16} />
@@ -563,7 +567,7 @@ const LandingPage = () => {
                         <span style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#64748b', fontWeight: '600', fontSize: '0.95rem' }}>@</span>
                         <input
                             type="text"
-                            className={`bio-link-input ${usernameError ? 'error' : ''}`}
+                            className={`bio - link - input ${usernameError ? 'error' : ''} `}
                             placeholder="yourname"
                             value={userProfile?.username || ''}
                             onChange={async (e) => {
@@ -615,27 +619,30 @@ const LandingPage = () => {
                                 const url = `${window.location.origin}/@${userProfile.username}`;
                                 navigator.clipboard.writeText(url);
                                 alert('✅ Link copied to clipboard!');
-                            }}
+                            }
+                            }
                         >
                             <LinkIcon size={16} />
                             <span className="btn-text-desktop">Copy Link</span>
-                        </button>
+                        </button >
                     )}
-                </div>
+                </div >
                 {userProfile?.username && userProfile.username.length >= 4 && !usernameError && (
                     <div className="bio-link-success">
                         ✓ Your public link: <strong>{window.location.origin}/@{userProfile.username}</strong>
                     </div>
                 )}
-                {userProfile?.username && userProfile.username.length < 4 && (
-                    <div className="bio-link-warning">
-                        Username must be at least 4 characters
-                    </div>
-                )}
+                {
+                    userProfile?.username && userProfile.username.length < 4 && (
+                        <div className="bio-link-warning">
+                            Username must be at least 4 characters
+                        </div>
+                    )
+                }
                 <div className="bio-link-hint">
                     4-20 characters. Letters, numbers, hyphens, and underscores only.
                 </div>
-            </div>
+            </div >
 
             <div className="builder-body">
                 {/* Edit Lock Overlay */}
@@ -819,7 +826,7 @@ const LandingPage = () => {
                     </div>
                 </main>
             </div>
-        </div>
+        </div >
     );
 };
 
