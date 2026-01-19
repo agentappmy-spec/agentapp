@@ -1282,12 +1282,18 @@ const SuperAdmin = () => {
                                         <div className="sa-plan-features-list">
                                             <div className="feature-list-title">Included Features</div>
                                             <div className="feature-tags">
-                                                {(Array.isArray(plan.features) ? plan.features : []).map((f, i) => (
-                                                    <div key={i} className="feature-tag">
-                                                        <CheckCircle2 size={12} />
-                                                        <span>{f}</span>
-                                                    </div>
-                                                ))}
+                                                {(Array.isArray(plan.features) ? plan.features : []).map((f, i) => {
+                                                    const featureDef = AVAILABLE_FEATURES.find(af => af.value === f || af.id === f);
+                                                    const label = featureDef ? featureDef.label : f.replace(/_/g, ' ');
+                                                    // Fallback label formatting if not found in constant
+
+                                                    return (
+                                                        <div key={i} className="feature-tag">
+                                                            <CheckCircle2 size={12} />
+                                                            <span>{label}</span>
+                                                        </div>
+                                                    );
+                                                })}
                                             </div>
                                         </div>
                                     </div>

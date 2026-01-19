@@ -595,3 +595,200 @@
     color: white;
     border-color: #0f172a;
 }
+
+/* Plans Header Fix */
+.sa-plans-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    gap: 1rem;
+}
+
+.sa-section-info h3 {
+    font-size: 1.5rem;
+    color: #0f172a;
+    font-weight: 800;
+    margin: 0 0 0.5rem 0;
+}
+
+.sa-section-info p {
+    color: #64748b;
+    font-size: 0.95rem;
+    margin: 0;
+}
+
+/* Feature Tags Styling */
+.feature-list-title {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    color: #94a3b8;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    margin-bottom: 1rem;
+}
+
+.feature-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+.feature-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #f8fafc;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    color: #334155;
+    border: 1px solid #e2e8f0;
+}
+
+.sa-plan-card.pro .feature-tag {
+    background: white;
+    border-color: #dbeafe;
+    color: #1e40af;
+}
+
+/* Currency Fix */
+.sa-plan-pricing {
+    display: flex;
+    align-items: baseline;
+    color: #0f172a;
+}
+
+.sa-plan-pricing .currency {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-right: 4px;
+}
+
+.sa-plan-pricing .amount {
+    font-size: 3rem;
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -0.02em;
+}
+
+.sa-plan-pricing .period {
+    color: #64748b;
+    font-size: 1rem;
+    margin-left: 6px;
+    font-weight: 500;
+}
+
+/* Plan Title Group */
+.sa-plan-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.sa-plan-title-group {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.sa-plan-icon {
+    width: 48px;
+    height: 48px;
+    background: #f1f5f9;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #475569;
+}
+
+.sa-plan-card.pro .sa-plan-icon {
+    background: #eff6ff;
+    color: #2563eb;
+}
+
+.sa-plan-title-group h4 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 4px;
+}
+
+/* Plan Action Buttons */
+.sa-plan-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.sa-action-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    background: white;
+    color: #94a3b8;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.sa-action-btn:hover {
+    color: #0f172a;
+    border-color: #cbd5e1;
+}
+
+.sa-action-btn.text-danger:hover {
+    color: #ef4444;
+    border-color: #fecaca;
+    background: #fef2f2;
+}
+
+.sa-plan-features-stats {
+    display: flex;
+    gap: 1.5rem;
+    padding: 1.5rem 0;
+    border-top: 1px solid #f1f5f9;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.sa-feature-stat {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.sa-feature-stat svg {
+    color: #94a3b8;
+}
+
+.sa-feature-stat .stat-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.sa-feature-stat .stat-value {
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: #0f172a;
+}
+
+.sa-feature-stat .stat-label {
+    font-size: 0.75rem;
+    color: #64748b;
+}
+
+.sa-plan-status-badge {
+    font-size: 0.7rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    color: #94a3b8;
+    letter-spacing: 0.05em;
+}
+
+.sa-plan-status-badge.active {
+    color: #2563eb;
+}
