@@ -684,24 +684,27 @@ const Settings = () => {
                                 <h2 className="section-title">Billing & Subscription</h2>
 
                                 {/* Current Plan Summary */}
-                                <div className="glass-panel" style={{ padding: '2rem', marginBottom: '2rem', borderLeft: `6px solid ${userProfile.planId === 'pro' ? '#10b981' : '#cbd5e1'}` }}>
+                                <div className="glass-panel" style={{ padding: '2rem', marginBottom: '2rem', borderLeft: `6px solid ${userProfile.planId === 'pro' || userProfile.planId === 'super_admin' ? '#10b981' : '#cbd5e1'}` }}>
                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem' }}>
                                         <div>
                                             <div style={{ textTransform: 'uppercase', fontSize: '0.75rem', fontWeight: '700', color: '#64748b', letterSpacing: '1px', marginBottom: '0.5rem' }}>Current Plan</div>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '0.5rem' }}>
                                                 <h3 style={{ fontSize: '1.75rem', fontWeight: '800', margin: 0, color: '#1e293b' }}>
-                                                    {userProfile.planId === 'pro' ? 'Pro Plan' : 'Free Starter'}
+                                                    {userProfile.planId === 'super_admin' ? 'Super Admin' : (userProfile.planId === 'pro' ? 'Pro Plan' : 'Free Starter')}
                                                 </h3>
-                                                <span className={`badge ${userProfile.planId === 'pro' ? 'pro' : ''}`} style={{ fontSize: '0.8rem', padding: '0.25rem 0.75rem' }}>
-                                                    {userProfile.planId === 'pro' ? 'ACTIVE' : 'FREE'}
+                                                <span className={`badge ${userProfile.planId === 'pro' || userProfile.planId === 'super_admin' ? 'pro' : ''}`} style={{ fontSize: '0.8rem', padding: '0.25rem 0.75rem' }}>
+                                                    {userProfile.planId === 'super_admin' ? 'UNLIMITED' : (userProfile.planId === 'pro' ? 'ACTIVE' : 'FREE')}
                                                 </span>
                                             </div>
                                             <p style={{ color: '#64748b', fontSize: '0.95rem', margin: 0, maxWidth: '500px' }}>
-                                                {userProfile.planId === 'pro'
-                                                    ? (userProfile.subscription_end_date
-                                                        ? `Your subscription renews automatically on ${new Date(userProfile.subscription_end_date).toLocaleDateString()}.`
-                                                        : 'Your Pro subscription is active.')
-                                                    : 'You are currently on the Free Starter plan. seamless upgrade available below.'}
+                                                {userProfile.planId === 'super_admin'
+                                                    ? 'You have full system access with no limits.'
+                                                    : (userProfile.planId === 'pro'
+                                                        ? (userProfile.subscription_end_date
+                                                            ? `Your subscription renews automatically on ${new Date(userProfile.subscription_end_date).toLocaleDateString()}.`
+                                                            : 'Your Pro subscription is active.')
+                                                        : 'You are currently on the Free Starter plan. seamless upgrade available below.')
+                                                }
                                             </p>
                                         </div>
 
@@ -952,7 +955,7 @@ const Settings = () => {
                                     description="Send automated WhatsApp messages to your leads."
                                     enabled={integrations.whatsapp?.enabled}
                                     onToggle={() => toggleIntegration('whatsapp')}
-                                    locked={userProfile.planId !== 'pro'}
+                                    locked={userProfile.planId !== 'pro' && userProfile.planId !== 'super_admin'}
                                 >
                                     <div className="status-badge success">
                                         ✓ System Provisioned
@@ -968,7 +971,7 @@ const Settings = () => {
                                     description="High-delivery SMS for urgent follow-ups."
                                     enabled={integrations.sms?.enabled}
                                     onToggle={() => toggleIntegration('sms')}
-                                    locked={userProfile.planId !== 'pro'}
+                                    locked={userProfile.planId !== 'pro' && userProfile.planId !== 'super_admin'}
                                 >
                                     <div className="status-badge success">
                                         ✓ Ready to use
@@ -979,7 +982,7 @@ const Settings = () => {
                                 </SettingsCard>
                             </div>
 
-                            {userProfile.planId !== 'pro' && (
+                            {userProfile.planId !== 'pro' && userProfile.planId !== 'super_admin' && (
                                 <div className="upgrade-box glass-panel" style={{ marginTop: '2rem', padding: '1.5rem', textAlign: 'center' }}>
                                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginBottom: '0.5rem', color: '#123456' }}>
                                         <Star size={20} fill="#f59e0b" color="#f59e0b" />
