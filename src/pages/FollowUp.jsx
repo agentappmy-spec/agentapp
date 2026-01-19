@@ -400,12 +400,57 @@ const FollowUp = () => {
 
             if (error) throw error;
 
+            // Strategy: Separate Global (user_id is null) vs Personal (user_id is set)
+            // Create a map where Personal overrides Global for the same slot (day or trigger_name)
+
+            const mergedData = [];
+            const personalMap = new Map();
+            const globalList = [];
+
+            // 1. Identify Personal Overrides
+            data.forEach(item => {
+                if (item.user_id) {
+                    // Create unique key for slot
+                    const key = `${item.template_id}-${item.day !== null ? item.day : item.trigger_name}`;
+                    personalMap.set(key, item);
+                } else {
+                    globalList.push(item);
+                }
+            });
+
+            // 2. Build Final List
+            // Start with Global items. If a personal override exists, use that instead.
+            // also include personal items that might be purely new additions (not overriding global) - though UI doesn't explicitly support 'add new' unless logic allows.
+
+            // Set of keys processed from global
+            const processedKeys = new Set();
+
+            globalList.forEach(globalItem => {
+                const key = `${globalItem.template_id}-${globalItem.day !== null ? globalItem.day : globalItem.trigger_name}`;
+                if (personalMap.has(key)) {
+                    // Use Personal Override
+                    // Add a flag to UI to show it's 'Edited'
+                    const pItem = personalMap.get(key);
+                    mergedData.push({ ...pItem, isPersonal: true });
+                } else {
+                    // Use Global Default
+                    mergedData.push({ ...globalItem, isGlobal: true });
+                }
+                processedKeys.add(key);
+            });
+
+            // 3. Add any Personal items that didn't match a global key (Custom added steps)
+            personalMap.forEach((item, key) => {
+                if (!processedKeys.has(key)) {
+                    mergedData.push({ ...item, isPersonal: true });
+                }
+            });
+
             // Group by template_id
             const grouped = {
-                prospect: data.filter(d => d.template_id === 'prospect'),
-                client: data.filter(d => d.template_id === 'client'),
-                global: data.filter(d => d.template_id === 'global').sort((a, b) => {
-                    // Custom sort for global (by date or trigger name)
+                prospect: mergedData.filter(d => d.template_id === 'prospect'),
+                client: mergedData.filter(d => d.template_id === 'client'),
+                global: mergedData.filter(d => d.template_id === 'global').sort((a, b) => {
                     if (a.date && b.date && a.date !== 'auto' && a.date !== 'auto') {
                         return new Date(a.date) - new Date(b.date);
                     }
@@ -416,7 +461,6 @@ const FollowUp = () => {
             setDbSteps(grouped);
         } catch (err) {
             console.error('Error fetching steps:', err);
-            // Fallback? No, we want to know if it fails.
         } finally {
             setIsLoading(false);
         }
@@ -424,23 +468,56 @@ const FollowUp = () => {
 
     const handleSaveNode = async (updatedNode) => {
         try {
-            const { error } = await supabase
-                .from('workflow_steps')
-                .update({
+            // Check if we are editing a Global Node (user_id is null)
+            // If so, we must INSERT a new personal copy.
+            // If it's already Personal (user_id is set), we UPDATE.
+
+            const isGlobal = !updatedNode.user_id;
+
+            if (isGlobal) {
+                // CLONE ON WRITE (Insert Personal Override)
+                const { user } = await supabase.auth.getUser(); // Ensure we have user
+                if (!user) throw new Error("No user found");
+
+                const newStep = {
+                    user_id: userProfile?.id, // Ensure we bind to profile
+                    template_id: updatedNode.template_id,
                     day: updatedNode.day,
                     date: updatedNode.date,
                     content_sms: updatedNode.contentSms || updatedNode.content,
                     content_whatsapp: updatedNode.contentWhatsapp,
                     content_email: updatedNode.contentEmail,
                     subject: updatedNode.subject,
-                    trigger_name: updatedNode.trigger_name || updatedNode.label, // Ensure trigger_name is saved
-                    updated_at: new Date()
-                })
-                .eq('id', updatedNode.id);
+                    trigger_name: updatedNode.trigger_name || updatedNode.label,
+                    is_active: true,
+                    // Copy other fields if needed
+                    client_only: updatedNode.client_only,
+                    mandatory: updatedNode.mandatory,
+                    days_before: updatedNode.days_before
+                };
 
-            if (error) throw error;
+                const { error } = await supabase.from('workflow_steps').insert([newStep]);
+                if (error) throw error;
 
-            // Refresh local state optimization
+            } else {
+                // UPDATE Existing Personal Node
+                const { error } = await supabase
+                    .from('workflow_steps')
+                    .update({
+                        day: updatedNode.day,
+                        date: updatedNode.date,
+                        content_sms: updatedNode.contentSms || updatedNode.content,
+                        content_whatsapp: updatedNode.contentWhatsapp,
+                        content_email: updatedNode.contentEmail,
+                        subject: updatedNode.subject,
+                        trigger_name: updatedNode.trigger_name || updatedNode.label,
+                        updated_at: new Date()
+                    })
+                    .eq('id', updatedNode.id);
+
+                if (error) throw error;
+            }
+
             fetchSteps();
             setEditingNode(null);
         } catch (err) {
@@ -449,13 +526,14 @@ const FollowUp = () => {
         }
     };
 
-    // Add Step Logic (Insert to DB)
+    // Add Step Logic (Insert to DB) - Always specific user
     const handleAddNode = async () => {
         const currentList = dbSteps[activeTab];
         const lastDay = currentList.length > 0 ? (currentList[currentList.length - 1].day || 0) : 0;
 
         try {
             const newNode = {
+                user_id: userProfile?.id, // Personal Step
                 template_id: activeTab,
                 day: lastDay + 3,
                 trigger_name: `Day ${lastDay + 3}`,
@@ -475,7 +553,6 @@ const FollowUp = () => {
             fetchSteps();
             if (data && data[0]) {
                 const created = data[0];
-                // Map DB keys to UI expected keys if needed
                 setEditingNode({
                     ...created,
                     contentSms: created.content_sms,
@@ -490,6 +567,12 @@ const FollowUp = () => {
     };
 
     const handleDeleteClick = (node) => {
+        // If Global, warn or disallow
+        if (!node.user_id) {
+            // Optional: You could allow "hiding" via another mechanism, but for now strict "no delete default"
+            alert("You cannot delete a System Default step. You can only edit it to create your own version.");
+            return;
+        }
         setDeletingNode(node);
     };
 

@@ -108,6 +108,6 @@ export const useMessageLimit = (userProfile) => {
         loading,
         checkLimit,
         logMessage,
-        canSendMessage: limit === 0 || usage < limit
+        canSendMessage: userProfile?.role === 'super_admin' || limit === 0 || usage < limit
     };
 };

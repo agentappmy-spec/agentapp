@@ -5,12 +5,6 @@ const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY')
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
 
-console.log('Environment check:', {
-    hasResendKey: !!RESEND_API_KEY,
-    hasSupabaseUrl: !!SUPABASE_URL,
-    hasServiceKey: !!SUPABASE_SERVICE_ROLE_KEY
-})
-
 const corsHeaders = {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
@@ -25,7 +19,6 @@ serve(async (req) => {
     try {
         // 1. Authenticate User
         const authHeader = req.headers.get('Authorization')
-
         if (!authHeader) {
             throw new Error('Missing Authorization header')
         }
@@ -48,18 +41,47 @@ serve(async (req) => {
         const body = await req.json()
         const { to, subject, html, text } = body
 
-        // 2. Fetch User Profile
+        // 2. Fetch User Profile & Plan Limits
         const supabase = createClient(
             SUPABASE_URL ?? '',
             SUPABASE_SERVICE_ROLE_KEY ?? ''
         )
         const { data: profile } = await supabase
             .from('profiles')
-            .select('role')
+            .select('role, plans (monthly_message_limit)')
             .eq('id', user.id)
             .single()
 
-        // 3. Prepare Resend Payload
+        if (!profile) throw new Error('Profile not found');
+
+        // 3. Check Quota (Skip for Super Admin)
+        if (profile.role !== 'super_admin') {
+            const limit = profile.plans?.monthly_message_limit || 0;
+            const today = new Date();
+            const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1).toISOString();
+
+            const { count, error: countError } = await supabase
+                .from('message_logs')
+                .select('*', { count: 'exact', head: true })
+                .eq('user_id', user.id)
+                .gte('created_at', firstDayOfMonth);
+
+            if (countError) throw countError;
+
+            const usage = count || 0;
+
+            if (usage >= limit) {
+                return new Response(JSON.stringify({
+                    error: 'Quota Exceeded',
+                    message: `You have reached your monthly limit of ${limit} messages. Usage: ${usage}`
+                }), {
+                    status: 403,
+                    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+                })
+            }
+        }
+
+        // 4. Prepare Resend Payload
         const cleanText = text || html?.replace(/<[^>]*>/g, '').substring(0, 10000) || 'No content'
 
         const emailPayload = {
