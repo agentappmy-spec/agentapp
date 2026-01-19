@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useOutletContext, useSearchParams, useLocation } from 'react-router-dom';
-import { User, Mail, Phone, Save, Tag, Package, Plus, Trash2, Edit2, MessageCircle, MessageSquare, Target, Facebook, Instagram, AtSign, Video, FileText, Globe, LogOut, Check, X, Star, Clock } from 'lucide-react';
+import { User, Mail, Phone, Save, Tag, Package, Plus, Trash2, Edit2, MessageCircle, MessageSquare, Target, Facebook, Instagram, AtSign, Video, FileText, Globe, LogOut, Check, X, Star, Clock, MapPin, Lock } from 'lucide-react';
 import { supabase } from '../services/supabaseClient';
 import MessageLogs from './MessageLogs';
 import './Settings.css';
@@ -126,6 +126,36 @@ const Settings = () => {
             alert('Failed to start payment. Server might be busy.');
         } finally {
             setIsProcessingPayment(false);
+        }
+    };
+
+    // Password Change Logic
+    const [passwordData, setPasswordData] = useState({ newPassword: '', confirmPassword: '' });
+    const [passwordStatus, setPasswordStatus] = useState({ message: '', type: '' });
+
+    const handlePasswordChange = async () => {
+        const { newPassword, confirmPassword } = passwordData;
+        if (!newPassword || !confirmPassword) {
+            setPasswordStatus({ message: 'Please fill in both fields.', type: 'error' });
+            return;
+        }
+        if (newPassword !== confirmPassword) {
+            setPasswordStatus({ message: 'Passwords do not match.', type: 'error' });
+            return;
+        }
+        if (newPassword.length < 6) {
+            setPasswordStatus({ message: 'Password must be at least 6 characters.', type: 'error' });
+            return;
+        }
+
+        try {
+            const { error } = await supabase.auth.updateUser({ password: newPassword });
+            if (error) throw error;
+            setPasswordStatus({ message: 'Password updated successfully!', type: 'success' });
+            setPasswordData({ newPassword: '', confirmPassword: '' });
+        } catch (error) {
+            console.error('Password update error:', error);
+            setPasswordStatus({ message: 'Failed to update password. Please try again.', type: 'error' });
         }
     };
 
@@ -667,6 +697,118 @@ const Settings = () => {
                                                     value={userProfile.social?.threads || ''}
                                                     onChange={e => setUserProfile(prev => ({ ...prev, social: { ...prev.social, threads: e.target.value } }))}
                                                 />
+                                            </div>
+
+                                            <h3 className="subsection-title" style={{ marginTop: '1.5rem', marginBottom: '1rem', width: '100%', gridColumn: '1 / -1' }}>Location & Billing Address</h3>
+                                            <div className="form-group" style={{ gridColumn: '1 / -1' }}>
+                                                <label><MapPin size={14} /> Address Line 1</label>
+                                                <input
+                                                    type="text"
+                                                    placeholder="e.g. 123, Jalan Ampang"
+                                                    value={userProfile.address_line1 || ''}
+                                                    onChange={e => updateProfile('address_line1', e.target.value)}
+                                                />
+                                            </div>
+                                            <div className="form-group" style={{ gridColumn: '1 / -1' }}>
+                                                <label>Address Line 2 (Optional)</label>
+                                                <input
+                                                    type="text"
+                                                    placeholder="Unit B-5-2"
+                                                    value={userProfile.address_line2 || ''}
+                                                    onChange={e => updateProfile('address_line2', e.target.value)}
+                                                />
+                                            </div>
+                                            <div className="form-row" style={{ gridColumn: '1 / -1', display: 'flex', gap: '1rem' }}>
+                                                <div className="form-group" style={{ flex: 1 }}>
+                                                    <label>City</label>
+                                                    <input
+                                                        type="text"
+                                                        placeholder="Kuala Lumpur"
+                                                        value={userProfile.city || ''}
+                                                        onChange={e => updateProfile('city', e.target.value)}
+                                                    />
+                                                </div>
+                                                <div className="form-group" style={{ flex: 1 }}>
+                                                    <label>Postcode</label>
+                                                    <input
+                                                        type="text"
+                                                        placeholder="50450"
+                                                        value={userProfile.postcode || ''}
+                                                        onChange={e => updateProfile('postcode', e.target.value)}
+                                                    />
+                                                </div>
+                                            </div>
+                                            <div className="form-row" style={{ gridColumn: '1 / -1', display: 'flex', gap: '1rem' }}>
+                                                <div className="form-group" style={{ flex: 1 }}>
+                                                    <label>State</label>
+                                                    <input
+                                                        type="text"
+                                                        placeholder="Wilayah Persekutuan"
+                                                        value={userProfile.state || ''}
+                                                        onChange={e => updateProfile('state', e.target.value)}
+                                                    />
+                                                </div>
+                                                <div className="form-group" style={{ flex: 1 }}>
+                                                    <label>Country</label>
+                                                    <input
+                                                        type="text"
+                                                        placeholder="Malaysia"
+                                                        value={userProfile.country || 'Malaysia'}
+                                                        onChange={e => updateProfile('country', e.target.value)}
+                                                    />
+                                                </div>
+                                            </div>
+                                            <div className="form-group" style={{ gridColumn: '1 / -1' }}>
+                                                <label><Globe size={14} /> Timezone</label>
+                                                <select
+                                                    value={userProfile.timezone || 'Asia/Kuala_Lumpur'}
+                                                    onChange={e => updateProfile('timezone', e.target.value)}
+                                                    style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid #e2e8f0' }}
+                                                >
+                                                    <option value="Asia/Kuala_Lumpur">Malaysia (GMT+8)</option>
+                                                    <option value="Asia/Singapore">Singapore (GMT+8)</option>
+                                                    <option value="Asia/Jakarta">Indonesia - WIB (GMT+7)</option>
+                                                    <option value="Asia/Bangkok">Thailand (GMT+7)</option>
+                                                </select>
+                                            </div>
+
+                                            <h3 className="subsection-title" style={{ marginTop: '1.5rem', marginBottom: '1rem', width: '100%', gridColumn: '1 / -1' }}>Security Settings</h3>
+                                            <div className="glass-panel" style={{ padding: '1.5rem', gridColumn: '1 / -1' }}>
+                                                <div className="form-group">
+                                                    <label><Lock size={14} /> New Password</label>
+                                                    <input
+                                                        type="password"
+                                                        placeholder="Enter new password"
+                                                        value={passwordData.newPassword}
+                                                        onChange={e => setPasswordData({ ...passwordData, newPassword: e.target.value })}
+                                                    />
+                                                </div>
+                                                <div className="form-group">
+                                                    <label>Confirm Password</label>
+                                                    <input
+                                                        type="password"
+                                                        placeholder="Confirm new password"
+                                                        value={passwordData.confirmPassword}
+                                                        onChange={e => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
+                                                    />
+                                                </div>
+                                                {passwordStatus.message && (
+                                                    <div style={{
+                                                        marginTop: '0.5rem',
+                                                        fontSize: '0.85rem',
+                                                        color: passwordStatus.type === 'error' ? '#ef4444' : '#10b981',
+                                                        fontWeight: '500'
+                                                    }}>
+                                                        {passwordStatus.message}
+                                                    </div>
+                                                )}
+                                                <button
+                                                    className="secondary-btn"
+                                                    onClick={handlePasswordChange}
+                                                    style={{ marginTop: '1rem', width: 'auto' }}
+                                                >
+                                                    Update Password
+                                                </button>
                                             </div>
                                             <button className="primary-btn" style={{ marginTop: '2rem', width: '100%', opacity: 0.8, cursor: 'default' }} disabled>
                                                 <Save size={18} style={{ marginRight: '8px' }} /> Changes Saved Automatically

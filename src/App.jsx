@@ -258,7 +258,15 @@ function App() {
                 agencyName: dbProfile.agency_name || prev?.agencyName || '',
                 licenseNo: dbProfile.license_no || prev?.licenseNo || '',
                 bio: dbProfile.bio || prev?.bio || '',
-                photoUrl: dbProfile.photo_url || prev?.photoUrl || ''
+                photoUrl: dbProfile.photo_url || prev?.photoUrl || '',
+                address_line1: dbProfile.address_line1 || prev?.address_line1 || '',
+                address_line2: dbProfile.address_line2 || prev?.address_line2 || '',
+                city: dbProfile.city || prev?.city || '',
+                state: dbProfile.state || prev?.state || '',
+                postcode: dbProfile.postcode || prev?.postcode || '',
+                country: dbProfile.country || prev?.country || 'Malaysia',
+                timezone: dbProfile.timezone || prev?.timezone || 'Asia/Kuala_Lumpur',
+                subscription_end_date: dbProfile.subscription_end_date || prev?.subscription_end_date
               };
               if (
                 prev?.planId !== fresh.planId ||
@@ -271,7 +279,15 @@ function App() {
                 prev?.agencyName !== fresh.agencyName ||
                 prev?.licenseNo !== fresh.licenseNo ||
                 prev?.bio !== fresh.bio ||
-                prev?.photoUrl !== fresh.photoUrl
+                prev?.photoUrl !== fresh.photoUrl ||
+                prev?.address_line1 !== fresh.address_line1 ||
+                prev?.address_line2 !== fresh.address_line2 ||
+                prev?.city !== fresh.city ||
+                prev?.state !== fresh.state ||
+                prev?.postcode !== fresh.postcode ||
+                prev?.country !== fresh.country ||
+                prev?.timezone !== fresh.timezone ||
+                prev?.subscription_end_date !== fresh.subscription_end_date
               ) {
                 return fresh;
               }
@@ -356,7 +372,14 @@ function App() {
           agency_name: userProfile.agencyName,
           license_no: userProfile.licenseNo,
           bio: userProfile.bio,
-          photo_url: userProfile.photoUrl
+          photo_url: userProfile.photoUrl,
+          address_line1: userProfile.address_line1,
+          address_line2: userProfile.address_line2,
+          city: userProfile.city,
+          state: userProfile.state,
+          postcode: userProfile.postcode,
+          country: userProfile.country,
+          timezone: userProfile.timezone
           // NOTE: role and plan_id are intentionally excluded
           // They should only be updated via redemption code or admin actions
         };
@@ -377,6 +400,13 @@ function App() {
     userProfile?.licenseNo,
     userProfile?.bio,
     userProfile?.photoUrl,
+    userProfile?.address_line1,
+    userProfile?.address_line2,
+    userProfile?.city,
+    userProfile?.state,
+    userProfile?.postcode,
+    userProfile?.country,
+    userProfile?.timezone,
     userProfile?.id
     // NOTE: role and planId are intentionally excluded from dependencies
   ]);
