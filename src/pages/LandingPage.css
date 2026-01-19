@@ -565,3 +565,152 @@
     background: #fee2e2;
     border-radius: 4px;
 }
+
+/* Public Bio Link Section */
+.public-bio-section {
+    background: white;
+    margin: 1.5rem;
+    padding: 1.5rem;
+    border-radius: 12px;
+    border: 1px solid #f1f5f9;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+}
+
+.bio-link-header {
+    margin-bottom: 1.25rem;
+}
+
+.bio-link-title {
+    font-size: 1rem;
+    font-weight: 700;
+    margin: 0 0 0.5rem 0;
+    color: #1e293b;
+}
+
+.bio-link-subtitle {
+    font-size: 0.85rem;
+    color: #64748b;
+    margin: 0;
+}
+
+.bio-link-input-wrapper {
+    display: flex;
+    gap: 0.75rem;
+    align-items: flex-start;
+}
+
+.bio-link-input-container {
+    position: relative;
+    flex: 1;
+    max-width: 400px;
+}
+
+.username-prefix {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #64748b;
+    font-weight: 600;
+    font-size: 0.95rem;
+    pointer-events: none;
+}
+
+.bio-link-input {
+    width: 100%;
+    padding: 0.75rem 0.75rem 0.75rem 32px;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    font-size: 0.95rem;
+    outline: none;
+    transition: all 0.2s;
+    box-sizing: border-box;
+}
+
+.bio-link-input:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+}
+
+.bio-link-input.error {
+    border-color: #ef4444;
+}
+
+.bio-link-input.error:focus {
+    box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.1);
+}
+
+.bio-link-error {
+    color: #ef4444;
+    font-size: 0.75rem;
+    margin-top: 4px;
+    font-weight: 500;
+}
+
+.bio-link-copy-btn {
+    white-space: nowrap;
+    padding: 0.75rem 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.bio-link-success {
+    margin-top: 0.75rem;
+    font-size: 0.85rem;
+    color: #10b981;
+    font-weight: 500;
+}
+
+.bio-link-warning {
+    margin-top: 0.75rem;
+    font-size: 0.85rem;
+    color: #ef4444;
+}
+
+.bio-link-hint {
+    margin-top: 0.5rem;
+    font-size: 0.75rem;
+    color: #94a3b8;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .public-bio-section {
+        margin: 1rem;
+        padding: 1.25rem;
+    }
+
+    .bio-link-input-wrapper {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .bio-link-input-container {
+        max-width: 100%;
+    }
+
+    .bio-link-copy-btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .bio-link-copy-btn .btn-text-desktop {
+        display: inline;
+    }
+}
+
+@media (max-width: 480px) {
+    .public-bio-section {
+        margin: 0.75rem;
+        padding: 1rem;
+    }
+
+    .bio-link-title {
+        font-size: 0.95rem;
+    }
+
+    .bio-link-subtitle {
+        font-size: 0.8rem;
+    }
+}
