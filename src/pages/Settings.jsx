@@ -573,98 +573,10 @@ const Settings = () => {
                                             />
                                         </div>
 
-                                        <h3 className="subsection-title" style={{ marginTop: '1.5rem', marginBottom: '1rem' }}>Public Bio Link</h3>
-                                        <div className="form-group">
-                                            <label>Username <span style={{ color: '#64748b', fontWeight: 'normal' }}>(for your public bio link)</span></label>
-                                            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'flex-start' }}>
-                                                <div style={{ position: 'relative', flex: 1 }}>
-                                                    <span style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#64748b', fontWeight: '600' }}>@</span>
-                                                    <input
-                                                        type="text"
-                                                        placeholder="yourname"
-                                                        value={userProfile.username || ''}
-                                                        onChange={async (e) => {
-                                                            const value = e.target.value.toLowerCase().replace(/[^a-z]/g, '').substring(0, 10);
-                                                            updateProfile('username', value);
-
-                                                            // Real-time validation
-                                                            if (value.length > 0 && value.length < 4) {
-                                                                setUsernameError('Username must be at least 4 characters');
-                                                            } else {
-                                                                setUsernameError('');
-
-                                                                if (value.length >= 4) {
-                                                                    const { data } = await supabase
-                                                                        .from('profiles')
-                                                                        .select('id')
-                                                                        .eq('username', value)
-                                                                        .single();
-
-                                                                    if (data && data.id !== userProfile.id) {
-                                                                        setUsernameError('Username is already taken');
-                                                                    }
-                                                                }
-                                                            }
-                                                        }}
-                                                        onBlur={async () => {
-                                                            if (usernameError) return;
-
-                                                            if (userProfile.username && userProfile.username.length >= 4) {
-                                                                const { error } = await supabase
-                                                                    .from('profiles')
-                                                                    .update({ username: userProfile.username })
-                                                                    .eq('id', userProfile.id);
-
-                                                                if (error) {
-                                                                    setUsernameError('Failed to save username. It might be taken.');
-                                                                }
-                                                            }
-                                                        }}
-                                                        style={{
-                                                            paddingLeft: '32px',
-                                                            borderColor: usernameError ? '#ef4444' : ''
-                                                        }}
-                                                    />
-                                                    {usernameError && (
-                                                        <div style={{ color: '#ef4444', fontSize: '0.75rem', marginTop: '4px', fontWeight: '500' }}>
-                                                            {usernameError}
-                                                        </div>
-                                                    )}
-                                                </div>
-                                                {userProfile.username && userProfile.username.length >= 4 && (
-                                                    <button
-                                                        type="button"
-                                                        className="secondary-btn"
-                                                        onClick={() => {
-                                                            const url = `${window.location.origin}/@${userProfile.username}`;
-                                                            navigator.clipboard.writeText(url);
-                                                            alert('✅ Link copied to clipboard!');
-                                                        }}
-                                                        style={{ whiteSpace: 'nowrap' }}
-                                                    >
-                                                        Copy Link
-                                                    </button>
-                                                )}
-                                            </div>
-                                            {userProfile.username && userProfile.username.length >= 3 && (
-                                                <small style={{ display: 'block', marginTop: '0.5rem', color: '#10b981', fontSize: '0.8rem' }}>
-                                                    ✓ Your public link: <strong>{window.location.origin}/@{userProfile.username}</strong>
-                                                </small>
-                                            )}
-                                            {userProfile.username && userProfile.username.length < 3 && (
-                                                <small style={{ display: 'block', marginTop: '0.5rem', color: '#ef4444', fontSize: '0.8rem' }}>
-                                                    Username must be at least 3 characters
-                                                </small>
-                                            )}
-                                            <small className="text-muted" style={{ fontSize: '0.75rem', display: 'block', marginTop: '0.5rem' }}>
-                                                3-20 characters. Letters, numbers, hyphens, and underscores only.
-                                            </small>
-                                        </div>
-
                                         <h3 className="subsection-title" style={{ marginTop: '1.5rem', marginBottom: '1rem' }}>Social Media</h3>
                                         <div className="social-grid">
                                             <div className="form-group">
-                                                <label><Facebook size={14} /> Facebook (Personal)</label>
+                                                <label><Facebook size={14} /> Facebook</label>
                                                 <input
                                                     type="text"
                                                     placeholder="fb.com/username"
@@ -682,20 +594,21 @@ const Settings = () => {
                                                 />
                                             </div>
                                             <div className="form-group">
+                                                <label><AtSign size={14} /> Threads</label>
+                                                <input
+                                                    type="text"
+                                                    placeholder="@username"
+                                                    value={userProfile.social?.threads || ''}
+                                                    onChange={e => setUserProfile(prev => ({ ...prev, social: { ...prev.social, threads: e.target.value } }))}
+                                                />
+                                            </div>
+                                            <div className="form-group">
                                                 <label><Video size={14} /> TikTok</label>
                                                 <input
                                                     type="text"
                                                     placeholder="@username"
                                                     value={userProfile.social?.tiktok || ''}
                                                     onChange={e => setUserProfile(prev => ({ ...prev, social: { ...prev.social, tiktok: e.target.value } }))}
-                                                />
-                                            </div>
-                                            <div className="form-group">
-                                                <input
-                                                    type="text"
-                                                    placeholder="@username"
-                                                    value={userProfile.social?.threads || ''}
-                                                    onChange={e => setUserProfile(prev => ({ ...prev, social: { ...prev.social, threads: e.target.value } }))}
                                                 />
                                             </div>
 

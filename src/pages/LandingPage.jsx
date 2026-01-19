@@ -87,6 +87,7 @@ const LandingPage = () => {
     const [previewMode, setPreviewMode] = useState('desktop');
     const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
+    const [usernameError, setUsernameError] = useState('');
 
     // Initialize with template if no config exists
     useEffect(() => {
@@ -503,6 +504,100 @@ const LandingPage = () => {
                     )}
                 </div>
             </header>
+
+            {/* Public Bio Link Section */}
+            <div className="glass-panel" style={{ margin: '1.5rem', padding: '1.5rem', borderRadius: '12px' }}>
+                <h3 style={{ fontSize: '1rem', fontWeight: '700', marginBottom: '0.5rem', color: '#1e293b' }}>Public Bio Link</h3>
+                <p style={{ fontSize: '0.85rem', color: '#64748b', marginBottom: '1rem' }}>Set your custom username for your public landing page.</p>
+
+                <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}>
+                    <div style={{ position: 'relative', flex: 1, maxWidth: '400px' }}>
+                        <span style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#64748b', fontWeight: '600', fontSize: '0.95rem' }}>@</span>
+                        <input
+                            type="text"
+                            placeholder="yourname"
+                            value={userProfile?.username || ''}
+                            onChange={async (e) => {
+                                const value = e.target.value.toLowerCase().replace(/[^a-z0-9_-]/g, '').substring(0, 20);
+                                setUserProfile(prev => ({ ...prev, username: value }));
+
+                                // Real-time validation
+                                if (value.length > 0 && value.length < 4) {
+                                    setUsernameError('Username must be at least 4 characters');
+                                } else {
+                                    setUsernameError('');
+
+                                    if (value.length >= 4) {
+                                        const { data } = await supabase
+                                            .from('profiles')
+                                            .select('id')
+                                            .eq('username', value)
+                                            .single();
+
+                                        if (data && data.id !== userProfile.id) {
+                                            setUsernameError('Username is already taken');
+                                        }
+                                    }
+                                }
+                            }}
+                            onBlur={async () => {
+                                if (usernameError) return;
+
+                                if (userProfile?.username && userProfile.username.length >= 4) {
+                                    const { error } = await supabase
+                                        .from('profiles')
+                                        .update({ username: userProfile.username })
+                                        .eq('id', userProfile.id);
+
+                                    if (error) {
+                                        setUsernameError('Failed to save username. It might be taken.');
+                                    }
+                                }
+                            }}
+                            style={{
+                                width: '100%',
+                                padding: '0.75rem 0.75rem 0.75rem 32px',
+                                borderRadius: '8px',
+                                border: `1px solid ${usernameError ? '#ef4444' : '#e2e8f0'}`,
+                                fontSize: '0.95rem',
+                                outline: 'none'
+                            }}
+                        />
+                        {usernameError && (
+                            <div style={{ color: '#ef4444', fontSize: '0.75rem', marginTop: '4px', fontWeight: '500' }}>
+                                {usernameError}
+                            </div>
+                        )}
+                    </div>
+                    {userProfile?.username && userProfile.username.length >= 4 && !usernameError && (
+                        <button
+                            className="secondary-btn"
+                            onClick={() => {
+                                const url = `${window.location.origin}/@${userProfile.username}`;
+                                navigator.clipboard.writeText(url);
+                                alert('✅ Link copied to clipboard!');
+                            }}
+                            style={{ whiteSpace: 'nowrap', padding: '0.75rem 1.25rem' }}
+                        >
+                            <LinkIcon size={16} style={{ marginRight: '6px' }} />
+                            Copy Link
+                        </button>
+                    )}
+                </div>
+                {userProfile?.username && userProfile.username.length >= 4 && !usernameError && (
+                    <div style={{ marginTop: '0.75rem', fontSize: '0.85rem', color: '#10b981', fontWeight: '500' }}>
+                        ✓ Your public link: <strong>{window.location.origin}/@{userProfile.username}</strong>
+                    </div>
+                )}
+                {userProfile?.username && userProfile.username.length < 4 && (
+                    <div style={{ marginTop: '0.75rem', fontSize: '0.85rem', color: '#ef4444' }}>
+                        Username must be at least 4 characters
+                    </div>
+                )}
+                <div style={{ marginTop: '0.5rem', fontSize: '0.75rem', color: '#94a3b8' }}>
+                    4-20 characters. Letters, numbers, hyphens, and underscores only.
+                </div>
+            </div>
 
             <div className="builder-body">
                 {/* Edit Lock Overlay */}
