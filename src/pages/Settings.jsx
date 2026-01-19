@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useOutletContext, useSearchParams, useLocation } from 'react-router-dom';
-import { User, Mail, Phone, Save, Tag, Package, Plus, Trash2, Edit2, MessageCircle, MessageSquare, Target, Facebook, Instagram, AtSign, Video, FileText, Globe, LogOut, Check, X, Star } from 'lucide-react';
+import { User, Mail, Phone, Save, Tag, Package, Plus, Trash2, Edit2, MessageCircle, MessageSquare, Target, Facebook, Instagram, AtSign, Video, FileText, Globe, LogOut, Check, X, Star, Clock } from 'lucide-react';
 import { supabase } from '../services/supabaseClient';
 import MessageLogs from './MessageLogs';
 import './Settings.css';
@@ -696,16 +696,26 @@ const Settings = () => {
                                                     {userProfile.planId === 'super_admin' ? 'UNLIMITED' : (userProfile.planId === 'pro' ? 'ACTIVE' : 'FREE')}
                                                 </span>
                                             </div>
-                                            <p style={{ color: '#64748b', fontSize: '0.95rem', margin: 0, maxWidth: '500px' }}>
+                                            <div style={{ marginTop: '0.5rem', color: '#64748b', fontSize: '0.95rem' }}>
                                                 {userProfile.planId === 'super_admin'
                                                     ? 'You have full system access with no limits.'
                                                     : (userProfile.planId === 'pro'
-                                                        ? (userProfile.subscription_end_date
-                                                            ? `Your subscription renews automatically on ${new Date(userProfile.subscription_end_date).toLocaleDateString()}.`
-                                                            : 'Your Pro subscription is active.')
+                                                        ? (
+                                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                                                <span>Your Pro subscription is active.</span>
+                                                                {userProfile.subscription_end_date && (
+                                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#eab308', fontWeight: '600', marginTop: '4px' }}>
+                                                                        <Clock size={16} />
+                                                                        <span>
+                                                                            Expires on {new Date(userProfile.subscription_end_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
+                                                                        </span>
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                        )
                                                         : 'You are currently on the Free Starter plan. seamless upgrade available below.')
                                                 }
-                                            </p>
+                                            </div>
                                         </div>
 
                                         <div style={{ alignSelf: 'center' }}>
