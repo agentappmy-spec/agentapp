@@ -104,10 +104,7 @@ const AppLayout = ({ context, userProfile, openAddModal, checkPermission, setUse
 
 function App() {
   const [contacts, setContacts] = useState([]); // Initialize empty for Supabase
-  const [availableProducts, setAvailableProducts] = useState(() => {
-    const saved = localStorage.getItem('agent_products');
-    return saved ? JSON.parse(saved) : ['Hibah', 'Medical Card'];
-  });
+  const [availableProducts, setAvailableProducts] = useState([]);
   const [availableTags, setAvailableTags] = useState(() => {
     const saved = localStorage.getItem('agent_tags');
     return saved ? JSON.parse(saved) : ['Referral', 'VIP', 'Good Paymaster', 'Late Payer', 'Low Budget', 'AgentApp Leads'];
@@ -266,7 +263,8 @@ function App() {
                 postcode: dbProfile.postcode || prev?.postcode || '',
                 country: dbProfile.country || prev?.country || 'Malaysia',
                 timezone: dbProfile.timezone || prev?.timezone || 'Asia/Kuala_Lumpur',
-                subscription_end_date: dbProfile.subscription_end_date || prev?.subscription_end_date
+                subscription_end_date: dbProfile.subscription_end_date || prev?.subscription_end_date,
+                products: dbProfile.products || prev?.products || []
               };
               if (
                 prev?.planId !== fresh.planId ||
@@ -295,9 +293,27 @@ function App() {
             });
 
             // 2. Sync Configs (Products & Tags & Landing) if they exist in DB
-            if (dbProfile.products && Array.isArray(dbProfile.products) && dbProfile.products.length > 0) {
+            // MIGRATION: Move localStorage products to database if database is empty
+            const localStorageProducts = localStorage.getItem('agent_products');
+            if ((!dbProfile.products || dbProfile.products.length === 0) && localStorageProducts) {
+              const productsFromLocalStorage = JSON.parse(localStorageProducts);
+              if (productsFromLocalStorage.length > 0) {
+                console.log('Migrating products from localStorage to database:', productsFromLocalStorage);
+                await supabase
+                  .from('profiles')
+                  .update({ products: productsFromLocalStorage })
+                  .eq('id', session.user.id);
+                setAvailableProducts(productsFromLocalStorage);
+              } else {
+                setAvailableProducts(dbProfile.products || ['Hibah', 'Medical Card']);
+              }
+            } else if (dbProfile.products && Array.isArray(dbProfile.products) && dbProfile.products.length > 0) {
               setAvailableProducts(dbProfile.products);
+            } else {
+              // Default products if nothing in DB or localStorage
+              setAvailableProducts(['Hibah', 'Medical Card']);
             }
+
             if (dbProfile.tags && Array.isArray(dbProfile.tags) && dbProfile.tags.length > 0) {
               setAvailableTags(dbProfile.tags);
             }

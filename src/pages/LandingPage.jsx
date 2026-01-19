@@ -17,6 +17,18 @@ import { supabase } from '../services/supabaseClient';
 import LandingRenderer from '../components/landing/LandingRenderer';
 import './LandingPage.css';
 
+// Default Product Descriptions
+const DEFAULT_PRODUCT_DESCRIPTIONS = {
+    'Hibah Takaful': 'Debt cancellation and income replacement protection.',
+    'Medical Card': 'Comprehensive medical coverage for you and your family.',
+    'Investment': 'Grow your wealth with shariah-compliant funds.',
+    'Savings': 'Secure your future with flexible savings plans.',
+    'Education': 'Plan for your children\'s educational future.',
+    'Retirement': 'Ensure a comfortable retirement with our plans.',
+    'Hibah': 'Debt cancellation and income replacement protection.',
+    'Medical': 'Comprehensive medical coverage for you and your family.'
+};
+
 // Template Definitions
 const TEMPLATES = {
     basic: {
@@ -712,17 +724,18 @@ const LandingPage = () => {
                                             <input type="color" value={selectedSection.content.accentColor} onChange={e => handleUpdateSection(selectedSection.id, { accentColor: e.target.value })} />
                                         </div>
                                         <div className="form-group">
-                                            <label>Products <span className="sync-note">(Synced from Products Settings)</span></label>
+                                            <label>Products <span className="sync-note">(Synced from Settings → Products & Tags)</span></label>
                                             <div className="list-editor">
                                                 {userProfile?.products?.length > 0 ? (
                                                     userProfile.products.map((p, idx) => {
                                                         const pName = typeof p === 'string' ? p : p.name;
-                                                        const pDesc = selectedSection.content.items?.find(i => (typeof i === 'string' ? i : i.name) === pName)?.description || (typeof p === 'object' ? p.description : '');
+                                                        const existingItem = selectedSection.content.items?.find(i => (typeof i === 'string' ? i : i.name) === pName);
+                                                        const pDesc = existingItem?.description || DEFAULT_PRODUCT_DESCRIPTIONS[pName] || '';
 
                                                         return (
                                                             <div key={idx} className="list-item-box" style={{ padding: '1rem', background: '#f8fafc', border: '1px solid #e2e8f0' }}>
                                                                 <div className="form-group" style={{ marginBottom: '8px' }}>
-                                                                    <label style={{ fontSize: '0.75rem', fontWeight: '800' }}>Product Name</label>
+                                                                    <label style={{ fontSize: '0.75rem', fontWeight: '800' }}>Product Name (Read-Only)</label>
                                                                     <div style={{ padding: '0.6rem 0.8rem', background: '#f1f5f9', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '0.9rem', color: '#64748b' }}>
                                                                         {pName}
                                                                     </div>
@@ -742,15 +755,25 @@ const LandingPage = () => {
                                                                             }
                                                                             handleUpdateSection(selectedSection.id, { items: newItems });
                                                                         }}
-                                                                        placeholder="Write a custom description for your landing page..."
+                                                                        placeholder={DEFAULT_PRODUCT_DESCRIPTIONS[pName] || "Write a custom description for your landing page..."}
                                                                         style={{ fontSize: '0.9rem' }}
                                                                     />
+                                                                    {!pDesc && DEFAULT_PRODUCT_DESCRIPTIONS[pName] && (
+                                                                        <div style={{ fontSize: '0.7rem', color: '#94a3b8', marginTop: '4px' }}>
+                                                                            💡 Default: {DEFAULT_PRODUCT_DESCRIPTIONS[pName]}
+                                                                        </div>
+                                                                    )}
                                                                 </div>
                                                             </div>
                                                         );
                                                     })
                                                 ) : (
-                                                    <p style={{ fontSize: '0.85rem', color: '#94a3b8', margin: 0 }}>No products configured. Set them in Settings &gt; Products.</p>
+                                                    <div style={{ padding: '1rem', background: '#fef3c7', border: '1px solid #fbbf24', borderRadius: '8px' }}>
+                                                        <p style={{ fontSize: '0.85rem', color: '#92400e', margin: '0 0 8px 0', fontWeight: '600' }}>⚠️ No products configured</p>
+                                                        <p style={{ fontSize: '0.8rem', color: '#78350f', margin: 0 }}>
+                                                            Add products in <strong>Settings → Products & Tags</strong> to display them here.
+                                                        </p>
+                                                    </div>
                                                 )}
                                             </div>
                                         </div>

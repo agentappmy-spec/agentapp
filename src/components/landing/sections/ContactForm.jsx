@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-const ContactForm = ({ content }) => {
+const ContactForm = ({ content, profile }) => {
     // We ignore the 'fields' and 'buttonText' from content to force the requested structure
     const {
         title = "Dapatkan Sebut Harga"
@@ -23,19 +23,16 @@ const ContactForm = ({ content }) => {
     const [agentProfile, setAgentProfile] = useState(null);
 
     useEffect(() => {
-        // Load available products from localStorage
-        const savedProducts = localStorage.getItem('agent_products');
-        if (savedProducts) {
-            setAvailableProducts(JSON.parse(savedProducts));
+        // Use products from profile (database) instead of localStorage
+        if (profile?.products && Array.isArray(profile.products)) {
+            setAvailableProducts(profile.products);
         }
 
-        // Load agent profile
-        // Key updated to match App.jsx persistence key 'agent_user_profile'
-        const savedProfile = localStorage.getItem('agent_user_profile');
-        if (savedProfile) {
-            setAgentProfile(JSON.parse(savedProfile));
+        // Set agent profile from prop
+        if (profile) {
+            setAgentProfile(profile);
         }
-    }, []);
+    }, [profile]);
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });

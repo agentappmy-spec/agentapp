@@ -88,7 +88,7 @@ const LandingRenderer = ({ config, profile }) => {
                     case 'features':
                         return <Features key={section.id} content={processedContent} />;
                     case 'form':
-                        return <ContactForm key={section.id} content={processedContent} />;
+                        return <ContactForm key={section.id} content={processedContent} profile={profile} />;
                     case 'profile_hero':
                         return <ProfileHero key={section.id} content={processedContent} />;
                     case 'bio':
