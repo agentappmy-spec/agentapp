@@ -1,5 +1,5 @@
--- Migration: Update Monthly Renewal Message Content
--- Updates the previously inserted 'Monthly Renewal' template with the user's preferred wording.
+-- Migration: Update Monthly Renewal Message Content (Fixed Newlines)
+-- Updates the previously inserted 'Monthly Renewal' template with proper formatting.
 
 UPDATE public.workflow_steps
 SET 
