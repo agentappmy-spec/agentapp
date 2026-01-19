@@ -159,7 +159,7 @@ const EditNodeModal = ({ node, onClose, onSave }) => {
                     <div className="shortcode-bar">
                         <span className="shortcode-label">Shortcodes:</span>
                         <div className="shortcode-chips">
-                            {['{name}', '{title}', '{phone}', '{email}', '{agency}', '{license}', '{bio}'].map(code => (
+                            {['{name}', '{title}', '{agent_name}', '{phone}', '{agency}', '{license}', '{bio}'].map(code => (
                                 <button
                                     key={code}
                                     type="button"

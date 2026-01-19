@@ -30,7 +30,13 @@ serve(async (req) => {
           id,
           email,
           role,
-          plans (monthly_message_limit)
+          plans (monthly_message_limit),
+          full_name,
+          phone,
+          title,
+          agency_name,
+          license_no,
+          bio
         )
       `)
             .neq('status', 'Lapsed')
@@ -148,8 +154,15 @@ serve(async (req) => {
                 // Prepare Email
                 const subject = step.subject || step.trigger_name || `Follow Up - Day ${step.day}`
                 let content = step.content_email || step.content_sms || ''
-                content = content.replace(/{name}/g, contact.name)
+                content = content
+                    .replace(/{name}/g, contact.name || '')
                     .replace(/{title}/g, contact.title || '')
+                    // Agent Details
+                    .replace(/{agent_name}/g, agent.full_name || agent.email || 'Your Agent')
+                    .replace(/{phone}/g, agent.phone || '')
+                    .replace(/{agency}/g, agent.agency_name || '')
+                    .replace(/{license}/g, agent.license_no || '')
+                    .replace(/{bio}/g, agent.bio || '');
 
                 // Send via Resend
                 const emailRes = await fetch('https://api.resend.com/emails', {
