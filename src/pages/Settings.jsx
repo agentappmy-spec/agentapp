@@ -737,51 +737,55 @@ const Settings = () => {
                             </div>
 
                             <div className="pricing-grid">
-                                {plans.map(plan => {
-                                    const isCurrent = (userProfile.planId || 'free') === plan.id;
-                                    const isPro = plan.name.toLowerCase().includes('pro');
-                                    const price = upgradePlan === 'yearly' ? plan.price_yearly : plan.price_monthly;
+                                {plans
+                                    .filter(plan => userProfile.role === 'super_admin' || plan.id !== 'super_admin') // Hide Super Admin plan for others
+                                    .map(plan => {
+                                        const isCurrent = (userProfile.planId || 'free') === plan.id;
+                                        const isPro = plan.name.toLowerCase().includes('pro');
+                                        const price = upgradePlan === 'yearly' ? plan.price_yearly : plan.price_monthly;
 
-                                    return (
-                                        <div key={plan.id} className={`pricing-card ${isPro ? 'popular' : ''}`}>
-                                            {isPro && <div className="popular-badge"><Star size={12} fill="white" /> Most Popular</div>}
-                                            <div className="plan-name">{plan.name}</div>
-                                            <div className="plan-desc">{isPro ? "Advanced features to track and grow your sales." : "Essential tools to manage your leads."}</div>
-                                            <div className="plan-price">
-                                                {upgradePlan === 'yearly' && plan.price_yearly > 0 && <span className="old-price">RM {plan.price_yearly * 1.2}</span>}
-                                                RM {price}
-                                                <small>{upgradePlan === 'yearly' ? '/ year' : '/ mo'}</small>
-                                            </div>
+                                        return (
+                                            <div key={plan.id} className={`pricing-card ${isPro ? 'popular' : ''}`}>
+                                                {isPro && <div className="popular-badge"><Star size={12} fill="white" /> Most Popular</div>}
+                                                <div className="plan-name">{plan.name}</div>
+                                                <div className="plan-desc">{isPro ? "Advanced features to track and grow your sales." : "Essential tools to manage your leads."}</div>
+                                                <div className="plan-price">
+                                                    {upgradePlan === 'yearly' && plan.price_yearly > 0 && <span className="old-price">RM {plan.price_yearly * 1.2}</span>}
+                                                    RM {price}
+                                                    <small>{upgradePlan === 'yearly' ? '/ year' : '/ mo'}</small>
+                                                </div>
 
-                                            <ul className="plan-features">
-                                                <li className="feature-item">
-                                                    <Check size={18} className="check-icon" />
-                                                    <span>{plan.contact_limit === 0 || plan.contact_limit > 10000 ? <strong>Unlimited</strong> : plan.contact_limit} Contacts</span>
-                                                </li>
-                                                {Array.isArray(plan.features) && plan.features.map((feature, idx) => (
-                                                    <li key={idx} className="feature-item">
+                                                <ul className="plan-features">
+                                                    <li className="feature-item">
                                                         <Check size={18} className="check-icon" />
-                                                        <span>{feature}</span>
+                                                        <span>{plan.contact_limit === 0 || plan.contact_limit > 10000 ? <strong>Unlimited</strong> : plan.contact_limit} Contacts</span>
                                                     </li>
-                                                ))}
-                                            </ul>
+                                                    {Array.isArray(plan.features) && plan.features
+                                                        .filter(f => f !== 'white_label') // Hide White Label feature
+                                                        .map((feature, idx) => (
+                                                            <li key={idx} className="feature-item">
+                                                                <Check size={18} className="check-icon" />
+                                                                <span>{feature.replace(/_/g, ' ')}</span>
+                                                            </li>
+                                                        ))}
+                                                </ul>
 
-                                            {isCurrent ? (
-                                                <button className="plan-btn outline" disabled>Current Plan</button>
-                                            ) : (
-                                                <button
-                                                    className={`plan-btn ${isPro ? 'primary' : 'outline'}`}
-                                                    onClick={() => isPro ? handleUpgradePayment(plan.id, upgradePlan) : alert('Please contact support to downgrade.')}
-                                                    disabled={isProcessingPayment}
-                                                >
-                                                    {isPro ? (isProcessingPayment ? 'Processing...' : 'Upgrade to Pro') : 'Downgrade'}
-                                                </button>
-                                            )}
+                                                {isCurrent ? (
+                                                    <button className="plan-btn outline" disabled>Current Plan</button>
+                                                ) : (
+                                                    <button
+                                                        className={`plan-btn ${isPro ? 'primary' : 'outline'}`}
+                                                        onClick={() => isPro ? handleUpgradePayment(plan.id, upgradePlan) : alert('Please contact support to downgrade.')}
+                                                        disabled={isProcessingPayment}
+                                                    >
+                                                        {isPro ? (isProcessingPayment ? 'Processing...' : 'Upgrade to Pro') : 'Downgrade'}
+                                                    </button>
+                                                )}
 
-                                            {isPro && <div className="guarantee-text">30-day money-back guarantee</div>}
-                                        </div>
-                                    );
-                                })}
+                                                {isPro && <div className="guarantee-text">30-day money-back guarantee</div>}
+                                            </div>
+                                        );
+                                    })}
                             </div>
 
 
