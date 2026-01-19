@@ -26,14 +26,16 @@ import './SuperAdmin.css';
 // --- System Configuration for Plans ---
 // Add new features here to make them appear in the Plan Editor
 const AVAILABLE_FEATURES = [
-    { id: 'global_reminder', label: 'Global Reminder', type: 'boolean', value: 'Auto Reminder' },
-    { id: 'auto_follow_up', label: 'Auto Follow Up', type: 'boolean', value: 'Auto Follow Up' },
-    { id: 'email', label: FEATURE_NAMES.EMAIL, type: 'boolean', value: FEATURE_NAMES.EMAIL },
-    { id: 'sms', label: FEATURE_NAMES.SMS, type: 'boolean', value: FEATURE_NAMES.SMS },
-    { id: 'whatsapp', label: FEATURE_NAMES.WHATSAPP, type: 'boolean', value: FEATURE_NAMES.WHATSAPP },
-    { id: 'landing_page', label: FEATURE_NAMES.LANDING_PAGE, type: 'boolean', value: FEATURE_NAMES.LANDING_PAGE },
-    { id: 'analytics', label: 'Advance Dashboard Analytics', type: 'boolean', value: 'Analytics' },
-    { id: 'white_label', label: 'White Labeling', type: 'boolean', value: 'White Label' }
+    { id: 'dashboard_access', label: 'Dashboard Access', type: 'boolean', value: 'dashboard_access' },
+    { id: 'email_enabled', label: 'Email Integration', type: 'boolean', value: 'email_enabled' },
+    { id: 'sms_enabled', label: 'SMS Integration', type: 'boolean', value: 'sms_enabled' },
+    { id: 'whatsapp_enabled', label: 'WhatsApp Integration', type: 'boolean', value: 'whatsapp_enabled' },
+    { id: 'global_reminders_enabled', label: 'Global Reminders', type: 'boolean', value: 'global_reminders_enabled' },
+    { id: 'auto_followup_enabled', label: 'Auto Follow Up', type: 'boolean', value: 'auto_followup_enabled' },
+    { id: 'landing_page_edit', label: 'Landing Page Editor', type: 'boolean', value: 'landing_page_edit' },
+    { id: 'landing_page_publish', label: 'Publish Landing Page', type: 'boolean', value: 'landing_page_publish' },
+    { id: 'analytics_advanced', label: 'Advanced Analytics', type: 'boolean', value: 'analytics_advanced' },
+    { id: 'white_label', label: 'White Labeling', type: 'boolean', value: 'white_label' }
 ];
 
 // --- Components for Auto Follow-up (Adapted) ---
