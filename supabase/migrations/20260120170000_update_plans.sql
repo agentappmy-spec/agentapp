@@ -16,7 +16,7 @@ VALUES (
     0, 
     10, 
     300, 
-    ARRAY['dashboard_access', 'email_enabled', 'global_reminders_enabled', 'landing_page_edit'], 
+    to_jsonb(ARRAY['dashboard_access', 'email_enabled', 'global_reminders_enabled', 'landing_page_edit']), 
     true
 )
 ON CONFLICT (id) DO UPDATE SET
@@ -36,7 +36,7 @@ VALUES (
     220, 
     210, -- 10 (Free) + 200 (Add more)
     3000, -- 300 (Free) + 2700 (Add more)
-    ARRAY[
+    to_jsonb(ARRAY[
         'dashboard_access', 
         'email_enabled', 
         'sms_enabled', 
@@ -47,7 +47,7 @@ VALUES (
         'landing_page_publish', 
         'analytics_advanced',
         'white_label'
-    ], 
+    ]), 
     true
 )
 ON CONFLICT (id) DO UPDATE SET
@@ -71,11 +71,11 @@ VALUES (
     0, 
     0, -- 0 means Unlimited in our logic
     0, -- 0 means Unlimited
-    ARRAY[
+    to_jsonb(ARRAY[
         'dashboard_access', 'email_enabled', 'sms_enabled', 'whatsapp_enabled', 
         'global_reminders_enabled', 'auto_followup_enabled', 'landing_page_edit', 
         'landing_page_publish', 'analytics_advanced', 'white_label', 'admin_panel'
-    ], 
+    ]), 
     true
 )
 ON CONFLICT (id) DO UPDATE SET
@@ -89,7 +89,3 @@ SET
     role = 'super_admin',
     plan_id = 'super_admin'
 WHERE email = 'agentapp.my@gmail.com';
-
--- Ensure RLS Policy prevents deletion of Super Admin
--- (Re-applying this policy to be safe, or creating if not exists logic is complex in pure SQL without PL/PGSQL blocks, 
--- but we can just ensure the user is updated correctly first).
