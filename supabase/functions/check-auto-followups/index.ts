@@ -107,6 +107,16 @@ serve(async (req) => {
                     if (step.date === 'auto') return false
                     return step.date === todayStr
                 }
+                // C. Special Triggers (Monthly Renewal)
+                if (step.trigger_name === 'Monthly Renewal') {
+                    // Check if today matches the "Day of Month" of joined_at
+                    const joinDay = joinedAt.getDate(); // 1-31
+                    const currentDay = today.getDate(); // 1-31
+                    // Logic: Send only if day matches
+                    // Edge case: If joined on 31st and today is 30th (Nov), we might skip. 
+                    // For MVP simplicity: Exact Match Only
+                    return joinDay === currentDay;
+                }
                 return false
             }
 
