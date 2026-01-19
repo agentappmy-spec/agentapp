@@ -217,12 +217,38 @@ const EditNodeModal = ({ node, onClose, onSave }) => {
 };
 
 const FollowUpCard = ({ step, prevStep, index, isLast, onEdit, onDelete }) => {
-    // Calculate relative delay
-    const delay = index === 0 ? 0 : (step.day - (prevStep ? prevStep.day : 0));
-    let delayText = index === 0 ? 'Instant' : `Wait ${delay} day${delay !== 1 ? 's' : ''}`;
-    const dayLabel = `Day ${step.day}`;
+    // Check if it's a global/date-based step
+    const isGlobal = step.template_id === 'global' || !!step.date;
+
+    // Logic for Labels
+    let dayLabel = `Day ${step.day}`;
+    let delayText = '';
+
+    if (isGlobal) {
+        // It's a Reminder/Event
+        dayLabel = step.trigger_name || 'Event';
+        if (step.date) {
+            // Format Date
+            if (step.date === 'auto') {
+                delayText = 'Auto-Detected Date';
+            } else {
+                try {
+                    const dateObj = new Date(step.date);
+                    delayText = dateObj.toLocaleDateString('en-MY', { day: 'numeric', month: 'short', year: 'numeric' });
+                } catch (e) {
+                    delayText = step.date;
+                }
+            }
+        } else {
+            delayText = 'Calendar Event';
+        }
+    } else {
+        // Standard Day Workflow
+        const delay = index === 0 ? 0 : (step.day - (prevStep ? prevStep.day : 0));
+        delayText = index === 0 ? 'Instant' : `Wait ${delay} day${delay !== 1 ? 's' : ''}`;
+    }
+
     const previewContent = step.contentSms || step.content || step.contentWhatsapp || step.contentEmail || 'No content';
-    const emailSubject = step.subject || 'No Subject';
 
     // Swipe Logic
     const [touchStart, setTouchStart] = useState(null);
@@ -262,7 +288,7 @@ const FollowUpCard = ({ step, prevStep, index, isLast, onEdit, onDelete }) => {
             >
                 <div className="step-indicator">
                     <div className={`step-circle ${index === 0 ? 'start-node' : ''}`}>
-                        {index === 0 ? <Check size={24} /> : (index + 1)}
+                        {isGlobal ? <Clock size={24} /> : (index === 0 ? <Check size={24} /> : (index + 1))}
                     </div>
                 </div>
 
@@ -270,7 +296,7 @@ const FollowUpCard = ({ step, prevStep, index, isLast, onEdit, onDelete }) => {
                     <div className="card-header">
                         <div className="step-info">
                             <h3>{dayLabel}</h3>
-                            <div className="wait-badge">
+                            <div className="wait-badge" style={{ background: isGlobal ? '#f3e8ff' : '#f1f5f9', color: isGlobal ? '#7c3aed' : '#64748b', borderColor: isGlobal ? '#e9d5ff' : '#e2e8f0' }}>
                                 <Clock size={12} />
                                 {delayText}
                             </div>
