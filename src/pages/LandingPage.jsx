@@ -537,20 +537,10 @@ const LandingPage = () => {
                             </button>
                         </>
                     ) : (
-                        <>
-                            <button className="secondary-btn save-btn" onClick={handleCopyLink}>
-                                <div className="btn-text-desktop"><LinkIcon size={18} /> Copy Link</div>
-                                <div className="btn-text-mobile"><LinkIcon size={18} /> Link</div>
-                            </button>
-                            <button className="secondary-btn save-btn" onClick={handleOpenInNewTab}>
-                                <div className="btn-text-desktop"><Grid size={18} /> Open Page</div>
-                                <div className="btn-text-mobile"><Grid size={18} /> View</div>
-                            </button>
-                            <button className="primary-btn save-btn" onClick={handleUnpublish}>
-                                <Minus size={18} />
-                                <span>Unpublish</span>
-                            </button>
-                        </>
+                        <button className="primary-btn save-btn" onClick={handleUnpublish}>
+                            <Minus size={18} />
+                            <span>Unpublish</span>
+                        </button>
                     )}
                 </div>
             </header>
@@ -562,12 +552,12 @@ const LandingPage = () => {
                     <p className="bio-link-subtitle">Set your custom username for your public landing page.</p>
                 </div>
 
-                <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}>
-                    <div style={{ position: 'relative', flex: 1, maxWidth: '400px' }}>
-                        <span style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#64748b', fontWeight: '600', fontSize: '0.95rem' }}>@</span>
+                <div className="bio-link-input-wrapper">
+                    <div className="bio-link-input-container">
+                        <span className="username-prefix">@</span>
                         <input
                             type="text"
-                            className={`bio - link - input ${usernameError ? 'error' : ''} `}
+                            className={`bio-link-input ${usernameError ? 'error' : ''}`}
                             placeholder="yourname"
                             value={userProfile?.username || ''}
                             onChange={async (e) => {
