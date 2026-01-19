@@ -46,6 +46,12 @@ serve(async (req) => {
             Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
         )
 
+        // Check if target user is the protected Super Admin
+        const { data: targetUser } = await supabaseAdmin.auth.admin.getUserById(user_id)
+        if (targetUser?.user?.email === 'agentapp.my@gmail.com') {
+            throw new Error('Forbidden: This Super Admin account cannot be deleted.')
+        }
+
         // 4. Delete Data (Order matters for Foreign Keys)
         // Delete contacts
         const { error: contactsError } = await supabaseAdmin

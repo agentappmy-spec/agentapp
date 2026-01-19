@@ -1,10 +1,11 @@
--- Migration: Update Subscription Plans
--- Cleans up old plan data and inserts the correct Free/Pro tiers as requested by the user.
+-- Migration: Update Plans & Super Admin
+-- 1. Updates Free/Pro plans with correct limits and features.
+-- 2. Ensures the Super Admin Plan exists (hidden/system plan).
+-- 3. Enforces Super Admin Role for 'agentapp.my@gmail.com'.
 
--- 1. Clear existing plans to avoid duplicates/conflicts (Profiles might reference them, so we handle dependencies if needed)
--- Note: If profiles reference these plans, we should be careful. 
--- However, since plan_id is text and 'free'/'pro' are standard, we can update them in place or delete and re-insert if IDs match.
--- Let's try to UPDATE existing ones to preserve references, and INSERT if missing.
+-- ==========================================
+-- 1. UPDATE STANDARD PLANS
+-- ==========================================
 
 -- FREE PLAN
 INSERT INTO public.plans (id, name, price_monthly, price_yearly, contact_limit, monthly_message_limit, features, is_active)
@@ -44,7 +45,8 @@ VALUES (
         'auto_followup_enabled', 
         'landing_page_edit', 
         'landing_page_publish', 
-        'analytics_advanced'
+        'analytics_advanced',
+        'white_label'
     ], 
     true
 )
@@ -55,3 +57,39 @@ ON CONFLICT (id) DO UPDATE SET
     contact_limit = EXCLUDED.contact_limit,
     monthly_message_limit = EXCLUDED.monthly_message_limit,
     features = EXCLUDED.features;
+
+-- ==========================================
+-- 2. SUPER ADMIN PLAN & ROLE
+-- ==========================================
+
+-- Create/Update Super Admin Plan (Unlimited)
+INSERT INTO public.plans (id, name, price_monthly, price_yearly, contact_limit, monthly_message_limit, features, is_active)
+VALUES (
+    'super_admin', 
+    'Super Admin', 
+    0, 
+    0, 
+    0, -- 0 means Unlimited in our logic
+    0, -- 0 means Unlimited
+    ARRAY[
+        'dashboard_access', 'email_enabled', 'sms_enabled', 'whatsapp_enabled', 
+        'global_reminders_enabled', 'auto_followup_enabled', 'landing_page_edit', 
+        'landing_page_publish', 'analytics_advanced', 'white_label', 'admin_panel'
+    ], 
+    true
+)
+ON CONFLICT (id) DO UPDATE SET
+    contact_limit = 0,
+    monthly_message_limit = 0,
+    features = EXCLUDED.features;
+
+-- Force 'agentapp.my@gmail.com' to be Super Admin
+UPDATE public.profiles
+SET 
+    role = 'super_admin',
+    plan_id = 'super_admin'
+WHERE email = 'agentapp.my@gmail.com';
+
+-- Ensure RLS Policy prevents deletion of Super Admin
+-- (Re-applying this policy to be safe, or creating if not exists logic is complex in pure SQL without PL/PGSQL blocks, 
+-- but we can just ensure the user is updated correctly first).
