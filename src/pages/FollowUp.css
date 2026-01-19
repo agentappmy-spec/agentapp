@@ -349,11 +349,51 @@
 
 .channel-tabs {
     background: #f1f5f9;
-    padding: 5px;
-    border-radius: 12px;
+    padding: 4px;
+    border-radius: 10px;
     display: flex;
-    gap: 5px;
+    gap: 4px;
     margin-bottom: 1.5rem;
+}
+
+.channel-tab {
+    flex: 1;
+    padding: 8px 12px;
+    border: none;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--text-secondary);
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: center;
+}
+
+.channel-tab:hover {
+    color: var(--text-primary);
+    background: rgba(255, 255, 255, 0.5);
+}
+
+.channel-tab.active {
+    background: white;
+    color: var(--text-primary);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.channel-tab.active.sms {
+    background: #1e293b; /* Dark/Black for SMS */
+    color: white;
+}
+
+.channel-tab.active.whatsapp {
+    background: #25D366;
+    color: white;
+}
+
+.channel-tab.active.email {
+    background: #EA4335;
+    color: white;
 }
 
 /* Responsive Overrides */

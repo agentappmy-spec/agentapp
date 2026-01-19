@@ -121,23 +121,20 @@ const EditNodeModal = ({ node, onClose, onSave }) => {
 
                 <div className="channel-tabs">
                     <button
-                        className={`tab-btn-sm ${activeChannel === 'sms' ? 'active' : ''}`}
+                        className={`channel-tab sms ${activeChannel === 'sms' ? 'active' : ''}`}
                         onClick={() => setActiveChannel('sms')}
-                        style={{ background: activeChannel === 'sms' ? 'var(--primary)' : 'transparent', color: activeChannel === 'sms' ? 'white' : 'var(--text-secondary)' }}
                     >
                         SMS
                     </button>
                     <button
-                        className={`tab-btn-sm ${activeChannel === 'whatsapp' ? 'active' : ''}`}
+                        className={`channel-tab whatsapp ${activeChannel === 'whatsapp' ? 'active' : ''}`}
                         onClick={() => setActiveChannel('whatsapp')}
-                        style={{ background: activeChannel === 'whatsapp' ? '#25D366' : 'transparent', color: activeChannel === 'whatsapp' ? 'white' : 'var(--text-secondary)' }}
                     >
                         WhatsApp
                     </button>
                     <button
-                        className={`tab-btn-sm ${activeChannel === 'email' ? 'active' : ''}`}
+                        className={`channel-tab email ${activeChannel === 'email' ? 'active' : ''}`}
                         onClick={() => setActiveChannel('email')}
-                        style={{ background: activeChannel === 'email' ? '#EA4335' : 'transparent', color: activeChannel === 'email' ? 'white' : 'var(--text-secondary)' }}
                     >
                         Email
                     </button>
