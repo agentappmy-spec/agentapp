@@ -10,7 +10,8 @@ import {
     Plus,
     Minus,
     Grid,
-    Link as LinkIcon
+    Link as LinkIcon,
+    RotateCcw
 } from 'lucide-react';
 import { supabase } from '../services/supabaseClient';
 import LandingRenderer from '../components/landing/LandingRenderer';
@@ -320,6 +321,36 @@ const LandingPage = () => {
         setSelectedSectionId(null);
     };
 
+    const handleResetToDefault = async () => {
+        const confirmed = window.confirm(
+            '⚠️ Reset to Default Template?\n\n' +
+            'This will replace your current landing page with the default Pro template. ' +
+            'All your customizations will be lost.\n\n' +
+            'Are you sure you want to continue?'
+        );
+
+        if (!confirmed) return;
+
+        // Apply the Pro template as default
+        applyTemplate('pro');
+
+        // Save to database immediately
+        try {
+            const { error } = await supabase
+                .from('profiles')
+                .update({ landing_config: TEMPLATES.pro })
+                .eq('id', userProfile.id);
+
+            if (error) throw error;
+
+            alert('✅ Landing page has been reset to default template!');
+            setHasUnsavedChanges(false);
+        } catch (error) {
+            console.error('Error resetting landing page:', error);
+            alert('❌ Failed to reset landing page. Please try again.');
+        }
+    };
+
     const selectedSection = pageConfig.sections.find(s => s.id === selectedSectionId);
 
     // Helper: Link Items Editor
@@ -458,6 +489,21 @@ const LandingPage = () => {
                             </button>
                         </div>
                     </div>
+
+                    <div className="divider-vertical"></div>
+
+                    {/* Reset Button */}
+                    {!userProfile?.is_published && (
+                        <button
+                            className="secondary-btn"
+                            onClick={handleResetToDefault}
+                            title="Reset to default template"
+                            style={{ padding: '0.5rem 1rem', display: 'flex', alignItems: 'center', gap: '6px' }}
+                        >
+                            <RotateCcw size={16} />
+                            <span className="btn-text-desktop">Reset</span>
+                        </button>
+                    )}
 
                     <div className="divider-vertical"></div>
 
