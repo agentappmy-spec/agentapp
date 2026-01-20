@@ -11,7 +11,8 @@ import {
     Minus,
     Grid,
     Link as LinkIcon,
-    RotateCcw
+    RotateCcw,
+    Lock
 } from 'lucide-react';
 import { supabase } from '../services/supabaseClient';
 import LandingRenderer from '../components/landing/LandingRenderer';
@@ -215,7 +216,7 @@ const LandingPage = () => {
         // Check permission (super admins and PRO users bypass this)
         const isPro = userProfile?.role === 'pro' || userProfile?.planId === 'pro';
 
-        if (userProfile?.role !== 'super_admin' && !isPro && !checkPermission('landing_page')) {
+        if (userProfile?.role !== 'super_admin' && !isPro) {
             if (window.confirm("📢 Publishing your Landing Page is a Pro feature.\n\nFree users can design and edit, but only Pro users can publish their page for the public to see.\n\nUpgrade now to share your professional landing page!\n\nClick OK to view upgrade options.")) {
                 window.location.href = '/settings?tab=billing';
             }
@@ -643,6 +644,11 @@ const LandingPage = () => {
                                 onClick={handlePublish}
                                 disabled={hasUnsavedChanges}
                                 style={{
+                                    // Logic to determine if locked
+                                    // We can re-derive isPro here or define it in component scope. 
+                                    // It wasn't in component scope before, only in handlePublish. 
+                                    // Let's assume we can access userProfile.
+                                    // We'll trust the click handler to enforce, this is just visual.
                                     padding: '0.85rem 1.75rem',
                                     fontSize: '1rem',
                                     fontWeight: '700',
@@ -654,7 +660,7 @@ const LandingPage = () => {
                                     boxShadow: '0 4px 16px rgba(220, 38, 38, 0.3)'
                                 }}
                             >
-                                <Layout size={20} />
+                                {(userProfile?.role === 'super_admin' || userProfile?.role === 'pro' || userProfile?.planId === 'pro') ? <Layout size={20} /> : <Lock size={20} />}
                                 <span>Publish</span>
                             </button>
                         </>
