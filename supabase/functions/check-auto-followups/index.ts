@@ -232,23 +232,58 @@ serve(async (req) => {
                     .replace(/{license}/g, agent.license_no || '')
                     .replace(/{bio}/g, agent.bio || '');
 
-                // Send via Resend
-                const emailRes = await fetch('https://api.resend.com/emails', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${RESEND_API_KEY}`,
-                    },
-                    body: JSON.stringify({
-                        from: 'AgentApp <system@mail.agentapp.my>',
-                        to: contact.email,
-                        reply_to: agent.email,
-                        subject: subject,
-                        html: `<p style="white-space: pre-wrap;">${content.replace(/\n/g, '<br/>')}</p>`,
-                    }),
-                })
+                // Send via Resend with Retry Logic
+                const maxRetries = 3;
+                let emailSent = false;
+                let lastError = '';
 
-                if (emailRes.ok) {
+                for (let attempt = 1; attempt <= maxRetries; attempt++) {
+                    try {
+                        const emailRes = await fetch('https://api.resend.com/emails', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${RESEND_API_KEY}`,
+                            },
+                            body: JSON.stringify({
+                                from: 'AgentApp <system@mail.agentapp.my>',
+                                to: contact.email,
+                                reply_to: agent.email,
+                                subject: subject,
+                                html: `<p style="white-space: pre-wrap;">${content.replace(/\n/g, '<br/>')}</p>`,
+                            }),
+                        });
+
+                        if (emailRes.ok) {
+                            emailSent = true;
+                            break; // Success, exit retry loop
+                        } else {
+                            lastError = await emailRes.text();
+
+                            // Don't retry on 4xx errors (client errors like invalid email)
+                            if (emailRes.status >= 400 && emailRes.status < 500) {
+                                console.error(`Client error for ${contact.email}, not retrying:`, lastError);
+                                break;
+                            }
+
+                            // Retry on 5xx errors (server errors)
+                            if (attempt < maxRetries) {
+                                const backoffMs = Math.pow(2, attempt) * 1000; // Exponential backoff: 2s, 4s, 8s
+                                console.warn(`Retry ${attempt}/${maxRetries} for ${contact.email} after ${backoffMs}ms`);
+                                await new Promise(resolve => setTimeout(resolve, backoffMs));
+                            }
+                        }
+                    } catch (fetchError: any) {
+                        lastError = fetchError.message || 'Network error';
+                        if (attempt < maxRetries) {
+                            const backoffMs = Math.pow(2, attempt) * 1000;
+                            console.warn(`Network error, retry ${attempt}/${maxRetries} after ${backoffMs}ms`);
+                            await new Promise(resolve => setTimeout(resolve, backoffMs));
+                        }
+                    }
+                }
+
+                if (emailSent) {
                     // Log Success
                     await supabase.from('message_logs').insert({
                         user_id: agent.id,
@@ -269,9 +304,8 @@ serve(async (req) => {
 
                     results.push({ contact: contact.name, step: step.day, status: 'sent' })
                 } else {
-                    const errText = await emailRes.text();
-                    console.error('Failed to send for', contact.email, errText)
-                    results.push({ contact: contact.name, status: 'error', error: errText })
+                    console.error('Failed to send after retries for', contact.email, lastError)
+                    results.push({ contact: contact.name, status: 'error', error: lastError })
                 }
             }
         }
