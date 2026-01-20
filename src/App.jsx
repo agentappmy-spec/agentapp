@@ -107,7 +107,7 @@ function App() {
   const [availableProducts, setAvailableProducts] = useState(() => {
     const saved = localStorage.getItem('agent_products');
     // Default to these 2 products if nothing is saved
-    return saved ? JSON.parse(saved) : ['Hibah', 'Medical Card'];
+    return saved ? JSON.parse(saved) : ['Medical Card', 'Hibah'];
   });
   const [availableTags, setAvailableTags] = useState(() => {
     const saved = localStorage.getItem('agent_tags');
@@ -331,10 +331,10 @@ function App() {
               setAvailableProducts(localProducts);
             } else {
               // Case C: Both empty -> Enforce Default
-              const defaultProducts = ['Hibah', 'Medical Card'];
+              const defaultProducts = ['Medical Card', 'Hibah'];
               setAvailableProducts(defaultProducts);
-              // Optionally save this default to DB immediately so next fetch finds it
-              // await supabase.from('profiles').update({ products: defaultProducts }).eq('id', session.user.id);
+              // Save default to DB immediately
+              await supabase.from('profiles').update({ products: defaultProducts }).eq('id', session.user.id);
             }
 
             if (dbProfile.tags && Array.isArray(dbProfile.tags) && dbProfile.tags.length > 0) {
