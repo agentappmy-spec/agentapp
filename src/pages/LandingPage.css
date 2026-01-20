@@ -216,10 +216,20 @@
     .control-group {
         width: 100%;
         justify-content: space-between;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+        padding: 0.75rem;
+        background: #f8fafc;
     }
 
-    .divider-vertical,
     .control-label {
+        display: block !important;
+        margin-left: 0;
+        font-size: 0.7rem;
+    }
+
+    .divider-vertical {
         display: none;
     }
 

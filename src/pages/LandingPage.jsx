@@ -479,9 +479,9 @@ const LandingPage = () => {
                                     padding: '0.6rem 1.25rem',
                                     fontSize: '0.9rem',
                                     fontWeight: '600',
-                                    border: pageConfig.name === TEMPLATES.basic.name ? '2px solid #2563eb' : '1px solid #e2e8f0',
-                                    background: pageConfig.name === TEMPLATES.basic.name ? '#eff6ff' : 'white',
-                                    color: pageConfig.name === TEMPLATES.basic.name ? '#2563eb' : '#64748b',
+                                    border: pageConfig.name === TEMPLATES.basic.name ? '2px solid #1e293b' : '1px solid #e2e8f0',
+                                    background: pageConfig.name === TEMPLATES.basic.name ? '#1e293b' : 'white',
+                                    color: pageConfig.name === TEMPLATES.basic.name ? 'white' : '#64748b',
                                     borderRadius: '8px',
                                     cursor: userProfile?.is_published ? 'not-allowed' : 'pointer',
                                     transition: 'all 0.2s'
@@ -497,9 +497,9 @@ const LandingPage = () => {
                                     padding: '0.6rem 1.25rem',
                                     fontSize: '0.9rem',
                                     fontWeight: '600',
-                                    border: pageConfig.name === TEMPLATES.pro.name ? '2px solid #2563eb' : '1px solid #e2e8f0',
-                                    background: pageConfig.name === TEMPLATES.pro.name ? '#eff6ff' : 'white',
-                                    color: pageConfig.name === TEMPLATES.pro.name ? '#2563eb' : '#64748b',
+                                    border: pageConfig.name === TEMPLATES.pro.name ? '2px solid #1e293b' : '1px solid #e2e8f0',
+                                    background: pageConfig.name === TEMPLATES.pro.name ? '#1e293b' : 'white',
+                                    color: pageConfig.name === TEMPLATES.pro.name ? 'white' : '#64748b',
                                     borderRadius: '8px',
                                     cursor: userProfile?.is_published ? 'not-allowed' : 'pointer',
                                     transition: 'all 0.2s'
@@ -514,16 +514,46 @@ const LandingPage = () => {
                         <span className="control-label">Preview</span>
                         <div className="btn-group">
                             <button
-                                className={`std - tab - item small - btn ${previewMode === 'desktop' ? 'active' : ''} `}
+                                className={`template-btn ${previewMode === 'desktop' ? 'active' : ''}`}
                                 onClick={() => setPreviewMode('desktop')}
+                                style={{
+                                    padding: '0.6rem 1rem',
+                                    fontSize: '0.9rem',
+                                    fontWeight: '600',
+                                    border: previewMode === 'desktop' ? '2px solid #1e293b' : '1px solid #e2e8f0',
+                                    background: previewMode === 'desktop' ? '#1e293b' : 'white',
+                                    color: previewMode === 'desktop' ? 'white' : '#64748b',
+                                    borderRadius: '8px',
+                                    cursor: 'pointer',
+                                    transition: 'all 0.2s',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '6px'
+                                }}
                             >
                                 <Monitor size={16} />
+                                <span className="btn-text-desktop">Desktop</span>
                             </button>
                             <button
-                                className={`std - tab - item small - btn ${previewMode === 'mobile' ? 'active' : ''} `}
+                                className={`template-btn ${previewMode === 'mobile' ? 'active' : ''}`}
                                 onClick={() => setPreviewMode('mobile')}
+                                style={{
+                                    padding: '0.6rem 1rem',
+                                    fontSize: '0.9rem',
+                                    fontWeight: '600',
+                                    border: previewMode === 'mobile' ? '2px solid #1e293b' : '1px solid #e2e8f0',
+                                    background: previewMode === 'mobile' ? '#1e293b' : 'white',
+                                    color: previewMode === 'mobile' ? 'white' : '#64748b',
+                                    borderRadius: '8px',
+                                    cursor: 'pointer',
+                                    transition: 'all 0.2s',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '6px'
+                                }}
                             >
                                 <Smartphone size={16} />
+                                <span className="btn-text-desktop">Mobile</span>
                             </button>
                         </div>
                     </div>
@@ -542,7 +572,9 @@ const LandingPage = () => {
                                 fontWeight: '600',
                                 display: 'flex',
                                 alignItems: 'center',
-                                gap: '8px'
+                                gap: '8px',
+                                minWidth: '130px',
+                                justifyContent: 'center'
                             }}
                         >
                             <RotateCcw size={18} />
