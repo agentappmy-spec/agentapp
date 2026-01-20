@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 const ContactForm = ({ content, profile }) => {
     // We ignore the 'fields' and 'buttonText' from content to force the requested structure
     const {
-        title = "Dapatkan Sebut Harga"
+        title = "Dapatkan Sebutharga Khas Untuk Anda"
     } = content || {};
 
     // Force the button text as requested

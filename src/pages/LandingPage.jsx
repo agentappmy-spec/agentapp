@@ -67,7 +67,7 @@ const TEMPLATES = {
             {
                 id: 'products-1', type: 'products_grid', name: 'My Services',
                 content: {
-                    title: 'How can I help?',
+                    title: 'Saya boleh bantu anda!',
                     cardColor: '#ffffff', accentColor: '#db2777',
                     items: [
                         { name: 'Hibah Takaful', description: 'Debt cancellation and income replacement.' },
@@ -87,7 +87,7 @@ const TEMPLATES = {
             },
             {
                 id: 'form-1', type: 'form', name: 'Contact Form',
-                content: { title: 'Get a Quote Today', buttonText: 'Submit Request', fields: ['name', 'phone', 'email'] }
+                content: { title: 'Dapatkan Sebutharga Khas Untuk Anda', buttonText: 'Submit Request', fields: ['name', 'phone', 'email'] }
             },
             { id: 'footer-1', type: 'footer', name: 'Footer', content: { text: '© 2026 AgentApp. All rights reserved.' } }
         ]

@@ -3,7 +3,7 @@ import { Shield, Heart, Activity, Briefcase } from 'lucide-react';
 
 const ProductsGrid = ({ content }) => {
     const {
-        title = "How can I help?",
+        title = "Saya boleh bantu anda!",
         items = [],
         cardColor = "#ffffff",
         accentColor = "#db2777"
