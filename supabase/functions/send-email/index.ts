@@ -17,6 +17,115 @@ serve(async (req) => {
     }
 
     try {
+        const body = await req.json()
+
+        // === HANDLE SUPABASE AUTH HOOKS ===
+        // Supabase sends { email_data: { token, token_hash, redirect_to, email_action_type }, user: { email, ... } }
+        if (body.email_data) {
+            const { email_data, user } = body;
+            const { token, token_hash, redirect_to, email_action_type } = email_data;
+            const email = user.email;
+
+            console.log(`Received Auth Hook: ${email_action_type} for ${email}`);
+
+            let subject = 'Confirm your account';
+            let htmlContent = '';
+            let actionUrl = '';
+
+            // Construct Action URL
+            if (token_hash) {
+                // PKCE / New Flow
+                actionUrl = `${redirect_to}?token_hash=${token_hash}&type=${email_action_type}`;
+            } else {
+                // Legacy Token
+                actionUrl = `${redirect_to}?token=${token}&type=${email_action_type}`;
+            }
+
+            // Select Template based on Action Type
+            switch (email_action_type) {
+                case 'signup':
+                    subject = 'Welcome to AgentApp! Confirm your email';
+                    htmlContent = `
+                        <h2>Welcome to AgentApp! 🎉</h2>
+                        <p>Thanks for signing up. Please confirm your email address to get started.</p>
+                        <p><a href="${actionUrl}" style="background-color: #4f46e5; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; display: inline-block;">Confirm Email</a></p>
+                        <p style="font-size: 0.9em; color: #666;">Or copy this link: ${actionUrl}</p>
+                    `;
+                    break;
+
+                case 'recovery':
+                    subject = 'Reset your password - AgentApp';
+                    htmlContent = `
+                        <h2>Reset Password Request</h2>
+                        <p>We received a request to reset your password. Click the button below to choose a new one.</p>
+                        <p><a href="${actionUrl}" style="background-color: #db2777; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; display: inline-block;">Reset Password</a></p>
+                        <p style="font-size: 0.9em; color: #666;">If you didn't request this, you can safely ignore this email.</p>
+                    `;
+                    break;
+
+                case 'magiclink':
+                    subject = 'Your Login Link - AgentApp';
+                    htmlContent = `
+                        <h2>Log in to AgentApp</h2>
+                        <p>Click the button below to sign in instantly.</p>
+                        <p><a href="${actionUrl}" style="background-color: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; display: inline-block;">Sign In</a></p>
+                    `;
+                    break;
+
+                case 'invite':
+                    subject = 'You have been invited to AgentApp';
+                    htmlContent = `
+                        <h2>You've been invited!</h2>
+                        <p>You have been invited to join an AgentApp workspace.</p>
+                        <p><a href="${actionUrl}" style="background-color: #4f46e5; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; display: inline-block;">Accept Invite</a></p>
+                    `;
+                    break;
+
+                case 'email_change':
+                    subject = 'Confirm Email Change - AgentApp';
+                    htmlContent = `
+                        <h2>Confirm Email Change</h2>
+                        <p>Please confirm your new email address by clicking the button below.</p>
+                        <p><a href="${actionUrl}" style="background-color: #4f46e5; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; display: inline-block;">Confirm Change</a></p>
+                    `;
+                    break;
+
+                default:
+                    console.warn('Unknown email action type:', email_action_type);
+                    return new Response(JSON.stringify({ message: 'Unknown action type, skipped' }), {
+                        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+                    });
+            }
+
+            // Send via Resend
+            const emailPayload = {
+                from: 'AgentApp <system@mail.agentapp.my>',
+                to: email,
+                subject: subject,
+                html: htmlContent
+            };
+
+            const res = await fetch('https://api.resend.com/emails', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${RESEND_API_KEY}`
+                },
+                body: JSON.stringify(emailPayload)
+            });
+
+            if (!res.ok) {
+                const errText = await res.text();
+                console.error('Resend Hook Error:', errText);
+                return new Response(JSON.stringify({ error: errText }), { status: 500 });
+            }
+
+            return new Response(JSON.stringify({ success: true }), {
+                headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+            });
+        }
+
+        // === HANDLE MANUAL/APP INVOCATIONS (Existing Logic) ===
         // 1. Authenticate User
         const authHeader = req.headers.get('Authorization')
         if (!authHeader) {
@@ -38,7 +147,6 @@ serve(async (req) => {
             })
         }
 
-        const body = await req.json()
         const { to, subject, html, text } = body
 
         // 2. Fetch User Profile & Plan Limits
