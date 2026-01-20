@@ -1,3 +1,4 @@
+
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2"
 
@@ -126,28 +127,40 @@ serve(async (req) => {
         }
 
         // === HANDLE MANUAL/APP INVOCATIONS (Existing Logic) ===
-        // 1. Authenticate User
-        const authHeader = req.headers.get('Authorization')
-        if (!authHeader) {
-            throw new Error('Missing Authorization header')
+        // 1. Authenticate User - ONLY for manual calls if NOT a hook
+        let user;
+        let to, subject, html, text;
+
+        if (!body.email_data) {
+            const authHeader = req.headers.get('Authorization')
+            if (!authHeader) {
+                throw new Error('Missing Authorization header')
+            }
+
+            const supabaseClient = createClient(
+                SUPABASE_URL ?? '',
+                Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+                { global: { headers: { Authorization: authHeader } } }
+            )
+
+            const { data: { user: authUser }, error: userError } = await supabaseClient.auth.getUser()
+
+            if (userError || !authUser) {
+                return new Response(JSON.stringify({ error: 'Unauthorized', details: userError }), {
+                    status: 401,
+                    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+                })
+            }
+
+            user = authUser;
+            ({ to, subject, html, text } = body);
+        } else {
+            throw new Error('Unexpected State: Email data present but fell through hook logic');
         }
 
-        const supabaseClient = createClient(
-            SUPABASE_URL ?? '',
-            Deno.env.get('SUPABASE_ANON_KEY') ?? '',
-            { global: { headers: { Authorization: authHeader } } }
-        )
-
-        const { data: { user }, error: userError } = await supabaseClient.auth.getUser()
-
-        if (userError || !user) {
-            return new Response(JSON.stringify({ error: 'Unauthorized', details: userError }), {
-                status: 401,
-                headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-            })
+        if (!user) {
+            throw new Error('User context missing');
         }
-
-        const { to, subject, html, text } = body
 
         // 2. Fetch User Profile & Plan Limits
         const supabase = createClient(

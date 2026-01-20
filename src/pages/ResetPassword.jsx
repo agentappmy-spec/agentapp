@@ -13,16 +13,45 @@ const ResetPassword = () => {
     const [success, setSuccess] = useState('');
 
     useEffect(() => {
-        // Check if we have the session from the URL hash (Supabase handles this automatically usually, 
-        // but we need to ensure the user is actually authenticated to update the password)
-        const checkSession = async () => {
-            const { data: { session }, error } = await supabase.auth.getSession();
-            if (error || !session) {
-                // If the link is invalid or expired, they won't have a session here.
+        const handleSessionCheck = async () => {
+            // 1. Check if we already have a session
+            const { data: { session: existingSession } } = await supabase.auth.getSession();
+            if (existingSession) return;
+
+            // 2. Check for PKCE token_hash in URL
+            const params = new URLSearchParams(window.location.search);
+            const token_hash = params.get('token_hash');
+            const type = params.get('type');
+
+            if (token_hash && type) {
+                setIsLoading(true);
+                const { error } = await supabase.auth.verifyOtp({
+                    token_hash,
+                    type,
+                });
+                setIsLoading(false);
+
+                if (error) {
+                    console.error('Verify OTP Error:', error);
+                    setError('Invalid or expired reset link. Please try again.');
+                }
+                // If success, Supabase sets the session automatically
+            } else {
+                // If no session and no token, show error (unless it's just loading)
                 setError('Invalid or expired reset link. Please try again.');
             }
         };
-        checkSession();
+
+        handleSessionCheck();
+
+        // Listen for auth state changes (successful recovery login)
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+            if (event === 'PASSWORD_RECOVERY' || (event === 'SIGNED_IN' && session)) {
+                setError('');
+            }
+        });
+
+        return () => subscription.unsubscribe();
     }, []);
 
     const handleUpdatePassword = async (e) => {
