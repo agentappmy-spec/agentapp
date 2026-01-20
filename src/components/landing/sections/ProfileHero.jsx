@@ -1,11 +1,12 @@
 import React from 'react';
-import { User, MapPin } from 'lucide-react';
+import { User, Building2 } from 'lucide-react';
 
 const ProfileHero = ({ content }) => {
     const {
         name = "Your Name",
         role = "Financial Advisor",
-        location = "Kuala Lumpur, MY",
+        agency,
+        location,
         imageUrl = "",
         primaryColor = "#db2777"
     } = content;
@@ -63,10 +64,10 @@ const ProfileHero = ({ content }) => {
                 {role}
             </div>
 
-            {location && (
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', color: '#6b7280', fontSize: '0.9rem' }}>
-                    <MapPin size={14} />
-                    <span>{location}</span>
+            {agency && (
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.35rem', color: '#6b7280', fontSize: '0.9rem', marginTop: '0.25rem' }}>
+                    <Building2 size={14} />
+                    <span>{agency}</span>
                 </div>
             )}
         </div>

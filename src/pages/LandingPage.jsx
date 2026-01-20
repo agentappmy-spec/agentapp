@@ -808,6 +808,10 @@ const LandingPage = () => {
                                             <input value={userProfile?.title || ''} disabled style={{ backgroundColor: '#f8fafc', color: '#64748b' }} />
                                         </div>
                                         <div className="form-group">
+                                            <label>Agency <span className="sync-note">(Synced from Profile)</span></label>
+                                            <input value={userProfile?.agencyName || ''} disabled style={{ backgroundColor: '#f8fafc', color: '#64748b' }} />
+                                        </div>
+                                        <div className="form-group">
                                             <label>Theme Color</label>
                                             <input type="color" value={selectedSection.content.primaryColor} onChange={e => handleUpdateSection(selectedSection.id, { primaryColor: e.target.value })} />
                                         </div>

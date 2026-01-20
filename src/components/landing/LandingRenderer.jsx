@@ -69,6 +69,7 @@ const LandingRenderer = ({ config, profile }) => {
                         mergedContent.name = profile.name || profile.full_name || mergedContent.name;
                         mergedContent.role = profile.title || mergedContent.role;
                         mergedContent.imageUrl = profile.photoUrl || profile.photo_url || mergedContent.imageUrl;
+                        mergedContent.agency = profile.agencyName || profile.agency_name || mergedContent.agency;
                     }
                     if (section.type === 'bio' && (profile.bio || profile.professional_bio)) {
                         mergedContent.text = profile.bio || profile.professional_bio;
