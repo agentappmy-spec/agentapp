@@ -246,6 +246,17 @@
         gap: 8px;
     }
 
+    /* Reset button should always show text */
+    .reset-btn span {
+        display: inline !important;
+    }
+
+    /* Action buttons should be larger on mobile */
+    .action-btn {
+        padding: 1rem 1.5rem !important;
+        font-size: 1rem !important;
+    }
+
     .lock-message {
         width: 90%;
         padding: 2rem 1.5rem;
