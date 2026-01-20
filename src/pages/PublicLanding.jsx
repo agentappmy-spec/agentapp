@@ -87,9 +87,7 @@ const PublicLanding = () => {
     return (
         <div className="public-landing-page">
             <LandingRenderer config={config} profile={profile} />
-            <footer style={{ textAlign: 'center', padding: '2rem', fontSize: '0.8rem', opacity: 0.6 }}>
-                Powered by AgentApp
-            </footer>
+
         </div>
     );
 };
