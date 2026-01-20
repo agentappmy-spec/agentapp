@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { supabase } from '../../../services/supabaseClient';
 
 const ContactForm = ({ content, profile }) => {
     // We ignore the 'fields' and 'buttonText' from content to force the requested structure
@@ -47,7 +48,7 @@ const ContactForm = ({ content, profile }) => {
         });
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
 
         // Save lead to localStorage
@@ -69,10 +70,43 @@ const ContactForm = ({ content, profile }) => {
             smoking: formData.smoking // Explicitly save to database field as well
         };
 
-        // Save to contacts in localStorage
+        // Save to contacts in localStorage (Backup)
         const existingContacts = JSON.parse(localStorage.getItem('agent_contacts') || '[]');
         existingContacts.push(leadData);
         localStorage.setItem('agent_contacts', JSON.stringify(existingContacts));
+
+        // Save to Database (Main Logic)
+        if (agentProfile?.id) {
+            try {
+                const dbPayload = {
+                    user_id: agentProfile.id,
+                    name: leadData.name,
+                    phone: leadData.phone,
+                    email: leadData.email,
+                    work: formData.occupation, // Map occupation to 'work' column
+                    birthday: formData.birthday,
+                    smoking: formData.smoking, // Map smoking status
+                    products: leadData.products,
+                    tags: ['AgentApp Leads', 'Public Form'],
+                    role: 'Prospect',
+                    status: 'New',
+                    source: 'Landing Page',
+                    created_at: new Date().toISOString(),
+                    updated_at: new Date().toISOString()
+                };
+
+                const { error } = await supabase.from('contacts').insert([dbPayload]);
+                if (error) {
+                    console.error('Error saving lead to DB:', error);
+                } else {
+                    console.log('Lead saved to DB successfully');
+                }
+            } catch (err) {
+                console.error('Unexpected error saving to DB:', err);
+            }
+        } else {
+            console.warn('No Agent ID found, skipping DB save');
+        }
 
         // Construct WhatsApp message
         const agentName = agentProfile?.name || 'Agent';
