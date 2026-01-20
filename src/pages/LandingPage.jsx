@@ -458,7 +458,7 @@ const LandingPage = () => {
 
                 <div className="header-controls">
                     {/* Status Badge */}
-                    <div className="status-badge">
+                    <div className="status-badge" style={{ padding: '8px 16px' }}>
                         {userProfile?.is_published ? (
                             <span className="badge-published">● Published</span>
                         ) : (
@@ -472,16 +472,38 @@ const LandingPage = () => {
                         <span className="control-label">Template</span>
                         <div className="btn-group">
                             <button
-                                className={`std - tab - item small - btn ${pageConfig.name === TEMPLATES.basic.name ? 'active' : ''} `}
+                                className={`template-btn ${pageConfig.name === TEMPLATES.basic.name ? 'active' : ''}`}
                                 onClick={() => applyTemplate('basic')}
                                 disabled={userProfile?.is_published}
+                                style={{
+                                    padding: '0.6rem 1.25rem',
+                                    fontSize: '0.9rem',
+                                    fontWeight: '600',
+                                    border: pageConfig.name === TEMPLATES.basic.name ? '2px solid #2563eb' : '1px solid #e2e8f0',
+                                    background: pageConfig.name === TEMPLATES.basic.name ? '#eff6ff' : 'white',
+                                    color: pageConfig.name === TEMPLATES.basic.name ? '#2563eb' : '#64748b',
+                                    borderRadius: '8px',
+                                    cursor: userProfile?.is_published ? 'not-allowed' : 'pointer',
+                                    transition: 'all 0.2s'
+                                }}
                             >
                                 Basic
                             </button>
                             <button
-                                className={`std - tab - item small - btn ${pageConfig.name === TEMPLATES.pro.name ? 'active' : ''} `}
+                                className={`template-btn ${pageConfig.name === TEMPLATES.pro.name ? 'active' : ''}`}
                                 onClick={() => applyTemplate('pro')}
                                 disabled={userProfile?.is_published}
+                                style={{
+                                    padding: '0.6rem 1.25rem',
+                                    fontSize: '0.9rem',
+                                    fontWeight: '600',
+                                    border: pageConfig.name === TEMPLATES.pro.name ? '2px solid #2563eb' : '1px solid #e2e8f0',
+                                    background: pageConfig.name === TEMPLATES.pro.name ? '#eff6ff' : 'white',
+                                    color: pageConfig.name === TEMPLATES.pro.name ? '#2563eb' : '#64748b',
+                                    borderRadius: '8px',
+                                    cursor: userProfile?.is_published ? 'not-allowed' : 'pointer',
+                                    transition: 'all 0.2s'
+                                }}
                             >
                                 Pro
                             </button>
@@ -538,18 +560,17 @@ const LandingPage = () => {
                                 onClick={handleSave}
                                 disabled={!hasUnsavedChanges || isSaving}
                                 style={{
-                                    padding: '1rem 1.75rem',
-                                    fontSize: '1rem',
-                                    fontWeight: '700',
+                                    padding: '0.75rem 1.25rem',
+                                    fontSize: '0.9rem',
+                                    fontWeight: '600',
                                     display: 'flex',
                                     alignItems: 'center',
-                                    gap: '10px',
-                                    minWidth: '160px',
-                                    justifyContent: 'center',
-                                    borderWidth: '2px'
+                                    gap: '8px',
+                                    minWidth: '130px',
+                                    justifyContent: 'center'
                                 }}
                             >
-                                <Save size={22} />
+                                <Save size={18} />
                                 <span className="btn-text-desktop">
                                     {isSaving ? 'Saving...' : hasUnsavedChanges ? 'Save Changes' : 'Saved'}
                                 </span>
@@ -562,19 +583,18 @@ const LandingPage = () => {
                                 onClick={handlePublish}
                                 disabled={hasUnsavedChanges}
                                 style={{
-                                    padding: '1rem 2rem',
-                                    fontSize: '1.05rem',
-                                    fontWeight: '800',
+                                    padding: '0.85rem 1.75rem',
+                                    fontSize: '1rem',
+                                    fontWeight: '700',
                                     display: 'flex',
                                     alignItems: 'center',
-                                    gap: '10px',
-                                    minWidth: '160px',
+                                    gap: '8px',
+                                    minWidth: '140px',
                                     justifyContent: 'center',
-                                    boxShadow: '0 6px 20px rgba(220, 38, 38, 0.35)',
-                                    transform: 'scale(1.05)'
+                                    boxShadow: '0 4px 16px rgba(220, 38, 38, 0.3)'
                                 }}
                             >
-                                <Layout size={24} />
+                                <Layout size={20} />
                                 <span>Publish</span>
                             </button>
                         </>
@@ -583,17 +603,17 @@ const LandingPage = () => {
                             className="primary-btn action-btn"
                             onClick={handleUnpublish}
                             style={{
-                                padding: '1rem 2rem',
-                                fontSize: '1.05rem',
-                                fontWeight: '800',
+                                padding: '0.85rem 1.75rem',
+                                fontSize: '1rem',
+                                fontWeight: '700',
                                 display: 'flex',
                                 alignItems: 'center',
-                                gap: '10px',
-                                minWidth: '160px',
+                                gap: '8px',
+                                minWidth: '140px',
                                 justifyContent: 'center'
                             }}
                         >
-                            <Minus size={24} />
+                            <Minus size={20} />
                             <span>Unpublish</span>
                         </button>
                     )}
