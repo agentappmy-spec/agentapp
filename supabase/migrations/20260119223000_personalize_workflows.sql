@@ -12,6 +12,7 @@ USING (
 
 DROP POLICY IF EXISTS "Enable write access for super admins" ON public.workflow_steps;
 -- Allow users to create their own steps
+DROP POLICY IF EXISTS "Enable insert for authenticated users" ON public.workflow_steps;
 CREATE POLICY "Enable insert for authenticated users" ON public.workflow_steps 
 FOR INSERT TO authenticated 
 WITH CHECK (
@@ -20,6 +21,7 @@ WITH CHECK (
 );
 
 -- Allow users to update ONLY their own steps
+DROP POLICY IF EXISTS "Enable update for authenticated users" ON public.workflow_steps;
 CREATE POLICY "Enable update for authenticated users" ON public.workflow_steps 
 FOR UPDATE TO authenticated 
 USING (
@@ -28,6 +30,7 @@ USING (
 );
 
 -- Allow users to delete ONLY their own steps
+DROP POLICY IF EXISTS "Enable delete for authenticated users" ON public.workflow_steps;
 CREATE POLICY "Enable delete for authenticated users" ON public.workflow_steps 
 FOR DELETE TO authenticated 
 USING (

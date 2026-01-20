@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
-import { ShieldCheck, ArrowRight, Loader, ArrowLeft, Mail, Lock, User } from 'lucide-react';
-import { supabase } from '../services/supabaseClient'; // Now valid
+import { ShieldCheck, ArrowRight, Loader, ArrowLeft, Mail, Lock, User, Phone } from 'lucide-react';
+import { supabase } from '../services/supabaseClient';
+import TermsModal from '../components/TermsModal';
 import './Login.css';
 
 const Login = () => {
@@ -19,7 +20,10 @@ const Login = () => {
     // Register State
     const [regName, setRegName] = useState('');
     const [regEmail, setRegEmail] = useState('');
+    const [regPhone, setRegPhone] = useState('');
     const [regPassword, setRegPassword] = useState('');
+    const [termsAccepted, setTermsAccepted] = useState(false);
+    const [showTermsModal, setShowTermsModal] = useState(false);
 
     useEffect(() => {
         // If already logged in (via Supabase session), redirect
@@ -87,6 +91,7 @@ const Login = () => {
                     id: user.id,
                     email: user.email,
                     full_name: name,
+                    phone: user.user_metadata?.phone || '',
                     role: 'free',
                     plan_id: 'free',
                     updated_at: new Date()
@@ -155,6 +160,20 @@ const Login = () => {
         setError('');
         setSuccess('');
 
+        // Validate terms acceptance
+        if (!termsAccepted) {
+            setError('Please accept the Terms and Conditions to continue.');
+            setIsLoading(false);
+            return;
+        }
+
+        // Validate phone format (basic check)
+        if (!regPhone || regPhone.trim().length < 10) {
+            setError('Please enter a valid phone number.');
+            setIsLoading(false);
+            return;
+        }
+
         try {
             const { data, error } = await supabase.auth.signUp({
                 email: regEmail.trim(),
@@ -162,6 +181,7 @@ const Login = () => {
                 options: {
                     data: {
                         full_name: regName,
+                        phone: regPhone.trim(),
                     },
                 },
             });
@@ -169,11 +189,10 @@ const Login = () => {
             if (error) throw error;
 
             if (data.session) {
-                // 2. Send Welcome Email (Fire & Forget)
                 loginSuccess(data.session);
             } else if (data.user && !data.session) {
-                // Email confirmation required context
-                setSuccess('Account created! Please check your email to verify.');
+                // Email confirmation required
+                setSuccess('Account created! Please check your email to verify your account before logging in.');
                 setIsLoading(false);
             }
         } catch (error) {
@@ -256,7 +275,7 @@ const Login = () => {
                 {view === 'register' && (
                     <form onSubmit={handleRegister} className="auth-form">
                         <div className="form-group">
-                            <label>Full Name</label>
+                            <label>Full Name *</label>
                             <div className="input-wrapper">
                                 <User className="input-icon" size={18} />
                                 <input
@@ -269,7 +288,7 @@ const Login = () => {
                             </div>
                         </div>
                         <div className="form-group">
-                            <label>Email</label>
+                            <label>Email Address *</label>
                             <div className="input-wrapper">
                                 <Mail className="input-icon" size={18} />
                                 <input
@@ -282,7 +301,20 @@ const Login = () => {
                             </div>
                         </div>
                         <div className="form-group">
-                            <label>Password</label>
+                            <label>Phone Number *</label>
+                            <div className="input-wrapper">
+                                <Phone className="input-icon" size={18} />
+                                <input
+                                    type="tel"
+                                    required
+                                    placeholder="e.g. 0123456789"
+                                    value={regPhone}
+                                    onChange={(e) => setRegPhone(e.target.value)}
+                                />
+                            </div>
+                        </div>
+                        <div className="form-group">
+                            <label>Create Password *</label>
                             <div className="input-wrapper">
                                 <Lock className="input-icon" size={18} />
                                 <input
@@ -294,11 +326,44 @@ const Login = () => {
                                 />
                             </div>
                         </div>
+                        <div className="form-group" style={{ marginTop: '16px' }}>
+                            <label className="terms-checkbox-label">
+                                <input
+                                    type="checkbox"
+                                    checked={termsAccepted}
+                                    onChange={(e) => setTermsAccepted(e.target.checked)}
+                                    required
+                                />
+                                <span>
+                                    I agree to the{' '}
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowTermsModal(true)}
+                                        style={{
+                                            background: 'none',
+                                            border: 'none',
+                                            color: 'var(--primary)',
+                                            textDecoration: 'underline',
+                                            cursor: 'pointer',
+                                            padding: 0,
+                                            font: 'inherit'
+                                        }}
+                                    >
+                                        Terms and Conditions
+                                    </button>
+                                </span>
+                            </label>
+                        </div>
                         <button type="submit" className="primary-btn" disabled={isLoading}>
                             {isLoading ? <Loader className="spin" size={18} /> : 'Create Account'}
                         </button>
                     </form>
                 )}
+
+                <TermsModal
+                    isOpen={showTermsModal}
+                    onClose={() => setShowTermsModal(false)}
+                />
 
                 <Link to="/" className="back-link">
                     ← Back to Home

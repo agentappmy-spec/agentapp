@@ -20,28 +20,75 @@ serve(async (req) => {
 
         if (rulesError) throw rulesError
 
-        // 2. Fetch Active Contacts with their Agent's details
-        // We need to know who the agent is to check THEIR quota
-        const { data: contacts, error: contactsError } = await supabase
+        // Parse optional body for specific target
+        let contact_id = null;
+        try {
+            const body = await req.json();
+            contact_id = body.contact_id;
+        } catch (e) {
+            // Body is likely empty or not JSON, ignore
+        }
+
+        // 2. Fetch Active Contacts (Raw)
+        let query = supabase
             .from('contacts')
-            .select(`
-        *,
-        profiles:user_id (
-          id,
-          email,
-          role,
-          plans (monthly_message_limit),
-          full_name,
-          phone,
-          title,
-          agency_name,
-          license_no,
-          bio
-        )
-      `)
+            .select('*')
             .neq('status', 'Lapsed')
 
+        if (contact_id) {
+            console.log(`🚀 Triggered for specific contact: ${contact_id}`);
+            query = query.eq('id', contact_id);
+        }
+
+        const { data: contacts, error: contactsError } = await query
+
         if (contactsError) throw contactsError
+
+        if (!contacts || contacts.length === 0) {
+            return new Response(
+                JSON.stringify({ success: true, processed: 0, message: "No active contacts found" }),
+                { headers: { "Content-Type": "application/json" } }
+            )
+        }
+
+        // 3. Fetch Agents (Profiles)
+        const userIds = [...new Set(contacts.map(c => c.user_id).filter(Boolean))];
+        const { data: profiles, error: profilesError } = await supabase
+            .from('profiles')
+            .select(`
+                id,
+                email,
+                role,
+                full_name,
+                phone,
+                title,
+                agency_name,
+                license_no,
+                bio
+            `)
+            .in('id', userIds);
+
+        if (profilesError) throw profilesError
+
+        // 4. Fetch Plans (Active for these agents)
+        // We handle plans separately to avoid foreign key issues
+        const { data: plans, error: plansError } = await supabase
+            .from('plans')
+            .select('*')
+            .in('owner_id', userIds)
+
+        const planMap = new Map();
+        if (plans) {
+            plans.forEach(p => planMap.set(p.owner_id, p));
+        }
+
+        // Map for easy lookup
+        const profileMap = new Map(profiles.map(p => {
+            // Fallback to 300 if no plan found
+            const plan = planMap.get(p.id) || { monthly_message_limit: 300 };
+            return [p.id, { ...p, plans: plan }]
+        }));
+
 
         const results = []
         const today = new Date()
@@ -76,9 +123,15 @@ serve(async (req) => {
 
         // 3. Iterate and Match
         for (const contact of contacts) {
-            if (!contact.profiles) continue // Orphaned contact?
+            // if (!contact.profiles) continue // Removed: We fetch profiles separately now
 
-            const agent = contact.profiles
+            const agent = profileMap.get(contact.user_id);
+            if (!agent) {
+                // Debug if agent missing
+                results.push({ contact: contact.name, status: 'error_no_agent_profile', agent_id: contact.user_id });
+                continue
+            }
+
             const agentId = agent.id;
             const limit = agent.plans?.monthly_message_limit || 0;
             const currentUsage = usageCache[agentId] || 0;
@@ -109,13 +162,16 @@ serve(async (req) => {
                 }
                 // C. Special Triggers (Monthly Renewal)
                 if (step.trigger_name === 'Monthly Renewal') {
+                    // Skip if this is Day 0 (instant trigger scenario)
+                    if (daysSinceJoined === 0) return false;
+
                     // Check if today matches the "Day of Month" of joined_at
                     const joinDay = joinedAt.getDate(); // 1-31
                     const currentDay = today.getDate(); // 1-31
-                    // Logic: Send only if day matches
+                    // Logic: Send only if day matches AND at least 30 days have passed
                     // Edge case: If joined on 31st and today is 30th (Nov), we might skip. 
                     // For MVP simplicity: Exact Match Only
-                    return joinDay === currentDay;
+                    return joinDay === currentDay && daysSinceJoined >= 30;
                 }
                 return false
             }
@@ -154,12 +210,12 @@ serve(async (req) => {
                 // Super Admins bypass limits
                 if (agent.role !== 'super_admin' && currentUsage >= limit) {
                     console.warn(`Quota Exceeded for Agent ${agent.email}. Limit: ${limit}, Used: ${currentUsage}`);
-                    // Optional: Log a "Failed/Skipped" message log? 
-                    // Let's not spam the logs with failures, but maybe ONE log would be good.
-                    // For now, just SKIP.
                     results.push({ contact: contact.name, status: 'skipped_quota', agent: agent.email });
                     continue;
                 }
+
+                // Rate Limit Protection: Wait 500ms between sends
+                await new Promise(resolve => setTimeout(resolve, 500));
 
                 // Prepare Email
                 const subject = step.subject || step.trigger_name || `Follow Up - Day ${step.day}`
@@ -167,8 +223,10 @@ serve(async (req) => {
                 content = content
                     .replace(/{name}/g, contact.name || '')
                     .replace(/{title}/g, contact.title || '')
+                    .replace(/{phone}/g, contact.phone || '')
                     // Agent Details
                     .replace(/{agent_name}/g, agent.full_name || agent.email || 'Your Agent')
+                    .replace(/{agent_phone}/g, agent.phone || '')
                     .replace(/{phone}/g, agent.phone || '')
                     .replace(/{agency}/g, agent.agency_name || '')
                     .replace(/{license}/g, agent.license_no || '')
