@@ -109,7 +109,7 @@ const ContactForm = ({ content, profile }) => {
         }
 
         // Construct WhatsApp message
-        const agentName = agentProfile?.name || 'Agent';
+        const agentName = agentProfile?.name || agentProfile?.full_name || 'Agent';
         let agentPhone = agentProfile?.phone || '';
 
         // Remove non-digit characters
