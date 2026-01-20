@@ -104,7 +104,11 @@ const AppLayout = ({ context, userProfile, openAddModal, checkPermission, setUse
 
 function App() {
   const [contacts, setContacts] = useState([]); // Initialize empty for Supabase
-  const [availableProducts, setAvailableProducts] = useState([]);
+  const [availableProducts, setAvailableProducts] = useState(() => {
+    const saved = localStorage.getItem('agent_products');
+    // Default to these 2 products if nothing is saved
+    return saved ? JSON.parse(saved) : ['Hibah', 'Medical Card'];
+  });
   const [availableTags, setAvailableTags] = useState(() => {
     const saved = localStorage.getItem('agent_tags');
     return saved ? JSON.parse(saved) : ['Referral', 'VIP', 'Good Paymaster', 'Late Payer', 'Low Budget', 'AgentApp Leads'];
@@ -292,26 +296,45 @@ function App() {
               return prev;
             });
 
-            // 2. Sync Configs (Products & Tags & Landing) if they exist in DB
-            // MIGRATION: Move localStorage products to database if database is empty
+            // 2. Sync Configs (Products & Tags & Landing)
+
+            // Check DB Products
+            let dbProducts = dbProfile.products;
+            // Treat empty array as 'no products' for the purpose of enforcing defaults for new users
+            if (dbProducts && Array.isArray(dbProducts) && dbProducts.length === 0) {
+              dbProducts = null;
+            }
+
+            // Check LocalStorage Products
             const localStorageProducts = localStorage.getItem('agent_products');
-            if ((!dbProfile.products || dbProfile.products.length === 0) && localStorageProducts) {
-              const productsFromLocalStorage = JSON.parse(localStorageProducts);
-              if (productsFromLocalStorage.length > 0) {
-                console.log('Migrating products from localStorage to database:', productsFromLocalStorage);
-                await supabase
-                  .from('profiles')
-                  .update({ products: productsFromLocalStorage })
-                  .eq('id', session.user.id);
-                setAvailableProducts(productsFromLocalStorage);
-              } else {
-                setAvailableProducts(dbProfile.products || ['Hibah', 'Medical Card']);
-              }
-            } else if (dbProfile.products && Array.isArray(dbProfile.products) && dbProfile.products.length > 0) {
-              setAvailableProducts(dbProfile.products);
+            let localProducts = null;
+            if (localStorageProducts) {
+              try {
+                const parsed = JSON.parse(localStorageProducts);
+                if (Array.isArray(parsed) && parsed.length > 0) {
+                  localProducts = parsed;
+                }
+              } catch (e) { /* ignore parse error */ }
+            }
+
+            // Decision Logic
+            if (dbProducts) {
+              // Case A: DB has data -> Use DB
+              setAvailableProducts(dbProducts);
+            } else if (localProducts) {
+              // Case B: DB empty, but LocalStorage has data -> Migrate Local to DB
+              console.log('Migrating products from localStorage to database:', localProducts);
+              await supabase
+                .from('profiles')
+                .update({ products: localProducts })
+                .eq('id', session.user.id);
+              setAvailableProducts(localProducts);
             } else {
-              // Default products if nothing in DB or localStorage
-              setAvailableProducts(['Hibah', 'Medical Card']);
+              // Case C: Both empty -> Enforce Default
+              const defaultProducts = ['Hibah', 'Medical Card'];
+              setAvailableProducts(defaultProducts);
+              // Optionally save this default to DB immediately so next fetch finds it
+              // await supabase.from('profiles').update({ products: defaultProducts }).eq('id', session.user.id);
             }
 
             if (dbProfile.tags && Array.isArray(dbProfile.tags) && dbProfile.tags.length > 0) {
