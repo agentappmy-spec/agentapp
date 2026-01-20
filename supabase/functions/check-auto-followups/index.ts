@@ -132,6 +132,13 @@ serve(async (req) => {
                 continue
             }
 
+            // Check if email integration is enabled for this user
+            if (agent.integrations?.email?.enabled === false) {
+                console.log(`Email integration disabled for user ${agent.id}, skipping contact ${contact.name}`);
+                results.push({ contact: contact.name, status: 'skipped_email_disabled', agent_id: agent.id });
+                continue;
+            }
+
             const agentId = agent.id;
             const limit = agent.plans?.monthly_message_limit || 0;
             const currentUsage = usageCache[agentId] || 0;
