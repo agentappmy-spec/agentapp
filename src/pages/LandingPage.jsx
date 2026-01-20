@@ -527,11 +527,21 @@ const LandingPage = () => {
                     {!userProfile?.is_published ? (
                         <>
                             <button
-                                className="secondary-btn save-btn"
+                                className="secondary-btn"
                                 onClick={handleSave}
                                 disabled={!hasUnsavedChanges || isSaving}
+                                style={{
+                                    padding: '0.75rem 1.5rem',
+                                    fontSize: '0.95rem',
+                                    fontWeight: '600',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '8px',
+                                    minWidth: '140px',
+                                    justifyContent: 'center'
+                                }}
                             >
-                                <Save size={18} />
+                                <Save size={20} />
                                 <span className="btn-text-desktop">
                                     {isSaving ? 'Saving...' : hasUnsavedChanges ? 'Save Changes' : 'Saved'}
                                 </span>
@@ -540,17 +550,41 @@ const LandingPage = () => {
                                 </span>
                             </button>
                             <button
-                                className="primary-btn save-btn"
+                                className="primary-btn"
                                 onClick={handlePublish}
                                 disabled={hasUnsavedChanges}
+                                style={{
+                                    padding: '0.75rem 1.75rem',
+                                    fontSize: '0.95rem',
+                                    fontWeight: '700',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '8px',
+                                    minWidth: '140px',
+                                    justifyContent: 'center',
+                                    boxShadow: '0 4px 12px rgba(220, 38, 38, 0.25)'
+                                }}
                             >
-                                <Layout size={18} />
+                                <Layout size={20} />
                                 <span>Publish</span>
                             </button>
                         </>
                     ) : (
-                        <button className="primary-btn save-btn" onClick={handleUnpublish}>
-                            <Minus size={18} />
+                        <button
+                            className="primary-btn"
+                            onClick={handleUnpublish}
+                            style={{
+                                padding: '0.75rem 1.75rem',
+                                fontSize: '0.95rem',
+                                fontWeight: '700',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '8px',
+                                minWidth: '140px',
+                                justifyContent: 'center'
+                            }}
+                        >
+                            <Minus size={20} />
                             <span>Unpublish</span>
                         </button>
                     )}
