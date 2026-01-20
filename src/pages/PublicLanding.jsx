@@ -14,7 +14,7 @@ const PublicLanding = () => {
     useEffect(() => {
         const fetchConfig = async () => {
             try {
-                let query = supabase.from('profiles').select('landing_config, is_published, username, full_name, photo_url, title, bio, products, phone');
+                let query = supabase.from('profiles').select('landing_config, is_published, username, full_name, photo_url, title, bio, products, phone, agency_name');
 
                 // Check if URL is @username format or clean slug
                 if (username) {
