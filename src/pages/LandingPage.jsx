@@ -458,7 +458,7 @@ const LandingPage = () => {
 
                 <div className="header-controls">
                     {/* Status Badge */}
-                    <div className="status-badge" style={{ padding: '8px 16px' }}>
+                    <div className="status-badge" style={{ padding: '8px 20px', whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                         {userProfile?.is_published ? (
                             <span className="badge-published">● Published</span>
                         ) : (
@@ -592,13 +592,13 @@ const LandingPage = () => {
                                 onClick={handleSave}
                                 disabled={!hasUnsavedChanges || isSaving}
                                 style={{
-                                    padding: '0.75rem 1.25rem',
+                                    padding: '0.75rem 1.75rem',
                                     fontSize: '0.9rem',
                                     fontWeight: '600',
                                     display: 'flex',
                                     alignItems: 'center',
-                                    gap: '8px',
-                                    minWidth: '130px',
+                                    gap: '10px',
+                                    minWidth: '160px',
                                     justifyContent: 'center'
                                 }}
                             >
