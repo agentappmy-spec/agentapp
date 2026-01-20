@@ -83,7 +83,7 @@ const ContactForm = ({ content, profile }) => {
                     name: leadData.name,
                     phone: leadData.phone,
                     email: leadData.email,
-                    work: formData.occupation,
+                    occupation: formData.occupation, // Match DB column name
                     birthday: formData.birthday,
                     smoking: formData.smoking,
                     products: leadData.products,
@@ -99,17 +99,14 @@ const ContactForm = ({ content, profile }) => {
                 const { error } = await supabase.from('contacts').insert([dbPayload]);
                 if (error) {
                     console.error('Error saving lead to DB:', error);
-                    alert('Debug Error: Failed to save to database. ' + error.message);
                 } else {
                     console.log('Lead saved to DB successfully');
                 }
             } catch (err) {
                 console.error('Unexpected error saving to DB:', err);
-                alert('Debug Error: System failure. ' + err.message);
             }
         } else {
             console.warn('No Agent ID found, skipping DB save');
-            alert('Debug Warning: No Agent ID found. Lead not saved.');
         }
 
         // Construct WhatsApp message with safer formatting (no emojis to prevent encoding issues)
