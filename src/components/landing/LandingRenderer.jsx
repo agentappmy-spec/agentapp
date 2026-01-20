@@ -8,6 +8,18 @@ import Links from './sections/Links';
 import ProductsGrid from './sections/ProductsGrid';
 import Footer from './sections/Footer';
 
+// Default key-value pairs for product descriptions match LandingPage.jsx
+const DEFAULT_PRODUCT_DESCRIPTIONS = {
+    'Hibah Takaful': 'Debt cancellation and income replacement protection.',
+    'Medical Card': 'Comprehensive medical coverage for you and your family.',
+    'Investment': 'Grow your wealth with shariah-compliant funds.',
+    'Savings': 'Secure your future with flexible savings plans.',
+    'Education': 'Plan for your children\'s educational future.',
+    'Retirement': 'Ensure a comfortable retirement with our plans.',
+    'Hibah': 'Debt cancellation and income replacement protection.',
+    'Medical': 'Comprehensive medical coverage for you and your family.'
+};
+
 // Helper to replace shortcodes in text
 const replaceShortcodes = (text, profile) => {
     if (typeof text !== 'string') return text;
@@ -61,16 +73,19 @@ const LandingRenderer = ({ config, profile }) => {
                     if (section.type === 'bio' && (profile.bio || profile.professional_bio)) {
                         mergedContent.text = profile.bio || profile.professional_bio;
                     }
-                    if (section.type === 'footer') {
+                    if (section.type === 'footer' && !mergedContent.text) {
                         mergedContent.text = `© ${new Date().getFullYear()} ${profile.name || profile.full_name || 'Agent'}. All rights reserved.`;
                     }
                     if (section.type === 'products_grid' && profile.products) {
                         mergedContent.items = profile.products.map(p => {
                             const pName = typeof p === 'string' ? p : p.name;
                             const existing = section.content.items?.find(i => (typeof i === 'string' ? i : i.name) === pName);
+                            // Fallback Order: 1. Existing Config (Saved) -> 2. Product Object Desc -> 3. Default Constant -> 4. Empty
+                            const desc = existing?.description || (typeof p === 'object' ? p.description : '') || DEFAULT_PRODUCT_DESCRIPTIONS[pName] || '';
+
                             return {
                                 name: pName,
-                                description: existing?.description || (typeof p === 'object' ? p.description : '')
+                                description: desc
                             };
                         });
                     }
