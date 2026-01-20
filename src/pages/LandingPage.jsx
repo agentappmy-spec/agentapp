@@ -44,8 +44,7 @@ const TEMPLATES = {
                 content: {
                     buttonColor: '#db2777', textColor: '#ffffff',
                     items: [
-                        { label: 'WhatsApp Me', url: 'https://wa.me/{phone}', iconType: 'whatsapp' },
-                        { label: 'My Website', url: 'https://example.com', iconType: 'link' }
+                        { label: 'WhatsApp Me', url: 'https://wa.me/{phone}', iconType: 'whatsapp' }
                     ]
                 }
             },
