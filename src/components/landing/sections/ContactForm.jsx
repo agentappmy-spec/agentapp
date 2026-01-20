@@ -76,14 +76,26 @@ const ContactForm = ({ content, profile }) => {
 
         // Construct WhatsApp message
         const agentName = agentProfile?.name || 'Agent';
-        let agentPhone = agentProfile?.phone || '60123456789';
+        let agentPhone = agentProfile?.phone || '';
 
-        // Remove non-digit characters (dashes, spaces, etc.)
+        // Remove non-digit characters
         agentPhone = agentPhone.replace(/\D/g, '');
 
-        // Ensure international format (60 prefix for Malaysia)
+        // If phone is empty, try to alert or just proceed (likely won't work well)
+        if (!agentPhone) {
+            console.warn('No agent phone number found');
+        }
+
+        // Malaysian Phone Format Normalization
+        // If starts with 0, replace with 60
         if (agentPhone.startsWith('0')) {
             agentPhone = '60' + agentPhone.substring(1);
+        }
+        // If doesn't start with 60 and is likely a Malaysian mobile (9-10 digits), prepend 60
+        // (Simple heuristic, or just trust the user input if not starting with 0)
+        else if (!agentPhone.startsWith('60') && agentPhone.length >= 9) {
+            // Optional: Force 60? It's risky for international users. 
+            // Sticking to 0 replacement is standard.
         }
 
         const productsText = formData.products.join(', ');

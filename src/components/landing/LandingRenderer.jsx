@@ -13,9 +13,27 @@ const replaceShortcodes = (text, profile) => {
     if (typeof text !== 'string') return text;
     if (!profile) return text;
 
-    return text
+    // Helper to format phone for WhatsApp (ensure 60 prefix)
+    const formatPhone = (phone) => {
+        if (!phone) return '';
+        let clean = phone.replace(/\D/g, ''); // Remove non-digits
+        if (clean.startsWith('0')) {
+            clean = '60' + clean.substring(1);
+        }
+        return clean;
+    };
+
+    let newText = text;
+
+    // Auto-fix empty wa.me links
+    if (newText === 'https://wa.me/' || newText === 'https://wa.me') {
+        const phone = formatPhone(profile.phone);
+        if (phone) return `https://wa.me/${phone}`;
+    }
+
+    return newText
         .replace(/{agent_name}|{name}/g, profile.name || profile.full_name || 'Agent')
-        .replace(/{phone}/g, profile.phone || '')
+        .replace(/{phone}/g, formatPhone(profile.phone))
         .replace(/{email}/g, profile.email || '')
         .replace(/{title}/g, profile.title || '')
         .replace(/{agency}/g, profile.agency_name || '')

@@ -44,7 +44,7 @@ const TEMPLATES = {
                 content: {
                     buttonColor: '#db2777', textColor: '#ffffff',
                     items: [
-                        { label: 'WhatsApp Me', url: 'https://wa.me/', iconType: 'whatsapp' },
+                        { label: 'WhatsApp Me', url: 'https://wa.me/{phone}', iconType: 'whatsapp' },
                         { label: 'My Website', url: 'https://example.com', iconType: 'link' }
                     ]
                 }
@@ -81,7 +81,7 @@ const TEMPLATES = {
                 content: {
                     buttonColor: '#db2777', textColor: '#ffffff',
                     items: [
-                        { label: 'Free Consultation', url: 'https://wa.me/', iconType: 'whatsapp' }
+                        { label: 'Free Consultation', url: 'https://wa.me/{phone}', iconType: 'whatsapp' }
                     ]
                 }
             },
@@ -278,7 +278,7 @@ const LandingPage = () => {
         };
         if (type === 'bio') baseContent = { text: userProfile?.bio || "Hello! I am here to help you." };
         if (type === 'links') baseContent = {
-            items: [{ label: 'WhatsApp Me', url: `https://wa.me/${userProfile?.phone || ''}`, iconType: 'whatsapp' }],
+            items: [{ label: 'WhatsApp Me', url: 'https://wa.me/{phone}', iconType: 'whatsapp' }],
             buttonColor: pageConfig.theme.primaryColor
         };
         if (type === 'products_grid') baseContent = { title: "My Services", items: [{ name: "Service Name", description: "Service Description" }] };
