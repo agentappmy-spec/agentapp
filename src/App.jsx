@@ -251,7 +251,7 @@ function App() {
                 username: dbProfile.username || prev?.username,
                 is_published: dbProfile.is_published || prev?.is_published || false,
                 title: dbProfile.title || prev?.title || '',
-                phone: dbProfile.phone || prev?.phone || '',
+                phone: dbProfile.phone || session.user.user_metadata?.phone || prev?.phone || '',
                 agencyName: dbProfile.agency_name || prev?.agencyName || '',
                 licenseNo: dbProfile.license_no || prev?.licenseNo || '',
                 bio: dbProfile.bio || prev?.bio || '',
@@ -321,7 +321,12 @@ function App() {
               setLandingConfig(dbProfile.landing_config);
             }
             if (dbProfile.integrations) {
-              setIntegrations(dbProfile.integrations);
+              setIntegrations(prev => ({
+                ...prev,
+                ...dbProfile.integrations,
+                // Ensure email is always present if missing in DB (legacy fix)
+                email: dbProfile.integrations.email || prev.email
+              }));
             }
           }
         }

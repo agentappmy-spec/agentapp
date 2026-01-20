@@ -62,7 +62,7 @@ const Login = () => {
             // Check if profile exists first to prevent overwriting 'pro' role with default 'free'
             const { data: existingProfile } = await supabase
                 .from('profiles')
-                .select('role, plan_id')
+                .select('role, plan_id, phone')
                 .eq('id', user.id)
                 .single();
 
@@ -83,6 +83,7 @@ const Login = () => {
                 await supabase.from('profiles').update({
                     email: user.email,
                     full_name: name,
+                    phone: existingProfile.phone || user.user_metadata?.phone || '',
                     updated_at: new Date()
                 }).eq('id', user.id);
             } else {
