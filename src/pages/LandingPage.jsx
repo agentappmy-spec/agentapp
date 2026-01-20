@@ -108,6 +108,35 @@ const LandingPage = () => {
         }
     }, [landingConfig, setLandingConfig]);
 
+    // FORCE REMOVE LEGACY "MY WEBSITE" LINK
+    useEffect(() => {
+        if (landingConfig?.sections) {
+            let foundLegacy = false;
+            const newSections = landingConfig.sections.map(section => {
+                if (section.type === 'links' && section.content?.items) {
+                    const cleanItems = section.content.items.filter(item =>
+                        // Remove if it matches the example URL exactly
+                        item.url !== 'https://example.com' &&
+                        // Or if it matches the specific label AND a generic/empty URL
+                        !(item.label === 'My Website' && (item.url === '#' || item.url === ''))
+                    );
+
+                    if (cleanItems.length !== section.content.items.length) {
+                        foundLegacy = true;
+                        return { ...section, content: { ...section.content, items: cleanItems } };
+                    }
+                }
+                return section;
+            });
+
+            if (foundLegacy) {
+                console.log('⚠️ Auto-removed legacy example links');
+                setLandingConfig(prev => ({ ...prev, sections: newSections }));
+            }
+        }
+    }, [landingConfig?.sections]); // Deep check usually not possible in deps, but using landingConfig object reference relies on stability. 
+    // To be safer against loops, we rely on foundLegacy toggle.
+
     // Track changes to mark as unsaved
     useEffect(() => {
         if (landingConfig) {
