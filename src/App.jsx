@@ -203,7 +203,7 @@ function App() {
   // Initialize integrations and userGoals BEFORE syncProfile useEffect
   const [integrations, setIntegrations] = useState({
     whatsapp: { enabled: true, apiKey: '', instanceId: '' },
-    email: { enabled: false, apiKey: '', sender: 'noreply@agent.com' },
+    email: { enabled: true, apiKey: '', sender: 'noreply@agent.com' }, // Changed to true - email is now fully functional
     sms: { enabled: false, apiKey: '', senderId: 'AGENCY' }
   });
 
