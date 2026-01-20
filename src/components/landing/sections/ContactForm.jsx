@@ -83,14 +83,15 @@ const ContactForm = ({ content, profile }) => {
                     name: leadData.name,
                     phone: leadData.phone,
                     email: leadData.email,
-                    work: formData.occupation, // Map occupation to 'work' column
+                    work: formData.occupation,
                     birthday: formData.birthday,
-                    smoking: formData.smoking, // Map smoking status
+                    smoking: formData.smoking,
                     products: leadData.products,
                     tags: ['AgentApp Leads', 'Public Form'],
                     role: 'Prospect',
                     status: 'New',
                     source: 'Landing Page',
+                    deal_value: 0, // Ensure numeric default
                     created_at: new Date().toISOString(),
                     updated_at: new Date().toISOString()
                 };
@@ -98,38 +99,33 @@ const ContactForm = ({ content, profile }) => {
                 const { error } = await supabase.from('contacts').insert([dbPayload]);
                 if (error) {
                     console.error('Error saving lead to DB:', error);
+                    alert('Debug Error: Failed to save to database. ' + error.message);
                 } else {
                     console.log('Lead saved to DB successfully');
                 }
             } catch (err) {
                 console.error('Unexpected error saving to DB:', err);
+                alert('Debug Error: System failure. ' + err.message);
             }
         } else {
             console.warn('No Agent ID found, skipping DB save');
+            alert('Debug Warning: No Agent ID found. Lead not saved.');
         }
 
-        // Construct WhatsApp message
+        // Construct WhatsApp message with safer formatting (no emojis to prevent encoding issues)
         const agentName = agentProfile?.name || agentProfile?.full_name || 'Agent';
         let agentPhone = agentProfile?.phone || '';
 
-        // Remove non-digit characters
         agentPhone = agentPhone.replace(/\D/g, '');
 
-        // If phone is empty, try to alert or just proceed (likely won't work well)
         if (!agentPhone) {
             console.warn('No agent phone number found');
         }
 
-        // Malaysian Phone Format Normalization
-        // If starts with 0, replace with 60
         if (agentPhone.startsWith('0')) {
             agentPhone = '60' + agentPhone.substring(1);
-        }
-        // If doesn't start with 60 and is likely a Malaysian mobile (9-10 digits), prepend 60
-        // (Simple heuristic, or just trust the user input if not starting with 0)
-        else if (!agentPhone.startsWith('60') && agentPhone.length >= 9) {
-            // Optional: Force 60? It's risky for international users. 
-            // Sticking to 0 replacement is standard.
+        } else if (!agentPhone.startsWith('60') && agentPhone.length >= 9) {
+            // keep as is
         }
 
         const productsText = formData.products.join(', ');
@@ -139,11 +135,11 @@ const ContactForm = ({ content, profile }) => {
 Saya ${formData.name}. Boleh saya tahu tentang ${productsText}?
 
 Maklumat saya:
-📱 Telefon: ${formData.phone}
-📧 Email: ${formData.email}
-💼 Pekerjaan: ${formData.occupation}
-🎂 Tarikh Lahir: ${formData.birthday}
-🚬 Merokok/Vape: ${formData.smoking}`;
+- Telefon: ${formData.phone}
+- Email: ${formData.email}
+- Pekerjaan: ${formData.occupation}
+- Tarikh Lahir: ${formData.birthday}
+- Merokok/Vape: ${formData.smoking}`;
 
         const whatsappUrl = `https://wa.me/${agentPhone}?text=${encodeURIComponent(message)}`;
 
